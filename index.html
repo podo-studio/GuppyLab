@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guppy Lab v2.2 - 교배 시 멈춤 기능</title>
+    <title>Guppy Lab v2.6 - 5단위 RGB 색상</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -328,10 +328,12 @@
             guppies: [], food: [], decorations: [], nextGuppyId: 0, 
             coins: 100, waterQuality: 100, discoveredPatterns: new Set(),
             isBreedingMode: false, breedingParents: [], currentInfoGuppyId: null,
-            isPaused: false, // 게임 일시정지 상태 추가
+            isPaused: false,
         };
 
         const toRgbString = (color) => `rgb(${color.r}, ${color.g}, ${color.b})`;
+        // 값을 가장 가까운 5의 배수로 반올림하는 헬퍼 함수
+        const roundToFive = (v) => Math.round(v / 5) * 5;
 
         class Food {
             constructor(x, y) { this.x = x; this.y = y; this.element = this.createElement(); }
@@ -459,6 +461,11 @@
             destroy() { this.element.remove(); }
         }
         
+        function getPatternKey(pattern) {
+            const roundValue = (v) => Math.min(255, Math.round(v / 20) * 20);
+            return `${pattern.type}-${pattern.colors.map(c => `${roundValue(c.r)},${roundValue(c.g)},${roundValue(c.b)}`).join('-')}`;
+        }
+
         function breedGuppies(parent1, parent2) {
             const inheritance = {};
             
@@ -468,7 +475,7 @@
             const newColors = [];
             inheritance.colors = [];
             
-            const colorSlots = 2; // 모든 패턴이 몸통색, 무늬색 2개를 가짐
+            const colorSlots = 2;
             
             for (let i = 0; i < colorSlots; i++) {
                 const p1Color = parent1.pattern.colors[i] || parent1.pattern.colors[0];
@@ -484,12 +491,19 @@
                 const g = gFrom === 1 ? p1Color.g : p2Color.g;
                 const b = bFrom === 1 ? p1Color.b : p2Color.b;
 
-                newColors.push({ r: Math.max(0, Math.min(255, r + Math.floor((Math.random() - 0.5) * 20))), g: Math.max(0, Math.min(255, g + Math.floor((Math.random() - 0.5) * 20))), b: Math.max(0, Math.min(255, b + Math.floor((Math.random() - 0.5) * 20))) });
+                const newR = roundToFive(Math.max(0, Math.min(255, r + Math.floor((Math.random() - 0.5) * 20))));
+                const newG = roundToFive(Math.max(0, Math.min(255, g + Math.floor((Math.random() - 0.5) * 20))));
+                const newB = roundToFive(Math.max(0, Math.min(255, b + Math.floor((Math.random() - 0.5) * 20))));
+                newColors.push({ r: newR, g: newG, b: newB });
             }
 
             const newPattern = { type: newPatternType, colors: newColors };
-            const patternKey = `${newPattern.type}-${newPattern.colors.map(c => `${c.r},${c.g},${c.b}`).join('-')}`;
-            if (!gameState.discoveredPatterns.has(patternKey)) { gameState.discoveredPatterns.add(patternKey); gameState.coins += 50; showToast('+50 코인! (새로운 조합)'); }
+            const patternKey = getPatternKey(newPattern);
+            if (!gameState.discoveredPatterns.has(patternKey)) {
+                gameState.discoveredPatterns.add(patternKey);
+                gameState.coins += 50;
+                showToast('+50 코인! (새로운 조합)');
+            }
             const newId = gameState.nextGuppyId++;
             const newGuppy = new Guppy(newId, newPattern);
             gameState.guppies.push(newGuppy);
@@ -571,7 +585,6 @@
             return false;
         }
         function renderLoop() {
-            // isPaused 상태가 아닐 때만 구피와 먹이의 위치를 업데이트합니다.
             if (!gameState.isPaused) {
                 gameState.food.forEach((food, index) => {
                     food.sink();
@@ -582,7 +595,6 @@
             requestAnimationFrame(renderLoop);
         }
         function tickLoop() {
-            // isPaused 상태가 아닐 때만 게임 로직을 실행합니다.
             if (!gameState.isPaused) {
                 gameState.guppies.forEach(guppy => { guppy.grow(); guppy.decideBehavior(); });
                 let waterQualityModifier = 1;
@@ -640,10 +652,16 @@
                 const el = (id) => document.getElementById(id);
                 el('info-id').textContent = `ID: ${guppy.id}`;
                 const pd = el('info-pattern-details');
-                const colorsHTML = guppy.pattern.colors
-                    .map(c => `<span class="inline-block w-4 h-4 rounded-full border border-slate-600 mr-1" style="background:${toRgbString(c)}"></span>`)
-                    .join('');
-                pd.innerHTML = `패턴: ${guppy.pattern.type} <div class="mt-1">${colorsHTML}</div>`;
+                const colorsHTML = guppy.pattern.colors.map(c => `
+                    <div class="flex items-center space-x-2 text-sm">
+                        <div class="w-3 h-3 rounded-full border border-slate-600" style="background-color: ${toRgbString(c)}"></div>
+                        <span class="text-slate-400">R:${c.r} G:${c.g} B:${c.b}</span>
+                    </div>
+                `).join('');
+                pd.innerHTML = `
+                    <p>패턴: ${guppy.pattern.type}</p>
+                    <div class="mt-1 space-y-1">${colorsHTML}</div>
+                `;
                 el('info-age').textContent = `나이: ${guppy.age}초`;
                 el('info-stage').textContent = `단계: ${guppy.stage === 'fry' ? '치어' : '성어'}`;
                 el('info-hunger').textContent = `허기: ${guppy.hunger} / ${MAX_HUNGER}`;
@@ -729,6 +747,10 @@
                     const newId = gameState.nextGuppyId++;
                     const newGuppy = new Guppy(newId, item.pattern);
                     gameState.guppies.push(newGuppy);
+                    const patternKey = getPatternKey(item.pattern);
+                    if (!gameState.discoveredPatterns.has(patternKey)) {
+                        gameState.discoveredPatterns.add(patternKey);
+                    }
                 }
                 shopModal.classList.add('hidden');
             } else {
@@ -749,6 +771,13 @@
 
                 const item = document.createElement('div');
                 item.className = 'flex items-center p-2 rounded-lg border border-slate-700';
+                const colorsHTML = pattern.colors.map(c => `
+                    <div class="flex items-center space-x-2">
+                        <div class="w-4 h-4 rounded-full border border-slate-600" style="background-color: ${toRgbString(c)}"></div>
+                        <p class="text-xs text-slate-400">R:${c.r} G:${c.g} B:${c.b}</p>
+                    </div>
+                `).join('');
+
                 item.innerHTML = `
                     <div class="static-guppy-container mr-4">
                         <div class="static-guppy" style="background-color: ${toRgbString(pattern.colors[0])};">
@@ -758,8 +787,8 @@
                     </div>
                     <div>
                         <p class="font-bold capitalize">${pattern.type}</p>
-                        <div class="flex space-x-1 mt-1">
-                            ${pattern.colors.map(c => `<div class="w-5 h-5 rounded-full border border-slate-600" style="background-color: ${toRgbString(c)}"></div>`).join('')}
+                        <div class="flex flex-col space-y-1 mt-1">
+                           ${colorsHTML}
                         </div>
                     </div>
                 `;
@@ -792,7 +821,7 @@
         }
 
         function startBreeding(firstParent = null) {
-            gameState.isPaused = true; // 교배 시작 시 게임을 멈춤
+            gameState.isPaused = true;
             gameState.isBreedingMode = true;
             gameState.breedingParents = firstParent ? [firstParent] : [];
             guppyInfoPanel.classList.add('hidden');
@@ -817,14 +846,13 @@
             if (gameState.breedingParents.length === 2) {
                 openBreedModal();
                 gameState.isBreedingMode = false;
-                 // 두 마리 선택 시 바로 교배 모달이 열리므로 isPaused는 유지
             } else {
                 showToast(`부모 1 선택 완료! 교배할 다른 구피를 선택하세요.`);
             }
         }
         
         function cancelBreeding() {
-            gameState.isPaused = false; // 교배 취소 시 게임을 다시 시작
+            gameState.isPaused = false;
             gameState.isBreedingMode = false;
             gameState.breedingParents = [];
             updateAllGuppySelectionUI();
@@ -906,7 +934,6 @@
         
         breedResultCloseButton.addEventListener('click', () => {
             breedModal.classList.add('hidden');
-            // 교배 결과 창을 닫을 때도 게임이 다시 시작되어야 합니다.
             if(gameState.isPaused) cancelBreeding();
         });
         closeBreedButton.addEventListener('click', () => {
@@ -956,6 +983,8 @@
                 const p1 = { type: 'spots', colors: [{ r: 255, g: 255, b: 255 }, { r: 255, g: 0, b: 0 }] };
                 const p2 = { type: 'stripes', colors: [{ r: 20, g: 20, b: 255 }, { r: 255, g: 255, b: 0 }] };
                 gameState.guppies.push(new Guppy(gameState.nextGuppyId++, p1), new Guppy(gameState.nextGuppyId++, p2));
+                gameState.discoveredPatterns.add(getPatternKey(p1));
+                gameState.discoveredPatterns.add(getPatternKey(p2));
             }
             for (let i = 0; i < 10; i++) {
                 const bubble = document.createElement('div');
