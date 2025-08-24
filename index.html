@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guppy Lab v2.1 - 새로운 교배 시스템 (버그 수정)</title>
+    <title>Guppy Lab v2.2 - 교배 시 멈춤 기능</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -328,6 +328,7 @@
             guppies: [], food: [], decorations: [], nextGuppyId: 0, 
             coins: 100, waterQuality: 100, discoveredPatterns: new Set(),
             isBreedingMode: false, breedingParents: [], currentInfoGuppyId: null,
+            isPaused: false, // 게임 일시정지 상태 추가
         };
 
         const toRgbString = (color) => `rgb(${color.r}, ${color.g}, ${color.b})`;
@@ -570,22 +571,28 @@
             return false;
         }
         function renderLoop() {
-            gameState.food.forEach((food, index) => {
-                food.sink();
-                if (food.y > aquarium.clientHeight) { food.destroy(); gameState.food.splice(index, 1); }
-            });
-            gameState.guppies.forEach(guppy => guppy.updatePosition());
+            // isPaused 상태가 아닐 때만 구피와 먹이의 위치를 업데이트합니다.
+            if (!gameState.isPaused) {
+                gameState.food.forEach((food, index) => {
+                    food.sink();
+                    if (food.y > aquarium.clientHeight) { food.destroy(); gameState.food.splice(index, 1); }
+                });
+                gameState.guppies.forEach(guppy => guppy.updatePosition());
+            }
             requestAnimationFrame(renderLoop);
         }
         function tickLoop() {
-            gameState.guppies.forEach(guppy => { guppy.grow(); guppy.decideBehavior(); });
-            let waterQualityModifier = 1;
-            gameState.decorations.forEach(deco => {
-                const item = SHOP_ITEMS.find(i => i.id === deco.itemId);
-                if (item && item.effect.waterQuality) { waterQualityModifier -= item.effect.waterQuality; }
-            });
-            const degradation = gameState.guppies.length * 0.1 * waterQualityModifier;
-            gameState.waterQuality = Math.max(0, gameState.waterQuality - degradation);
+            // isPaused 상태가 아닐 때만 게임 로직을 실행합니다.
+            if (!gameState.isPaused) {
+                gameState.guppies.forEach(guppy => { guppy.grow(); guppy.decideBehavior(); });
+                let waterQualityModifier = 1;
+                gameState.decorations.forEach(deco => {
+                    const item = SHOP_ITEMS.find(i => i.id === deco.itemId);
+                    if (item && item.effect.waterQuality) { waterQualityModifier -= item.effect.waterQuality; }
+                });
+                const degradation = gameState.guppies.length * 0.1 * waterQualityModifier;
+                gameState.waterQuality = Math.max(0, gameState.waterQuality - degradation);
+            }
             updateUI(); saveGame();
         }
 
@@ -785,6 +792,7 @@
         }
 
         function startBreeding(firstParent = null) {
+            gameState.isPaused = true; // 교배 시작 시 게임을 멈춤
             gameState.isBreedingMode = true;
             gameState.breedingParents = firstParent ? [firstParent] : [];
             guppyInfoPanel.classList.add('hidden');
@@ -809,12 +817,14 @@
             if (gameState.breedingParents.length === 2) {
                 openBreedModal();
                 gameState.isBreedingMode = false;
+                 // 두 마리 선택 시 바로 교배 모달이 열리므로 isPaused는 유지
             } else {
                 showToast(`부모 1 선택 완료! 교배할 다른 구피를 선택하세요.`);
             }
         }
         
         function cancelBreeding() {
+            gameState.isPaused = false; // 교배 취소 시 게임을 다시 시작
             gameState.isBreedingMode = false;
             gameState.breedingParents = [];
             updateAllGuppySelectionUI();
@@ -894,7 +904,11 @@
             cancelBreeding();
         });
         
-        breedResultCloseButton.addEventListener('click', () => breedModal.classList.add('hidden'));
+        breedResultCloseButton.addEventListener('click', () => {
+            breedModal.classList.add('hidden');
+            // 교배 결과 창을 닫을 때도 게임이 다시 시작되어야 합니다.
+            if(gameState.isPaused) cancelBreeding();
+        });
         closeBreedButton.addEventListener('click', () => {
             breedModal.classList.add('hidden');
             cancelBreeding();
