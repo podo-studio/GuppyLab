@@ -470,7 +470,12 @@
                 gameState.guppies.splice(guppyIndex, 1);
                 gameState.breedingParents = gameState.breedingParents.filter(p => p.id !== guppyId);
                 updateUI();
-                openGuppyList();
+                // FIX: Reopening the list caused the "back button" behavior.
+                // Now, it finds and removes the modal, effectively closing it.
+                const modal = document.getElementById('guppy-list-modal');
+                if (modal) {
+                    modal.remove();
+                }
             });
         }
         function showConfirmation(message, onConfirm) {
