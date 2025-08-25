@@ -409,19 +409,18 @@
                 const p1Color = parent1.pattern.colors[i] || parent1.pattern.colors[0];
                 const p2Color = parent2.pattern.colors[i] || parent2.pattern.colors[0];
                 
-                const rFrom = Math.random() < 0.5 ? 1 : 2;
-                const gFrom = Math.random() < 0.5 ? 1 : 2;
-                const bFrom = Math.random() < 0.5 ? 1 : 2;
+                // [MODIFIED] Decide which parent to inherit the whole color from
+                const inheritFromParent1 = Math.random() < 0.5;
+                const inheritedColor = inheritFromParent1 ? p1Color : p2Color;
                 
-                inheritance.colors.push({r: rFrom, g: gFrom, b: bFrom});
+                // [MODIFIED] Store inheritance information for the report
+                inheritance.colors.push({ from: inheritFromParent1 ? 1 : 2 });
 
-                const r = rFrom === 1 ? p1Color.r : p2Color.r;
-                const g = gFrom === 1 ? p1Color.g : p2Color.g;
-                const b = bFrom === 1 ? p1Color.b : p2Color.b;
-
-                const newR = roundToFive(Math.max(0, Math.min(255, r + Math.floor((Math.random() - 0.5) * 20))));
-                const newG = roundToFive(Math.max(0, Math.min(255, g + Math.floor((Math.random() - 0.5) * 20))));
-                const newB = roundToFive(Math.max(0, Math.min(255, b + Math.floor((Math.random() - 0.5) * 20))));
+                // Apply mutation
+                const newR = roundToFive(Math.max(0, Math.min(255, inheritedColor.r + Math.floor((Math.random() - 0.5) * 20))));
+                const newG = roundToFive(Math.max(0, Math.min(255, inheritedColor.g + Math.floor((Math.random() - 0.5) * 20))));
+                const newB = roundToFive(Math.max(0, Math.min(255, inheritedColor.b + Math.floor((Math.random() - 0.5) * 20))));
+                
                 newColors.push({ r: newR, g: newG, b: newB });
             }
 
@@ -854,13 +853,11 @@
                 let reportHTML = `<p>패턴: ${newGuppy.pattern.type} (부모 ${inheritance.pattern}에게서 유전)</p>`;
                 newGuppy.pattern.colors.forEach((childColor, i) => {
                     const colorLabel = i === 0 ? '몸통색' : `무늬색${i}`;
-                    const p1Color = p1.pattern.colors[i] || p1.pattern.colors[0];
-                    const p2Color = p2.pattern.colors[i] || p2.pattern.colors[0];
                     const inheritanceInfo = inheritance.colors[i];
-
-                    const rInheritedFrom = inheritanceInfo.r === 1 ? p1Color.r : p2Color.r;
-                    const gInheritedFrom = inheritanceInfo.g === 1 ? p1Color.g : p2Color.g;
-                    const bInheritedFrom = inheritanceInfo.b === 1 ? p1Color.b : p2Color.b;
+                    const parentNum = inheritanceInfo.from;
+                    const parentColor = parentNum === 1 
+                        ? (p1.pattern.colors[i] || p1.pattern.colors[0])
+                        : (p2.pattern.colors[i] || p2.pattern.colors[0]);
 
                     reportHTML += `
                         <div class="p-2 my-1 bg-slate-800 rounded">
@@ -870,11 +867,7 @@
                                     <span>R:${childColor.r} G:${childColor.g} B:${childColor.b}</span>
                                 </span>
                             </p>
-                            <ul class="text-xs text-slate-400 pl-4">
-                                <li>R: ${childColor.r} (부모 ${inheritanceInfo.r}의 ${rInheritedFrom}에서 변이)</li>
-                                <li>G: ${childColor.g} (부모 ${inheritanceInfo.g}의 ${gInheritedFrom}에서 변이)</li>
-                                <li>B: ${childColor.b} (부모 ${inheritanceInfo.b}의 ${bInheritedFrom}에서 변이)</li>
-                            </ul>
+                            <p class="text-xs text-slate-400 pl-4">부모 ${parentNum}의 색상(R:${parentColor.r} G:${parentColor.g} B:${parentColor.b})에서 변이</p>
                         </div>
                     `;
                 });
