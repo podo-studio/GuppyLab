@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guppy Lab v2.8 - 다중 수조</title>
+    <title>Guppy Lab v2.9 - 자동 번식</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -205,7 +205,7 @@
 
             <div class="panel p-3 rounded-xl mb-2 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
-                    <span class="font-bold text-lg text-cyan-400">� 코인</span>
+                    <span class="font-bold text-lg text-cyan-400">💰 코인</span>
                     <p id="coins-display" class="text-slate-200 text-xl">0</p>
                 </div>
                 <div>
@@ -281,6 +281,7 @@
         const MAX_HUNGER = 100;
         const HUNGRY_THRESHOLD = 70;
         const FEED_COST = 10;
+        const BREED_COOLDOWN = 20000; // 20 seconds
         const PATTERN_TYPES = ['spots', 'stripes', 'h_stripes', 'v_stripes', 'freckles', 'half', 'rings', 'checker', 'gradient'];
         const SHOP_ITEMS = [
             { id: 'plant1', type: 'decoration', name: '네온 수초', price: 50, effect: { waterQuality: 0.02 }, svg: `<svg width="50" height="100" viewBox="0 0 50 100"><path d="M25 100 C 10 80, 40 60, 25 40 S 10 20, 25 0" stroke="cyan" stroke-width="4" fill="none" /></svg>` },
@@ -318,8 +319,9 @@
         }
 
         class Guppy {
-            constructor(id, pattern, age = 0, parents = null, hunger = 0) {
+            constructor(id, pattern, age = 0, parents = null, hunger = 0, lastBredTime = 0) {
                 this.id = id; this.pattern = pattern; this.age = age; this.parents = parents; this.hunger = hunger;
+                this.lastBredTime = lastBredTime;
                 this.stage = this.age >= ADULT_AGE ? 'adult' : 'fry';
                 this.x = Math.random() * (aquarium.clientWidth - 50);
                 this.y = Math.random() * (aquarium.clientHeight - 25);
@@ -574,7 +576,7 @@
                 gameState.discoveredPatterns = new Set(loadedState.discoveredPatterns);
                 
                 gameState.aquariums.forEach(aqData => {
-                    const guppies = aqData.guppies.map(gData => new Guppy(gData.id, gData.pattern, gData.age, gData.parents, gData.hunger));
+                    const guppies = aqData.guppies.map(gData => new Guppy(gData.id, gData.pattern, gData.age, gData.parents, gData.hunger, gData.lastBredTime || 0));
                     const decorations = aqData.decorations.map(dData => {
                         const item = SHOP_ITEMS.find(i => i.id === dData.item.id);
                         return new Decoration(item, dData.x);
@@ -600,10 +602,14 @@
         }
         function tickLoop() {
             if (!gameState.isPaused) {
-                let totalGuppies = 0;
-                gameState.aquariums.forEach(aq => {
-                    aq.guppies.forEach(guppy => { guppy.grow(); guppy.decideBehavior(aq); });
+                gameState.aquariums.forEach((aq, aqIndex) => {
+                    // Grow and decide behavior for all guppies
+                    aq.guppies.forEach(guppy => { 
+                        guppy.grow(); 
+                        guppy.decideBehavior(aq); 
+                    });
                     
+                    // Handle water degradation
                     let waterQualityModifier = 1;
                     aq.decorations.forEach(deco => {
                         if (deco.item.effect && deco.item.effect.waterQuality) {
@@ -612,10 +618,43 @@
                     });
                     const degradation = aq.guppies.length * 0.1 * waterQualityModifier;
                     aq.waterQuality = Math.max(0, aq.waterQuality - degradation);
-                    totalGuppies += aq.guppies.length;
+
+                    // Handle automatic breeding
+                    const adults = aq.guppies.filter(g => g.stage === 'adult');
+                    const now = Date.now();
+
+                    for (let i = 0; i < adults.length; i++) {
+                        const g1 = adults[i];
+
+                        if (g1.hunger < 20 && (now - g1.lastBredTime > BREED_COOLDOWN)) {
+                            for (let j = i + 1; j < adults.length; j++) {
+                                const g2 = adults[j];
+
+                                if (g2.hunger < 20 && (now - g2.lastBredTime > BREED_COOLDOWN)) {
+                                    const distance = Math.hypot(g1.x - g2.x, g1.y - g2.y);
+                                    const adultWidth = 50;
+
+                                    if (distance < adultWidth) {
+                                        breedGuppies(g1, g2);
+
+                                        g1.lastBredTime = now;
+                                        g2.lastBredTime = now;
+                                        g1.hunger = 50;
+                                        g2.hunger = 50;
+
+                                        if (aqIndex === gameState.currentAquariumIndex) {
+                                            showToast('새로운 치어가 태어났습니다!');
+                                        }
+                                        break; 
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
             }
-            updateUI(); saveGame();
+            updateUI(); 
+            saveGame();
         }
 
         function openGuppyList() {
@@ -1153,8 +1192,8 @@
                         </ul>
                         <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">교배 (브리딩)</h3>
                         <ul class="list-disc list-inside space-y-2 text-slate-300">
-                            <li><b>부모 선택</b>: '성어' 구피 두 마리를 클릭하여 브리딩 패널에 등록하세요.</li>
-                            <li><b>교배하기</b>: 두 마리가 모두 선택되면 '교배하기' 버튼이 활성화됩니다.</li>
+                            <li><b>수동 교배</b>: '교배 시작하기' 버튼을 누르거나 구피 정보창에서 '교배'를 선택해 직접 짝을 맺어줄 수 있습니다.</li>
+                            <li><b>자동 번식</b>: 허기가 20 미만인 성어들은 서로 만나면 스스로 번식하기도 합니다.</li>
                         </ul>
                         <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">기타 팁</h3>
                         <ul class="list-disc list-inside space-y-2 text-slate-300">
@@ -1205,4 +1244,3 @@
     </script>
 </body>
 </html>
-�
