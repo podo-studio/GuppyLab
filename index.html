@@ -470,8 +470,6 @@
                 gameState.guppies.splice(guppyIndex, 1);
                 gameState.breedingParents = gameState.breedingParents.filter(p => p.id !== guppyId);
                 updateUI();
-                // FIX: Reopening the list caused the "back button" behavior.
-                // Now, it finds and removes the modal, effectively closing it.
                 const modal = document.getElementById('guppy-list-modal');
                 if (modal) {
                     modal.remove();
@@ -556,6 +554,13 @@
             } else {
                  listContent = gameState.guppies.map(guppy => {
                     const value = calculateGuppyValue(guppy);
+                    const colorsHTML = guppy.pattern.colors.map(c => `
+                        <div class="flex items-center space-x-1 text-xs">
+                            <div class="w-3 h-3 rounded-full border border-slate-600" style="background-color: ${toRgbString(c)}"></div>
+                            <span class="text-slate-500">R:${c.r} G:${c.g} B:${c.b}</span>
+                        </div>
+                    `).join('');
+
                     return `
                     <div class="flex items-center p-2 rounded-lg hover:bg-slate-800">
                         <div class="flex-1 flex items-center cursor-pointer" onclick="showGuppyInfoById(${guppy.id})">
@@ -568,6 +573,7 @@
                             <div>
                                 <p class="font-bold">ID: ${guppy.id} (${guppy.stage === 'fry' ? '치어' : '성어'})</p>
                                 <p class="text-sm text-slate-400">패턴: ${guppy.pattern.type}</p>
+                                <div class="mt-1 space-y-1">${colorsHTML}</div>
                             </div>
                         </div>
                         <button data-guppy-id="${guppy.id}" class="rehome-button ml-4 bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-sm ${guppy.stage === 'fry' ? 'opacity-50 cursor-not-allowed' : ''}" ${guppy.stage === 'fry' ? 'disabled' : ''}>
@@ -846,9 +852,31 @@
                 breedModal.querySelector('#breed-result-guppy').innerHTML = getGuppyCardHTML(newGuppy);
                 
                 let reportHTML = `<p>패턴: ${newGuppy.pattern.type} (부모 ${inheritance.pattern}에게서 유전)</p>`;
-                newGuppy.pattern.colors.forEach((c, i) => {
+                newGuppy.pattern.colors.forEach((childColor, i) => {
                     const colorLabel = i === 0 ? '몸통색' : `무늬색${i}`;
-                    reportHTML += `<p>${colorLabel}: R(부모${inheritance.colors[i].r}), G(부모${inheritance.colors[i].g}), B(부모${inheritance.colors[i].b})</p>`;
+                    const p1Color = p1.pattern.colors[i] || p1.pattern.colors[0];
+                    const p2Color = p2.pattern.colors[i] || p2.pattern.colors[0];
+                    const inheritanceInfo = inheritance.colors[i];
+
+                    const rInheritedFrom = inheritanceInfo.r === 1 ? p1Color.r : p2Color.r;
+                    const gInheritedFrom = inheritanceInfo.g === 1 ? p1Color.g : p2Color.g;
+                    const bInheritedFrom = inheritanceInfo.b === 1 ? p1Color.b : p2Color.b;
+
+                    reportHTML += `
+                        <div class="p-2 my-1 bg-slate-800 rounded">
+                            <p class="font-semibold">${colorLabel}: 
+                                <span class="inline-flex items-center space-x-1">
+                                    <span class="w-3 h-3 rounded-full border border-slate-600" style="background-color: ${toRgbString(childColor)}"></span>
+                                    <span>R:${childColor.r} G:${childColor.g} B:${childColor.b}</span>
+                                </span>
+                            </p>
+                            <ul class="text-xs text-slate-400 pl-4">
+                                <li>R: ${childColor.r} (부모 ${inheritanceInfo.r}의 ${rInheritedFrom}에서 변이)</li>
+                                <li>G: ${childColor.g} (부모 ${inheritanceInfo.g}의 ${gInheritedFrom}에서 변이)</li>
+                                <li>B: ${childColor.b} (부모 ${inheritanceInfo.b}의 ${bInheritedFrom}에서 변이)</li>
+                            </ul>
+                        </div>
+                    `;
                 });
                 breedModal.querySelector('#breed-report').innerHTML = reportHTML;
 
@@ -863,8 +891,15 @@
         }
         
         function getGuppyCardHTML(guppy) {
+            const colorsHTML = guppy.pattern.colors.map(c => `
+                <div class="flex items-center justify-center space-x-1 text-xs">
+                    <div class="w-3 h-3 rounded-full border border-slate-600" style="background-color: ${toRgbString(c)}"></div>
+                    <span class="text-slate-500">R:${c.r} G:${c.g} B:${c.b}</span>
+                </div>
+            `).join('');
+
             let html = `
-                <p class="font-bold">ID: ${guppy.id}</p>
+                <p class="font-bold">ID: ${guppy.id || '새로운 구피'}</p>
                 <div class="flex justify-center my-2">
                     <div class="static-guppy-container">
                         <div class="static-guppy" style="background-color: ${toRgbString(guppy.pattern.colors[0])};">
@@ -874,6 +909,7 @@
                     </div>
                 </div>
                 <p class="text-sm">패턴: ${guppy.pattern.type}</p>
+                <div class="mt-1 space-y-1">${colorsHTML}</div>
             `;
             return html;
         }
