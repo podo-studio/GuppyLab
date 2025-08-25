@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guppy Lab v2.7 - 시작 화면 추가</title>
+    <title>Guppy Lab v2.8 - 다중 수조</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -15,6 +15,31 @@
             box-shadow: 0 0 25px rgba(0, 229, 255, 0.3), inset 0 0 15px rgba(0,0,0,0.5);
             overflow: hidden; position: relative; width: 100%; aspect-ratio: 16 / 9;
         }
+        .aquarium-nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: rgba(15, 23, 42, 0.5);
+            color: #67e8f9;
+            border: 1px solid #334155;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 30;
+            transition: all 0.2s ease;
+        }
+        .aquarium-nav-arrow:hover {
+            background-color: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+        }
+        #prev-aquarium { left: -50px; }
+        #next-aquarium { right: -50px; }
+
         .guppy {
             position: absolute; border-radius: 50%; 
             transition: transform 0.3s ease, width 0.5s ease, height 0.5s ease;
@@ -178,9 +203,9 @@
                 </div>
             </header>
 
-            <div class="panel p-3 rounded-xl mb-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div class="panel p-3 rounded-xl mb-2 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
-                    <span class="font-bold text-lg text-cyan-400">💰 코인</span>
+                    <span class="font-bold text-lg text-cyan-400">� 코인</span>
                     <p id="coins-display" class="text-slate-200 text-xl">0</p>
                 </div>
                 <div>
@@ -192,7 +217,14 @@
                      <button id="clean-button" class="btn h-full rounded-lg">청소하기</button>
                 </div>
             </div>
-            <div id="aquarium" class="aquarium"></div>
+
+            <div id="aquarium-title" class="text-center font-bold text-cyan-300 mb-2 text-lg"></div>
+            <div id="aquarium-container" class="relative">
+                <div id="prev-aquarium" class="aquarium-nav-arrow hidden">&lt;</div>
+                <div id="aquarium" class="aquarium"></div>
+                <div id="next-aquarium" class="aquarium-nav-arrow hidden">&gt;</div>
+            </div>
+
             <div class="panel p-4 rounded-xl shadow-lg mt-4 text-center">
                  <button id="breed-button" class="btn btn-primary w-1/2 font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
                     교배 시작하기
@@ -207,8 +239,9 @@
                 <p id="info-hunger"></p>
                 <div class="mt-4 grid grid-cols-2 gap-2">
                     <button id="info-breed-button" class="btn text-sm">교배</button>
-                    <button id="info-rehome-button" class="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-3 rounded">분양</button>
+                    <button id="info-move-button" class="btn text-sm">수조 이동</button>
                 </div>
+                 <button id="info-rehome-button" class="mt-2 w-full bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-3 rounded">분양</button>
                 <button id="close-info-panel" class="absolute top-2 right-2 text-slate-400 hover:text-white">X</button>
             </div>
         </div>
@@ -220,7 +253,7 @@
 
     <script>
         // --- DOM 요소 ---
-        const introWrapper = document.getElementById('intro-wrapper'); // Changed from intro-screen to intro-wrapper
+        const introWrapper = document.getElementById('intro-wrapper');
         const mainAppScreen = document.getElementById('main-app-screen');
         const startButton = document.getElementById('start-button');
         const aquarium = document.getElementById('aquarium');
@@ -233,12 +266,15 @@
         const closeInfoPanelButton = document.getElementById('close-info-panel');
         const infoBreedButton = document.getElementById('info-breed-button');
         const infoRehomeButton = document.getElementById('info-rehome-button');
+        const infoMoveButton = document.getElementById('info-move-button');
         const manualButton = document.getElementById('manual-button');
         const guppyListButton = document.getElementById('guppy-list-button');
         const shopButton = document.getElementById('shop-button');
         const collectionButton = document.getElementById('collection-button');
-        const toastContainer = document.getElementById('toast-container');
         const modalContainer = document.getElementById('modal-container');
+        const prevAquariumButton = document.getElementById('prev-aquarium');
+        const nextAquariumButton = document.getElementById('next-aquarium');
+        const aquariumTitle = document.getElementById('aquarium-title');
 
         // --- 게임 설정 및 데이터 ---
         const ADULT_AGE = 20;
@@ -250,12 +286,18 @@
             { id: 'plant1', type: 'decoration', name: '네온 수초', price: 50, effect: { waterQuality: 0.02 }, svg: `<svg width="50" height="100" viewBox="0 0 50 100"><path d="M25 100 C 10 80, 40 60, 25 40 S 10 20, 25 0" stroke="cyan" stroke-width="4" fill="none" /></svg>` },
             { id: 'guppy_red', type: 'guppy', name: '빨강 점박이 구피', price: 100, pattern: { type: 'spots', colors: [{ r: 255, g: 20, b: 20 }, { r: 255, g: 20, b: 20 }] } },
             { id: 'guppy_blue', type: 'guppy', name: '파랑 줄무늬 구피', price: 120, pattern: { type: 'stripes', colors: [{ r: 20, g: 20, b: 255 }, { r: 20, g: 20, b: 255 }] } },
+            { id: 'aquarium_new', type: 'aquarium', name: '새로운 수조', price: 500 },
         ];
 
         let gameState = {
-            guppies: [], food: [], decorations: [], nextGuppyId: 0, 
-            coins: 100, waterQuality: 100, discoveredPatterns: new Set(),
-            isBreedingMode: false, breedingParents: [], currentInfoGuppyId: null,
+            aquariums: [{ guppies: [], decorations: [], waterQuality: 100, food: [] }],
+            currentAquariumIndex: 0,
+            nextGuppyId: 0, 
+            coins: 100, 
+            discoveredPatterns: new Set(),
+            isBreedingMode: false, 
+            breedingParents: [], 
+            currentInfoGuppyId: null,
             isPaused: false,
         };
         let gameInitialized = false;
@@ -283,7 +325,7 @@
                 this.y = Math.random() * (aquarium.clientHeight - 25);
                 this.target = null; this.speed = 1 + Math.random() * 1.5; this.isFlipped = false;
                 this.nibbleTargetX = null;
-                this.element = this.createElement(); this.updateAppearance();
+                this.element = null; // Element is created when rendered in an aquarium
             }
             createElement() {
                 const guppyEl = document.createElement('div');
@@ -301,9 +343,12 @@
                         showGuppyInfo(this);
                     }
                 });
-                aquarium.appendChild(guppyEl); return guppyEl;
+                aquarium.appendChild(guppyEl); 
+                this.element = guppyEl;
+                this.updateAppearance();
             }
             updateAppearance() {
+                if (!this.element) return;
                 this.element.classList.toggle('fry', this.stage === 'fry');
                 this.element.classList.toggle('adult', this.stage === 'adult');
                 const baseColor = toRgbString(this.pattern.colors[0]);
@@ -319,11 +364,11 @@
                 this.age++; this.hunger = Math.min(MAX_HUNGER, this.hunger + 1);
                 if (this.stage === 'fry' && this.age >= ADULT_AGE) { this.stage = 'adult'; this.updateAppearance(); }
             }
-            decideBehavior() {
-                if (gameState.food.length > 0) {
+            decideBehavior(aquariumState) {
+                if (aquariumState.food.length > 0) {
                     this.nibbleTargetX = null;
                     let closestFood = null; let minDistance = Infinity;
-                    for (const food of gameState.food) {
+                    for (const food of aquariumState.food) {
                         const distance = Math.hypot(this.x - food.x, this.y - food.y);
                         if (distance < minDistance) { minDistance = distance; closestFood = food; }
                     }
@@ -338,16 +383,16 @@
                 }
                 
                 this.nibbleTargetX = null;
-                if (!this.target || (this.target && !gameState.food.includes(this.target))) {
+                if (!this.target || (this.target && !aquariumState.food.includes(this.target))) {
                     this.target = { x: Math.random() * (aquarium.clientWidth - 50), y: Math.random() * (aquarium.clientHeight - 25) };
                 }
             }
-            updatePosition() {
-                if (!this.target) return;
+            updatePosition(aquariumState) {
+                if (!this.target || !this.element) return;
                 const dx = this.target.x - this.x; const dy = this.target.y - this.y;
                 const distance = Math.hypot(dx, dy);
 
-                if (this.hunger > HUNGRY_THRESHOLD && gameState.food.length === 0 && this.y < 30) {
+                if (this.hunger > HUNGRY_THRESHOLD && aquariumState.food.length === 0 && this.y < 30) {
                     this.element.classList.add('nibbling');
                     this.element.classList.toggle('flipped', this.isFlipped);
                 } else {
@@ -357,7 +402,7 @@
                 if (distance < this.speed) {
                     if (this.target.constructor.name === 'Food') {
                         this.hunger = Math.max(0, this.hunger - 50); this.target.destroy();
-                        gameState.food = gameState.food.filter(f => f !== this.target);
+                        aquariumState.food = aquariumState.food.filter(f => f !== this.target);
                     }
                     this.target = null; return;
                 }
@@ -369,14 +414,14 @@
                 }
                 this.element.style.left = `${this.x}px`; this.element.style.top = `${this.y}px`;
             }
-            destroy() { this.element.remove(); }
+            destroy() { if (this.element) this.element.remove(); this.element = null; }
         }
         
         class Decoration {
             constructor(item, x) {
                 this.item = item;
                 this.x = x;
-                this.element = this.createElement();
+                this.element = null;
             }
             createElement() {
                 const el = document.createElement('div');
@@ -384,9 +429,9 @@
                 el.innerHTML = this.item.svg;
                 el.style.left = `${this.x}%`;
                 aquarium.appendChild(el);
-                return el;
+                this.element = el;
             }
-            destroy() { this.element.remove(); }
+            destroy() { if (this.element) this.element.remove(); this.element = null; }
         }
         
         function getPatternKey(pattern) {
@@ -409,14 +454,11 @@
                 const p1Color = parent1.pattern.colors[i] || parent1.pattern.colors[0];
                 const p2Color = parent2.pattern.colors[i] || parent2.pattern.colors[0];
                 
-                // [MODIFIED] Decide which parent to inherit the whole color from
                 const inheritFromParent1 = Math.random() < 0.5;
                 const inheritedColor = inheritFromParent1 ? p1Color : p2Color;
                 
-                // [MODIFIED] Store inheritance information for the report
                 inheritance.colors.push({ from: inheritFromParent1 ? 1 : 2 });
 
-                // Apply mutation
                 const newR = roundToFive(Math.max(0, Math.min(255, inheritedColor.r + Math.floor((Math.random() - 0.5) * 20))));
                 const newG = roundToFive(Math.max(0, Math.min(255, inheritedColor.g + Math.floor((Math.random() - 0.5) * 20))));
                 const newB = roundToFive(Math.max(0, Math.min(255, inheritedColor.b + Math.floor((Math.random() - 0.5) * 20))));
@@ -433,7 +475,8 @@
             }
             const newId = gameState.nextGuppyId++;
             const newGuppy = new Guppy(newId, newPattern);
-            gameState.guppies.push(newGuppy);
+            gameState.aquariums[gameState.currentAquariumIndex].guppies.push(newGuppy);
+            newGuppy.createElement(); // Create element in the current aquarium
             
             return { newGuppy, inheritance };
         }
@@ -456,22 +499,25 @@
             return value;
         }
         function rehomeGuppy(guppyId) {
-            const guppyIndex = gameState.guppies.findIndex(g => g.id === guppyId);
+            const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
+            const guppyIndex = currentAq.guppies.findIndex(g => g.id === guppyId);
             if (guppyIndex === -1) return;
-            const guppy = gameState.guppies[guppyIndex];
+            const guppy = currentAq.guppies[guppyIndex];
             const value = calculateGuppyValue(guppy);
             if (value === 0) {
+                showToast('치어는 분양 보낼 수 없습니다.');
                 return;
             }
             showConfirmation(`${value} 코인을 받고 이 구피를 분양 보내시겠습니까?`, () => {
                 gameState.coins += value;
                 guppy.destroy();
-                gameState.guppies.splice(guppyIndex, 1);
+                currentAq.guppies.splice(guppyIndex, 1);
                 gameState.breedingParents = gameState.breedingParents.filter(p => p.id !== guppyId);
                 updateUI();
                 const modal = document.getElementById('guppy-list-modal');
                 if (modal) {
                     modal.remove();
+                    openGuppyList(); // Refresh the list
                 }
             });
         }
@@ -500,58 +546,88 @@
             confirmModal.querySelector('#confirm-yes-button').addEventListener('click', yesHandler);
             confirmModal.querySelector('#confirm-no-button').addEventListener('click', noHandler);
         }
-        function updateUI() { coinsDisplay.textContent = gameState.coins; waterQualityBar.style.width = `${gameState.waterQuality}%`; }
+        function updateUI() {
+            const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
+            coinsDisplay.textContent = gameState.coins; 
+            waterQualityBar.style.width = `${currentAq.waterQuality}%`; 
+            aquariumTitle.textContent = `수조 ${gameState.currentAquariumIndex + 1} / ${gameState.aquariums.length}`;
+            updateAquariumNav();
+        }
         function saveGame() {
-            const plainGuppies = gameState.guppies.map(g => ({ id: g.id, pattern: g.pattern, age: g.age, parents: g.parents, hunger: g.hunger }));
-            const savedState = { ...gameState, guppies: plainGuppies, food: [], decorations: gameState.decorations, discoveredPatterns: Array.from(gameState.discoveredPatterns) };
-            localStorage.setItem('guppyLabSave', JSON.stringify(savedState));
+            const plainState = JSON.parse(JSON.stringify(gameState));
+            plainState.aquariums.forEach(aq => {
+                aq.guppies.forEach(g => {
+                    delete g.element; // Don't save DOM elements
+                    delete g.target;
+                });
+                aq.decorations.forEach(d => delete d.element);
+                aq.food = [];
+            });
+            plainState.discoveredPatterns = Array.from(plainState.discoveredPatterns);
+            localStorage.setItem('guppyLabSave', JSON.stringify(plainState));
         }
         function loadGame() {
             const savedData = localStorage.getItem('guppyLabSave');
             if (savedData) {
                 const loadedState = JSON.parse(savedData);
-                if (!loadedState.decorations) loadedState.decorations = [];
-                gameState = { ...gameState, ...loadedState, guppies: [], discoveredPatterns: new Set(loadedState.discoveredPatterns) };
-                loadedState.guppies.forEach(data => { gameState.guppies.push(new Guppy(data.id, data.pattern, data.age, data.parents, data.hunger)); });
-                gameState.nextGuppyId = Math.max(...gameState.guppies.map(g => g.id).concat(0)) + 1;
-                loadDecorations();
+                gameState = { ...gameState, ...loadedState };
+                gameState.discoveredPatterns = new Set(loadedState.discoveredPatterns);
+                
+                gameState.aquariums.forEach(aqData => {
+                    const guppies = aqData.guppies.map(gData => new Guppy(gData.id, gData.pattern, gData.age, gData.parents, gData.hunger));
+                    const decorations = aqData.decorations.map(dData => {
+                        const item = SHOP_ITEMS.find(i => i.id === dData.item.id);
+                        return new Decoration(item, dData.x);
+                    });
+                    aqData.guppies = guppies;
+                    aqData.decorations = decorations;
+                    aqData.food = [];
+                });
                 return true;
             }
             return false;
         }
         function renderLoop() {
             if (!gameState.isPaused) {
-                gameState.food.forEach((food, index) => {
+                const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
+                currentAq.food.forEach((food, index) => {
                     food.sink();
-                    if (food.y > aquarium.clientHeight) { food.destroy(); gameState.food.splice(index, 1); }
+                    if (food.y > aquarium.clientHeight) { food.destroy(); currentAq.food.splice(index, 1); }
                 });
-                gameState.guppies.forEach(guppy => guppy.updatePosition());
+                currentAq.guppies.forEach(guppy => guppy.updatePosition(currentAq));
             }
             requestAnimationFrame(renderLoop);
         }
         function tickLoop() {
             if (!gameState.isPaused) {
-                gameState.guppies.forEach(guppy => { guppy.grow(); guppy.decideBehavior(); });
-                let waterQualityModifier = 1;
-                gameState.decorations.forEach(deco => {
-                    const item = SHOP_ITEMS.find(i => i.id === deco.itemId);
-                    if (item && item.effect.waterQuality) { waterQualityModifier -= item.effect.waterQuality; }
+                let totalGuppies = 0;
+                gameState.aquariums.forEach(aq => {
+                    aq.guppies.forEach(guppy => { guppy.grow(); guppy.decideBehavior(aq); });
+                    
+                    let waterQualityModifier = 1;
+                    aq.decorations.forEach(deco => {
+                        if (deco.item.effect && deco.item.effect.waterQuality) {
+                            waterQualityModifier -= deco.item.effect.waterQuality;
+                        }
+                    });
+                    const degradation = aq.guppies.length * 0.1 * waterQualityModifier;
+                    aq.waterQuality = Math.max(0, aq.waterQuality - degradation);
+                    totalGuppies += aq.guppies.length;
                 });
-                const degradation = gameState.guppies.length * 0.1 * waterQualityModifier;
-                gameState.waterQuality = Math.max(0, gameState.waterQuality - degradation);
             }
             updateUI(); saveGame();
         }
 
         function openGuppyList() {
+            const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
             const guppyListModal = document.createElement('div');
             guppyListModal.id = 'guppy-list-modal';
             guppyListModal.className = 'modal-overlay';
             let listContent = '';
-            if (gameState.guppies.length === 0) {
-                listContent = '<p class="text-slate-400">어항에 구피가 없습니다.</p>';
+            if (currentAq.guppies.length === 0) {
+                listContent = '<p class="text-slate-400">이 수조에는 구피가 없습니다.</p>';
             } else {
-                 listContent = gameState.guppies.map(guppy => {
+                 listContent = currentAq.guppies.map(guppy => {
                     const value = calculateGuppyValue(guppy);
                     const colorsHTML = guppy.pattern.colors.map(c => `
                         <div class="flex items-center space-x-1 text-xs">
@@ -585,15 +661,23 @@
             guppyListModal.innerHTML = `
                 <div class="modal-content">
                     <button class="close-modal-button absolute top-4 right-4 text-2xl font-bold text-slate-400 hover:text-white">&times;</button>
-                    <h2 class="text-3xl font-bold mb-4 text-cyan-300">내 구피 목록</h2>
+                    <h2 class="text-3xl font-bold mb-4 text-cyan-300">내 구피 목록 (수조 ${gameState.currentAquariumIndex + 1})</h2>
                     <div class="space-y-3">${listContent}</div>
                 </div>
             `;
             modalContainer.appendChild(guppyListModal);
         }
         
+        function findGuppyById(guppyId) {
+            for (const aq of gameState.aquariums) {
+                const guppy = aq.guppies.find(g => g.id === guppyId);
+                if (guppy) return guppy;
+            }
+            return null;
+        }
+
         function showGuppyInfoById(guppyId) {
-            const guppy = gameState.guppies.find(g => g.id === guppyId);
+            const guppy = findGuppyById(guppyId);
             if (guppy) {
                 showGuppyInfo(guppy);
                 const modal = document.getElementById('guppy-list-modal');
@@ -619,6 +703,7 @@
                 el('info-age').textContent = `나이: ${guppy.age}초`;
                 el('info-stage').textContent = `단계: ${guppy.stage === 'fry' ? '치어' : '성어'}`;
                 el('info-hunger').textContent = `허기: ${guppy.hunger} / ${MAX_HUNGER}`;
+                infoMoveButton.classList.toggle('hidden', gameState.aquariums.length <= 1);
                 guppyInfoPanel.classList.remove('hidden');
             } catch (e) {
                 console.error('showGuppyInfo 오류:', e);
@@ -665,6 +750,9 @@
                             </div>
                         </div>
                         <div><p class="font-bold">${item.name}</p><p class="text-sm text-slate-400">기본 혈통</p></div>`;
+                } else if (item.type === 'aquarium') {
+                     itemPreview = `<div class="flex justify-center items-center h-24 text-6xl">🐠</div>
+                        <div><p class="font-bold">${item.name}</p><p class="text-sm text-slate-400">구피를 더 키워보세요</p></div>`;
                 }
                 return `<div class="border border-slate-700 rounded-lg p-2 text-center flex flex-col justify-between">
                     ${itemPreview}
@@ -687,21 +775,27 @@
                 gameState.coins -= item.price;
                 if (item.type === 'decoration') {
                     const xPos = 10 + Math.random() * 80;
-                    new Decoration(item, xPos);
-                    gameState.decorations.push({ itemId: item.id, x: xPos });
+                    const newDeco = new Decoration(item, xPos);
+                    gameState.aquariums[gameState.currentAquariumIndex].decorations.push(newDeco);
+                    newDeco.createElement();
                 } else if (item.type === 'guppy') {
                     const newId = gameState.nextGuppyId++;
                     const newGuppy = new Guppy(newId, item.pattern);
-                    gameState.guppies.push(newGuppy);
+                    gameState.aquariums[gameState.currentAquariumIndex].guppies.push(newGuppy);
+                    newGuppy.createElement();
                     const patternKey = getPatternKey(item.pattern);
                     if (!gameState.discoveredPatterns.has(patternKey)) {
                         gameState.discoveredPatterns.add(patternKey);
                     }
+                } else if (item.type === 'aquarium') {
+                    gameState.aquariums.push({ guppies: [], decorations: [], waterQuality: 100, food: [] });
+                    switchAquarium(gameState.aquariums.length - 1 - gameState.currentAquariumIndex);
                 }
                 const modal = document.getElementById('shop-modal');
                 if(modal) modal.remove();
+                updateUI();
             } else {
-                showConfirmation('코인이 부족합니다!', () => {});
+                showToast('코인이 부족합니다!');
             }
         }
 
@@ -749,13 +843,6 @@
             modalContainer.appendChild(collectionModal);
         }
 
-        function loadDecorations() {
-            gameState.decorations.forEach(decoData => {
-                const item = SHOP_ITEMS.find(i => i.id === decoData.itemId);
-                if (item) new Decoration(item, decoData.x);
-            });
-        }
-        
         function showToast(message) {
             const toast = document.createElement('div');
             toast.className = 'toast';
@@ -811,9 +898,11 @@
         }
 
         function updateAllGuppySelectionUI() {
-            gameState.guppies.forEach(g => {
-                const isSelected = gameState.breedingParents.some(p => p.id === g.id);
-                g.element.classList.toggle('selected', isSelected);
+            gameState.aquariums[gameState.currentAquariumIndex].guppies.forEach(g => {
+                if (g.element) {
+                    const isSelected = gameState.breedingParents.some(p => p.id === g.id);
+                    g.element.classList.toggle('selected', isSelected);
+                }
             });
         }
 
@@ -907,9 +996,60 @@
             return html;
         }
 
+        function renderCurrentAquarium() {
+            // Clear everything except bubbles
+            const bubbles = aquarium.querySelectorAll('.bubble');
+            aquarium.innerHTML = '';
+            bubbles.forEach(b => aquarium.appendChild(b));
+
+            const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
+            currentAq.guppies.forEach(g => g.createElement());
+            currentAq.decorations.forEach(d => d.createElement());
+            currentAq.food.forEach(f => f.createElement());
+            updateUI();
+        }
+
+        function switchAquarium(direction) {
+            const newIndex = gameState.currentAquariumIndex + direction;
+            if (newIndex >= 0 && newIndex < gameState.aquariums.length) {
+                gameState.currentAquariumIndex = newIndex;
+                renderCurrentAquarium();
+            }
+        }
+
+        function updateAquariumNav() {
+            prevAquariumButton.classList.toggle('hidden', gameState.currentAquariumIndex === 0);
+            nextAquariumButton.classList.toggle('hidden', gameState.currentAquariumIndex === gameState.aquariums.length - 1);
+        }
+        
+        function openMoveGuppyModal() {
+            const guppy = findGuppyById(gameState.currentInfoGuppyId);
+            if (!guppy) return;
+
+            const moveModal = document.createElement('div');
+            moveModal.id = 'move-guppy-modal';
+            moveModal.className = 'modal-overlay';
+
+            let optionsHTML = '';
+            gameState.aquariums.forEach((aq, index) => {
+                if (index !== gameState.currentAquariumIndex) {
+                    optionsHTML += `<button class="move-to-aq-button btn w-full" data-target-index="${index}">수조 ${index + 1} (으)로 보내기</button>`;
+                }
+            });
+
+            moveModal.innerHTML = `
+                <div class="modal-content">
+                    <button class="close-modal-button absolute top-4 right-4 text-2xl font-bold text-slate-400 hover:text-white">&times;</button>
+                    <h2 class="text-2xl font-bold mb-4 text-cyan-300">어디로 옮길까요?</h2>
+                    <div class="space-y-2">${optionsHTML}</div>
+                </div>
+            `;
+            modalContainer.appendChild(moveModal);
+        }
+
         // --- 이벤트 리스너 ---
         startButton.addEventListener('click', () => {
-            introWrapper.classList.add('hidden'); // Changed from intro-screen to intro-wrapper
+            introWrapper.classList.add('hidden');
             mainAppScreen.classList.remove('hidden');
             mainAppScreen.classList.add('flex');
             if (!gameInitialized) {
@@ -921,18 +1061,22 @@
         feedButton.addEventListener('click', () => {
             if (gameState.coins >= FEED_COST) {
                 gameState.coins -= FEED_COST;
+                const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
                 for (let i = 0; i < 15; i++) {
                     const x = Math.random() * (aquarium.clientWidth - 10);
                     const y = Math.random() * 20;
-                    gameState.food.push(new Food(x, y));
+                    currentAq.food.push(new Food(x, y));
                 }
-            } else { showConfirmation('코인이 부족합니다!', () => {}); }
+            } else { showToast('코인이 부족합니다!'); }
         });
-        cleanButton.addEventListener('click', () => { gameState.waterQuality = 100; });
+        cleanButton.addEventListener('click', () => { 
+            gameState.aquariums[gameState.currentAquariumIndex].waterQuality = 100;
+            updateUI();
+        });
         breedButton.addEventListener('click', () => startBreeding());
         
         infoBreedButton.addEventListener('click', () => {
-            const guppy = gameState.guppies.find(g => g.id === gameState.currentInfoGuppyId);
+            const guppy = findGuppyById(gameState.currentInfoGuppyId);
             if (guppy) startBreeding(guppy);
         });
         
@@ -941,7 +1085,12 @@
             guppyInfoPanel.classList.add('hidden');
         });
         
+        infoMoveButton.addEventListener('click', openMoveGuppyModal);
+        
         closeInfoPanelButton.addEventListener('click', () => guppyInfoPanel.classList.add('hidden'));
+
+        prevAquariumButton.addEventListener('click', () => switchAquarium(-1));
+        nextAquariumButton.addEventListener('click', () => switchAquarium(1));
         
         document.body.addEventListener('click', (e) => {
             if (e.target.classList.contains('rehome-button')) {
@@ -966,6 +1115,23 @@
             }
             if (e.target.classList.contains('buy-button')) {
                 buyItem(e.target.dataset.itemId);
+            }
+            if (e.target.classList.contains('move-to-aq-button')) {
+                const targetIndex = parseInt(e.target.dataset.targetIndex);
+                const guppyToMove = findGuppyById(gameState.currentInfoGuppyId);
+                const sourceAq = gameState.aquariums[gameState.currentAquariumIndex];
+                
+                const guppyIndex = sourceAq.guppies.findIndex(g => g.id === guppyToMove.id);
+                if (guppyIndex > -1) {
+                    sourceAq.guppies.splice(guppyIndex, 1);
+                    guppyToMove.destroy();
+                    
+                    gameState.aquariums[targetIndex].guppies.push(guppyToMove);
+                    
+                    guppyInfoPanel.classList.add('hidden');
+                    e.target.closest('.modal-overlay').remove();
+                    showToast(`구피를 수조 ${targetIndex + 1}(으)로 옮겼습니다.`);
+                }
             }
         });
 
@@ -992,7 +1158,8 @@
                         </ul>
                         <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">기타 팁</h3>
                         <ul class="list-disc list-inside space-y-2 text-slate-300">
-                            <li><b>상세 정보</b>: 우측 상단의 물고기(🐟) 버튼을 눌러 구피 목록을 열고, 목록에서 구피를 클릭해 상세 정보를 확인하세요.</li>
+                            <li><b>수조 관리</b>: 상점에서 새 수조를 구매하고, 수조 옆 화살표로 이동할 수 있습니다. 구피 정보창에서 다른 수조로 구피를 옮길 수도 있습니다.</li>
+                            <li><b>상세 정보</b>: 우측 상단의 물고기(🐟) 버튼을 눌러 현재 수조의 구피 목록을 열고, 목록에서 구피를 클릭해 상세 정보를 확인하세요.</li>
                             <li><b>코인 얻기</b>: 새로운 조합의 구피를 탄생시키면 50코인을 얻습니다.</li>
                             <li><b>자동 저장</b>: 게임은 1초마다 자동으로 저장됩니다.</li>
                         </ul>`;
@@ -1012,14 +1179,16 @@
         collectionButton.addEventListener('click', openCollection);
 
         function init() {
-            aquarium.innerHTML = '';
             if (!loadGame()) {
                 const p1 = { type: 'spots', colors: [{ r: 255, g: 255, b: 255 }, { r: 255, g: 0, b: 0 }] };
                 const p2 = { type: 'stripes', colors: [{ r: 20, g: 20, b: 255 }, { r: 255, g: 255, b: 0 }] };
-                gameState.guppies.push(new Guppy(gameState.nextGuppyId++, p1), new Guppy(gameState.nextGuppyId++, p2));
+                const guppy1 = new Guppy(gameState.nextGuppyId++, p1);
+                const guppy2 = new Guppy(gameState.nextGuppyId++, p2);
+                gameState.aquariums[0].guppies.push(guppy1, guppy2);
                 gameState.discoveredPatterns.add(getPatternKey(p1));
                 gameState.discoveredPatterns.add(getPatternKey(p2));
             }
+            
             for (let i = 0; i < 10; i++) {
                 const bubble = document.createElement('div');
                 bubble.className = 'bubble';
@@ -1028,10 +1197,12 @@
                 bubble.style.animationDelay = `${Math.random() * 4}s`;
                 aquarium.appendChild(bubble);
             }
+            
+            renderCurrentAquarium();
             setInterval(tickLoop, 1000);
             requestAnimationFrame(renderLoop);
-            updateUI();
         }
     </script>
 </body>
 </html>
+�
