@@ -892,15 +892,14 @@
         
         function getGuppyCardHTML(guppy) {
             const colorsHTML = guppy.pattern.colors.map(c => `
-                <div class="flex items-center justify-center space-x-1 text-xs">
+                <div class="flex items-center space-x-1 text-xs">
                     <div class="w-3 h-3 rounded-full border border-slate-600" style="background-color: ${toRgbString(c)}"></div>
                     <span class="text-slate-500">R:${c.r} G:${c.g} B:${c.b}</span>
                 </div>
             `).join('');
 
             let html = `
-                <p class="font-bold">ID: ${guppy.id || '새로운 구피'}</p>
-                <div class="flex justify-center my-2">
+                <div class="flex justify-center mb-4">
                     <div class="static-guppy-container">
                         <div class="static-guppy" style="background-color: ${toRgbString(guppy.pattern.colors[0])};">
                             <div class="pattern-overlay" style="${getPatternStyle(guppy.pattern)}"></div>
@@ -908,8 +907,9 @@
                         </div>
                     </div>
                 </div>
+                <p class="font-bold">ID: ${guppy.id || '새로운 구피'}</p>
                 <p class="text-sm">패턴: ${guppy.pattern.type}</p>
-                <div class="mt-1 space-y-1">${colorsHTML}</div>
+                <div class="mt-1 space-y-1 text-left inline-block">${colorsHTML}</div>
             `;
             return html;
         }
