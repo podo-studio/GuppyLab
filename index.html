@@ -477,6 +477,11 @@
             }
             const newId = gameState.nextGuppyId++;
             const newGuppy = new Guppy(newId, newPattern);
+            
+            // [MODIFIED] Set spawn position near parents
+            newGuppy.x = (parent1.x + parent2.x) / 2;
+            newGuppy.y = (parent1.y + parent2.y) / 2;
+
             gameState.aquariums[gameState.currentAquariumIndex].guppies.push(newGuppy);
             newGuppy.createElement(); // Create element in the current aquarium
             
