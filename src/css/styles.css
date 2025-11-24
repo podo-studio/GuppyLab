@@ -1,0 +1,155 @@
+body { font-family: 'Inter', sans-serif; touch-action: manipulation; }
+.aquarium {
+    background: linear-gradient(to bottom, #0a2a43 0%, #0c4a6e 100%);
+    border: 4px solid rgba(0, 229, 255, 0.3);
+    border-radius: 1.5rem;
+    box-shadow: 0 0 25px rgba(0, 229, 255, 0.3), inset 0 0 15px rgba(0,0,0,0.5);
+    overflow: hidden; position: relative; width: 100%; aspect-ratio: 16 / 9;
+}
+.aquarium-nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: rgba(15, 23, 42, 0.5);
+    color: #67e8f9;
+    border: 1px solid #334155;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 30;
+    transition: all 0.2s ease;
+}
+.aquarium-nav-arrow:hover {
+    background-color: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+}
+#prev-aquarium { left: -50px; }
+#next-aquarium { right: -50px; }
+
+.guppy {
+    position: absolute; border-radius: 50%; 
+    transition: transform 0.3s ease, width 0.5s ease, height 0.5s ease;
+    cursor: pointer; transform-origin: center center; z-index: 5;
+    filter: saturate(1.2);
+}
+.guppy.fry { width: 30px; height: 15px; }
+.guppy.adult { width: 50px; height: 25px; }
+.pattern-overlay { position: absolute; width: 100%; height: 100%; border-radius: 50%; }
+.guppy-tail {
+    position: absolute; left: 0px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0; border-top: 12px solid transparent; border-bottom: 12px solid transparent;
+    border-left: 22px solid; transition: border-width 0.5s ease;
+}
+.guppy.fry .guppy-tail { border-top-width: 7px; border-bottom-width: 7px; border-left-width: 13px; }
+.guppy.selected {
+    box-shadow: 0 0 15px 3px yellow;
+    outline: none;
+    z-index: 10;
+}
+
+.nibbling { animation: nibble 0.5s infinite alternate; }
+@keyframes nibble {
+    0% { transform-origin: center; transform: rotate(-5deg) scaleX(1); }
+    100% { transform-origin: center; transform: rotate(5deg) scaleX(1); }
+}
+.nibbling.flipped { animation-name: nibble-flipped; }
+@keyframes nibble-flipped {
+    0% { transform-origin: center; transform: rotate(-5deg) scaleX(-1); }
+    100% { transform-origin: center; transform: rotate(5deg) scaleX(-1); }
+}
+
+.bubble {
+    position: absolute; bottom: -30px; width: 20px; height: 20px;
+    background-color: rgba(0, 229, 255, 0.15);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    border-radius: 50%;
+    animation: bubble-rise 5s infinite ease-in; z-index: 1;
+}
+@keyframes bubble-rise {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-100vh); opacity: 0; }
+}
+.food-pellet {
+    position: absolute; width: 6px; height: 6px;
+    background-color: #c2783e;
+    border-radius: 50%; z-index: 20;
+    box-shadow: 0 0 5px #c2783e;
+}
+.progress-bar-bg { background-color: rgba(0,0,0,0.3); border-radius: 0.5rem; overflow: hidden; }
+.progress-bar { height: 100%; border-radius: 0.5rem; transition: width 0.3s ease-in-out; }
+
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(10, 20, 30, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 100;
+}
+.modal-content {
+    background: rgba(15, 23, 42, 0.9); border: 1px solid #1e293b;
+    padding: 2rem; border-radius: 1rem;
+    width: 90%; max-width: 600px; max-height: 80vh;
+    overflow-y: auto; position: relative;
+}
+.static-guppy-container {
+    position: relative; width: 50px; height: 25px; flex-shrink: 0;
+}
+.static-guppy {
+    position: absolute; border-radius: 50%; width: 50px; height: 25px;
+}
+.static-guppy-tail {
+    position: absolute; left: 0px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0; border-top: 12px solid transparent; border-bottom: 12px solid transparent;
+    border-left: 22px solid;
+}
+#guppy-info-panel { z-index: 110; }
+.decoration {
+    position: absolute;
+    bottom: 0;
+    transform: translateX(-50%);
+    z-index: 2;
+    filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.5));
+}
+.panel {
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid #334155;
+}
+.btn {
+    border: 1px solid #22d3ee;
+    background: rgba(6, 182, 212, 0.1);
+    color: #67e8f9;
+    transition: all 0.2s ease;
+}
+.btn:hover {
+    background: rgba(6, 182, 212, 0.2);
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+}
+.btn-primary {
+    background: #0891b2;
+    border-color: #06b6d4;
+    color: white;
+}
+.btn-primary:hover {
+    background: #06b6d4;
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.7);
+}
+.toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(15, 23, 42, 0.9);
+    color: #67e8f9;
+    padding: 10px 20px;
+    border-radius: 20px;
+    z-index: 200;
+    border: 1px solid #334155;
+    opacity: 0;
+    transition: opacity 0.5s, top 0.5s;
+}
