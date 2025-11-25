@@ -46,8 +46,15 @@ const BREED_COOLDOWN = 20000; // 20 seconds
 const PATTERN_TYPES = ['spots', 'stripes', 'h_stripes', 'v_stripes', 'freckles', 'half', 'rings', 'checker', 'gradient'];
 const SHOP_ITEMS = [
     { id: 'plant1', type: 'decoration', name: '네온 수초', price: 50, effect: { waterQuality: 0.02 }, svg: `<svg width="50" height="100" viewBox="0 0 50 100"><path d="M25 100 C 10 80, 40 60, 25 40 S 10 20, 25 0" stroke="cyan" stroke-width="4" fill="none" /></svg>` },
-    { id: 'guppy_red', type: 'guppy', name: '빨강 점박이 구피', price: 100, pattern: { type: 'spots', colors: [{ r: 255, g: 20, b: 20 }, { r: 255, g: 20, b: 20 }] } },
-    { id: 'guppy_blue', type: 'guppy', name: '파랑 줄무늬 구피', price: 120, pattern: { type: 'stripes', colors: [{ r: 20, g: 20, b: 255 }, { r: 20, g: 20, b: 255 }] } },
+    { id: 'guppy_spots', type: 'guppy', name: '점무늬 구피', price: 100, pattern: { type: 'spots', colors: [{ r: 255, g: 100, b: 100 }, { r: 255, g: 200, b: 200 }] } },
+    { id: 'guppy_stripes', type: 'guppy', name: '대각선 줄무늬 구피', price: 120, pattern: { type: 'stripes', colors: [{ r: 100, g: 100, b: 255 }, { r: 200, g: 200, b: 255 }] } },
+    { id: 'guppy_h_stripes', type: 'guppy', name: '가로 줄무늬 구피', price: 130, pattern: { type: 'h_stripes', colors: [{ r: 100, g: 255, b: 100 }, { r: 200, g: 255, b: 200 }] } },
+    { id: 'guppy_v_stripes', type: 'guppy', name: '세로 줄무늬 구피', price: 130, pattern: { type: 'v_stripes', colors: [{ r: 255, g: 255, b: 100 }, { r: 255, g: 255, b: 200 }] } },
+    { id: 'guppy_freckles', type: 'guppy', name: '주근깨 구피', price: 140, pattern: { type: 'freckles', colors: [{ r: 255, g: 150, b: 50 }, { r: 255, g: 200, b: 150 }] } },
+    { id: 'guppy_half', type: 'guppy', name: '반반 구피', price: 150, pattern: { type: 'half', colors: [{ r: 50, g: 50, b: 50 }, { r: 200, g: 200, b: 200 }] } },
+    { id: 'guppy_rings', type: 'guppy', name: '고리 구피', price: 160, pattern: { type: 'rings', colors: [{ r: 255, g: 50, b: 255 }, { r: 255, g: 150, b: 255 }] } },
+    { id: 'guppy_checker', type: 'guppy', name: '체크 구피', price: 170, pattern: { type: 'checker', colors: [{ r: 50, g: 255, b: 255 }, { r: 150, g: 255, b: 255 }] } },
+    { id: 'guppy_gradient', type: 'guppy', name: '그라데이션 구피', price: 200, pattern: { type: 'gradient', colors: [{ r: 255, g: 100, b: 255 }, { r: 100, g: 255, b: 255 }] } },
     { id: 'aquarium_new', type: 'aquarium', name: '새로운 수조', price: 500 },
 ];
 
@@ -667,14 +674,14 @@ function tickLoop() {
 
 function getPatternLabel(patternType) {
     const labels = {
-        'spots': '점무늬 🐆',
-        'stripes': '줄무늬 🦓',
-        'h_stripes': '가로 줄무늬 ➖',
-        'v_stripes': '세로 줄무늬 ❙',
-        'freckles': '주근깨 ˙˙',
-        'half': '반반 🌓',
-        'rings': '고리 ⭕',
-        'checker': '체크 🏁',
+        'spots': '점무늬 ●',
+        'stripes': '줄무늬 //',
+        'h_stripes': '가로 줄무늬 =',
+        'v_stripes': '세로 줄무늬 ||',
+        'freckles': '주근깨 ::',
+        'half': '반반 🌗',
+        'rings': '고리 ◎',
+        'checker': '체크 ▦',
         'gradient': '그라데이션 🌈'
     };
     return labels[patternType] || patternType;
