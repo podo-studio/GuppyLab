@@ -1,26 +1,41 @@
 // --- DOM 요소 ---
-const introWrapper = document.getElementById('intro-wrapper');
-const mainAppScreen = document.getElementById('main-app-screen');
-const startButton = document.getElementById('start-button');
-const aquarium = document.getElementById('aquarium');
-const coinsDisplay = document.getElementById('coins-display');
-const waterQualityBar = document.getElementById('water-quality-bar');
-const feedButton = document.getElementById('feed-button');
-const cleanButton = document.getElementById('clean-button');
-const breedButton = document.getElementById('breed-button');
-const guppyInfoPanel = document.getElementById('guppy-info-panel');
-const closeInfoPanelButton = document.getElementById('close-info-panel');
-const infoBreedButton = document.getElementById('info-breed-button');
-const infoRehomeButton = document.getElementById('info-rehome-button');
-const infoMoveButton = document.getElementById('info-move-button');
-const manualButton = document.getElementById('manual-button');
-const guppyListButton = document.getElementById('guppy-list-button');
-const shopButton = document.getElementById('shop-button');
-const collectionButton = document.getElementById('collection-button');
-const modalContainer = document.getElementById('modal-container');
-const prevAquariumButton = document.getElementById('prev-aquarium');
-const nextAquariumButton = document.getElementById('next-aquarium');
-const aquariumTitle = document.getElementById('aquarium-title');
+let introWrapper, mainAppScreen, startButton, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle;
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Guppy Lab: DOM Content Loaded");
+    introWrapper = document.getElementById('intro-wrapper');
+    mainAppScreen = document.getElementById('main-app-screen');
+    startButton = document.getElementById('start-button');
+    aquarium = document.getElementById('aquarium');
+    coinsDisplay = document.getElementById('coins-display');
+    waterQualityBar = document.getElementById('water-quality-bar');
+    feedButton = document.getElementById('feed-button');
+    cleanButton = document.getElementById('clean-button');
+    breedButton = document.getElementById('breed-button');
+    guppyInfoPanel = document.getElementById('guppy-info-panel');
+    closeInfoPanelButton = document.getElementById('close-info-panel');
+    infoBreedButton = document.getElementById('info-breed-button');
+    infoRehomeButton = document.getElementById('info-rehome-button');
+    infoMoveButton = document.getElementById('info-move-button');
+    manualButton = document.getElementById('manual-button');
+    guppyListButton = document.getElementById('guppy-list-button');
+    shopButton = document.getElementById('shop-button');
+    collectionButton = document.getElementById('collection-button');
+    modalContainer = document.getElementById('modal-container');
+    prevAquariumButton = document.getElementById('prev-aquarium');
+    nextAquariumButton = document.getElementById('next-aquarium');
+    aquariumTitle = document.getElementById('aquarium-title');
+
+    if (startButton) {
+        console.log("Guppy Lab: Start button found, attaching listener");
+        startButton.addEventListener('click', startGame);
+    } else {
+        console.error("Guppy Lab: Start button NOT found!");
+    }
+
+    // Initialize other UI listeners here if needed, or keep them where they are but ensure elements exist
+    setupEventListeners();
+});
 
 // --- 게임 설정 및 데이터 ---
 const ADULT_AGE = 20;
@@ -81,53 +96,215 @@ class Food {
 }
 
 class Guppy {
-    constructor(id, pattern, age = 0, parents = null, hunger = 0, lastBredTime = 0) {
+    constructor(id, pattern, age = 0, parents = null, hunger = 0, lastBredTime = 0, x = null, y = null) {
         this.id = id; this.pattern = pattern; this.age = age; this.parents = parents; this.hunger = hunger;
         this.lastBredTime = lastBredTime;
         this.stage = this.age >= ADULT_AGE ? 'adult' : 'fry';
-        this.x = Math.random() * (aquarium.clientWidth - 50);
-        this.y = Math.random() * (aquarium.clientHeight - 25);
+
+        const containerWidth = aquarium.clientWidth || 800;
+        const containerHeight = aquarium.clientHeight || 400;
+
+        // Ensure x and y are valid numbers
+        const isValid = (val) => typeof val === 'number' && isFinite(val);
+
+        this.x = isValid(x) ? x : Math.random() * (containerWidth - 50);
+        this.y = isValid(y) ? y : Math.random() * (containerHeight - 25);
+
         this.target = null; this.speed = 1 + Math.random() * 1.5; this.isFlipped = false;
         this.nibbleTargetX = null;
-        this.element = null; // Element is created when rendered in an aquarium
+        this.element = null;
     }
+
     createElement() {
-        const guppyEl = document.createElement('div');
-        guppyEl.className = 'guppy'; guppyEl.dataset.id = this.id;
-        guppyEl.style.left = `${this.x}px`; guppyEl.style.top = `${this.y}px`;
-        const patternOverlay = document.createElement('div');
-        patternOverlay.className = 'pattern-overlay'; guppyEl.appendChild(patternOverlay);
-        const tail = document.createElement('div');
-        tail.className = 'guppy-tail'; guppyEl.appendChild(tail);
-        guppyEl.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (gameState.isBreedingMode) {
-                selectBreedingGuppy(this);
-            } else {
-                showGuppyInfo(this);
-            }
-        });
-        aquarium.appendChild(guppyEl);
-        this.element = guppyEl;
-        this.updateAppearance();
+        try {
+            console.log(`Creating element for guppy ${this.id} at ${this.x}, ${this.y}`);
+            const guppyEl = document.createElement('div');
+            guppyEl.className = 'guppy';
+            guppyEl.dataset.id = this.id;
+            guppyEl.style.left = `${this.x}px`;
+            guppyEl.style.top = `${this.y}px`;
+
+            guppyEl.innerHTML = this.getGuppySVG();
+
+            guppyEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (gameState.isBreedingMode) {
+                    selectBreedingGuppy(this);
+                } else {
+                    showGuppyInfo(this);
+                }
+            });
+            aquarium.appendChild(guppyEl);
+            this.element = guppyEl;
+            this.updateAppearance();
+            console.log(`Element created for guppy ${this.id}`);
+        } catch (e) {
+            console.error(`Error creating element for guppy ${this.id}:`, e);
+        }
     }
+
+    getGuppySVG() {
+        const bodyPath = "M10,15 Q25,5 45,15 Q25,25 10,15 Z";
+        const tailPath = "M40,15 Q55,0 65,5 Q70,15 65,25 Q55,30 40,15 Z";
+        const dorsalFinPath = "M25,10 Q35,0 40,10 Z";
+        const pectoralFinPath = "M28,18 Q35,22 28,24 Z";
+        const eyeCircle = '<circle cx="15" cy="13" r="1.5" fill="black" /><circle cx="16" cy="12" r="0.5" fill="white" />';
+
+        // Calculate colors for static rendering
+        const c1 = this.pattern.colors[0];
+        const c2 = this.pattern.colors[1] || c1;
+        const bodyColor1 = toRgbString(c1);
+        const bodyColor2 = toRgbString(c2);
+        const tailC1 = { r: Math.min(255, c1.r + 20), g: Math.min(255, c1.g + 20), b: Math.min(255, c1.b + 20) };
+        const tailC2 = { r: Math.min(255, c2.r + 20), g: Math.min(255, c2.g + 20), b: Math.min(255, c2.b + 20) };
+        const tailColor1 = toRgbString(tailC1);
+        const tailColor2 = toRgbString(tailC2);
+
+        // Generate Pattern SVG
+        let patternSVG = '';
+        const pType = this.pattern.type;
+        const pColor = toRgbString(c2); // Use secondary color for pattern
+        const pOpacity = 0.7;
+
+        if (pType === 'spots') {
+            patternSVG = `
+                <circle cx="20" cy="15" r="2.5" fill="${pColor}" opacity="${pOpacity}" />
+                <circle cx="30" cy="10" r="2" fill="${pColor}" opacity="${pOpacity}" />
+                <circle cx="35" cy="20" r="2.5" fill="${pColor}" opacity="${pOpacity}" />
+                <circle cx="42" cy="15" r="1.5" fill="${pColor}" opacity="${pOpacity}" />
+            `;
+        } else if (pType === 'stripes') {
+            patternSVG = `
+                <path d="M15,25 L25,5 M25,25 L35,5 M35,25 L45,5" stroke="${pColor}" stroke-width="2" opacity="${pOpacity}" />
+            `;
+        } else if (pType === 'h_stripes') {
+            patternSVG = `
+                <line x1="10" y1="12" x2="50" y2="12" stroke="${pColor}" stroke-width="1.5" opacity="${pOpacity}" />
+                <line x1="10" y1="18" x2="50" y2="18" stroke="${pColor}" stroke-width="1.5" opacity="${pOpacity}" />
+            `;
+        } else if (pType === 'v_stripes') {
+            patternSVG = `
+                <line x1="20" y1="5" x2="20" y2="25" stroke="${pColor}" stroke-width="1.5" opacity="${pOpacity}" />
+                <line x1="30" y1="5" x2="30" y2="25" stroke="${pColor}" stroke-width="1.5" opacity="${pOpacity}" />
+                <line x1="40" y1="5" x2="40" y2="25" stroke="${pColor}" stroke-width="1.5" opacity="${pOpacity}" />
+            `;
+        } else if (pType === 'freckles') {
+            patternSVG = `
+                <filter id="noise-${this.id}">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+                </filter>
+                <rect x="10" y="5" width="40" height="20" fill="${pColor}" opacity="0.4" filter="url(#noise-${this.id})" />
+            `;
+            // Fallback/Alternative for freckles if filter is too heavy or complex: simple dots
+            patternSVG = `
+                <circle cx="18" cy="12" r="0.8" fill="${pColor}" opacity="${pOpacity}" />
+                <circle cx="22" cy="18" r="0.8" fill="${pColor}" opacity="${pOpacity}" />
+                <circle cx="28" cy="14" r="0.8" fill="${pColor}" opacity="${pOpacity}" />
+                <circle cx="34" cy="19" r="0.8" fill="${pColor}" opacity="${pOpacity}" />
+                <circle cx="38" cy="13" r="0.8" fill="${pColor}" opacity="${pOpacity}" />
+                <circle cx="25" cy="10" r="0.8" fill="${pColor}" opacity="${pOpacity}" />
+                <circle cx="42" cy="17" r="0.8" fill="${pColor}" opacity="${pOpacity}" />
+             `;
+        } else if (pType === 'half') {
+            patternSVG = `
+                <rect x="30" y="0" width="30" height="30" fill="${pColor}" opacity="${pOpacity}" />
+            `;
+        } else if (pType === 'rings') {
+            patternSVG = `
+                <circle cx="25" cy="15" r="4" stroke="${pColor}" stroke-width="1.5" fill="none" opacity="${pOpacity}" />
+                <circle cx="38" cy="15" r="4" stroke="${pColor}" stroke-width="1.5" fill="none" opacity="${pOpacity}" />
+            `;
+        } else if (pType === 'checker') {
+            patternSVG = `
+                <rect x="20" y="10" width="5" height="5" fill="${pColor}" opacity="${pOpacity}" />
+                <rect x="30" y="10" width="5" height="5" fill="${pColor}" opacity="${pOpacity}" />
+                <rect x="40" y="10" width="5" height="5" fill="${pColor}" opacity="${pOpacity}" />
+                <rect x="25" y="15" width="5" height="5" fill="${pColor}" opacity="${pOpacity}" />
+                <rect x="35" y="15" width="5" height="5" fill="${pColor}" opacity="${pOpacity}" />
+             `;
+        }
+
+        return `
+            <svg viewBox="0 0 80 30" width="100%" height="100%" style="overflow: visible;">
+                <defs>
+                    <linearGradient id="bodyGradient-${this.id}" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="${bodyColor1}" class="body-color-1" />
+                        <stop offset="100%" stop-color="${bodyColor2}" class="body-color-2" />
+                    </linearGradient>
+                    <radialGradient id="tailGradient-${this.id}" cx="0%" cy="50%" r="100%">
+                        <stop offset="0%" stop-color="${tailColor1}" class="tail-color-1" />
+                        <stop offset="100%" stop-color="${tailColor2}" class="tail-color-2" />
+                    </radialGradient>
+                    <clipPath id="bodyClip-${this.id}">
+                        <path d="${bodyPath}" />
+                    </clipPath>
+                </defs>
+                <g class="guppy-group">
+                    <path d="${tailPath}" fill="url(#tailGradient-${this.id})" class="guppy-tail-svg" />
+                    <path d="${dorsalFinPath}" fill="url(#tailGradient-${this.id})" class="guppy-dorsal-fin" opacity="0.8" />
+                    
+                    <!-- Body Group with Pattern -->
+                    <g>
+                        <path d="${bodyPath}" fill="url(#bodyGradient-${this.id})" class="guppy-body" />
+                        <g clip-path="url(#bodyClip-${this.id})">
+                            ${patternSVG}
+                        </g>
+                    </g>
+                    
+                    <path d="${pectoralFinPath}" fill="rgba(255,255,255,0.5)" class="guppy-pectoral-fin" />
+                    ${eyeCircle}
+                </g>
+            </svg>
+        `;
+    }
+
     updateAppearance() {
         if (!this.element) return;
-        this.element.classList.toggle('fry', this.stage === 'fry');
-        this.element.classList.toggle('adult', this.stage === 'adult');
-        const baseColor = toRgbString(this.pattern.colors[0]);
-        this.element.style.backgroundColor = baseColor;
-        const patternOverlay = this.element.querySelector('.pattern-overlay');
-        patternOverlay.style.cssText = getPatternStyle(this.pattern);
+        try {
+            const isAdult = this.stage === 'adult';
+            const width = isAdult ? 60 : 35;
+            const height = isAdult ? 30 : 18;
+            this.element.style.width = `${width}px`;
+            this.element.style.height = `${height}px`;
 
-        const tail = this.element.querySelector('.guppy-tail');
-        const tailColor = toRgbString({ r: Math.max(0, this.pattern.colors[0].r - 30), g: Math.max(0, this.pattern.colors[0].g - 30), b: Math.max(0, this.pattern.colors[0].b - 30) });
-        tail.style.borderLeftColor = tailColor;
+            if (!this.pattern || !this.pattern.colors) {
+                console.error(`Guppy ${this.id} has invalid pattern:`, this.pattern);
+                return;
+            }
+
+            const c1 = this.pattern.colors[0];
+            const c2 = this.pattern.colors[1] || c1;
+
+            const bodyColor1 = toRgbString(c1);
+            const bodyColor2 = toRgbString(c2);
+
+            const tailC1 = { r: Math.min(255, c1.r + 20), g: Math.min(255, c1.g + 20), b: Math.min(255, c1.b + 20) };
+            const tailC2 = { r: Math.min(255, c2.r + 20), g: Math.min(255, c2.g + 20), b: Math.min(255, c2.b + 20) };
+            const tailColor1 = toRgbString(tailC1);
+            const tailColor2 = toRgbString(tailC2);
+
+            const svg = this.element.querySelector('svg');
+            if (svg) {
+                const bodyStop1 = svg.querySelector(`#bodyGradient-${this.id} .body-color-1`);
+                const bodyStop2 = svg.querySelector(`#bodyGradient-${this.id} .body-color-2`);
+                const tailStop1 = svg.querySelector(`#tailGradient-${this.id} .tail-color-1`);
+                const tailStop2 = svg.querySelector(`#tailGradient-${this.id} .tail-color-2`);
+
+                if (bodyStop1) bodyStop1.setAttribute('stop-color', bodyColor1);
+                if (bodyStop2) bodyStop2.setAttribute('stop-color', bodyColor2);
+                if (tailStop1) tailStop1.setAttribute('stop-color', tailColor1);
+                if (tailStop2) tailStop2.setAttribute('stop-color', tailColor2);
+            }
+        } catch (e) {
+            console.error(`Error updating appearance for guppy ${this.id}:`, e);
+        }
     }
+
     grow() {
         this.age++; this.hunger = Math.min(MAX_HUNGER, this.hunger + 1);
         if (this.stage === 'fry' && this.age >= ADULT_AGE) { this.stage = 'adult'; this.updateAppearance(); }
     }
+
     decideBehavior(aquariumState) {
         if (aquariumState.food.length > 0) {
             this.nibbleTargetX = null;
@@ -141,16 +318,20 @@ class Guppy {
         if (this.hunger > HUNGRY_THRESHOLD) {
             if (this.nibbleTargetX === null || Math.abs(this.x - this.nibbleTargetX) < 10) {
                 const guppyWidth = this.stage === 'adult' ? 50 : 30;
-                this.nibbleTargetX = Math.random() * (aquarium.clientWidth - guppyWidth);
+                const containerWidth = aquarium.clientWidth || 800;
+                this.nibbleTargetX = Math.random() * (containerWidth - guppyWidth);
             }
             this.target = { x: this.nibbleTargetX, y: 10 }; return;
         }
 
         this.nibbleTargetX = null;
         if (!this.target || (this.target && !aquariumState.food.includes(this.target))) {
-            this.target = { x: Math.random() * (aquarium.clientWidth - 50), y: Math.random() * (aquarium.clientHeight - 25) };
+            const containerWidth = aquarium.clientWidth || 800;
+            const containerHeight = aquarium.clientHeight || 400;
+            this.target = { x: Math.random() * (containerWidth - 50), y: Math.random() * (containerHeight - 25) };
         }
     }
+
     updatePosition(aquariumState) {
         if (!this.target || !this.element) return;
         const dx = this.target.x - this.x; const dy = this.target.y - this.y;
@@ -158,9 +339,17 @@ class Guppy {
 
         if (this.hunger > HUNGRY_THRESHOLD && aquariumState.food.length === 0 && this.y < 30) {
             this.element.classList.add('nibbling');
-            this.element.classList.toggle('flipped', this.isFlipped);
+            this.element.style.transform = 'scaleX(1) rotate(-45deg)';
         } else {
-            this.element.classList.remove('nibbling', 'flipped');
+            this.element.classList.remove('nibbling');
+
+            const angleDeg = Math.atan2(dy, dx) * (180 / Math.PI);
+
+            if (dx >= 0) {
+                this.element.style.transform = `scaleX(-1) rotate(${-angleDeg}deg)`;
+            } else {
+                this.element.style.transform = `scaleX(1) rotate(${angleDeg - 180}deg)`;
+            }
         }
 
         if (distance < this.speed) {
@@ -170,15 +359,21 @@ class Guppy {
             }
             this.target = null; return;
         }
-        const oldX = this.x;
-        this.x += (dx / distance) * this.speed; this.y += (dy / distance) * this.speed;
-        if (this.x !== oldX) {
-            this.isFlipped = this.x < oldX;
-            this.element.style.transform = this.isFlipped ? 'scaleX(-1)' : 'scaleX(1)';
-        }
-        this.element.style.left = `${this.x}px`; this.element.style.top = `${this.y}px`;
+
+        // Move towards target
+        const moveX = (dx / distance) * this.speed;
+        const moveY = (dy / distance) * this.speed;
+
+        this.x += moveX;
+        this.y += moveY;
+
+        this.element.style.left = `${this.x}px`;
+        this.element.style.top = `${this.y}px`;
     }
-    destroy() { if (this.element) this.element.remove(); this.element = null; }
+    toJSON() {
+        const { element, target, ...rest } = this;
+        return rest;
+    }
 }
 
 class Decoration {
@@ -187,6 +382,7 @@ class Decoration {
         this.x = x;
         this.element = null;
     }
+
     createElement() {
         const el = document.createElement('div');
         el.className = 'decoration';
@@ -195,12 +391,6 @@ class Decoration {
         aquarium.appendChild(el);
         this.element = el;
     }
-    destroy() { if (this.element) this.element.remove(); this.element = null; }
-}
-
-function getPatternKey(pattern) {
-    const roundValue = (v) => Math.min(255, Math.round(v / 20) * 20);
-    return `${pattern.type}-${pattern.colors.map(c => `${roundValue(c.r)},${roundValue(c.g)},${roundValue(c.b)}`).join('-')}`;
 }
 
 function breedGuppies(parent1, parent2) {
@@ -277,16 +467,38 @@ function rehomeGuppy(guppyId) {
         return;
     }
     showConfirmation(`${value} 코인을 받고 이 구피를 분양 보내시겠습니까?`, () => {
+        console.log(`Rehoming guppy ${guppyId}...`);
         gameState.coins += value;
-        guppy.destroy();
+
+        // Try to destroy via method if available
+        if (typeof guppy.destroy === 'function') {
+            console.log("Calling guppy.destroy()...");
+            guppy.destroy();
+        } else {
+            console.warn("guppy.destroy is NOT a function. Manually removing element.");
+            if (guppy.element) guppy.element.remove();
+        }
+
+        // Fallback: Try to remove by ID if element reference was lost or manual removal failed
+        const selector = `.guppy[data-id="${guppyId}"]`;
+        const el = document.querySelector(selector);
+        if (el) {
+            console.log(`Fallback: Removing element found by '${selector}'`);
+            el.remove();
+        }
+
         currentAq.guppies.splice(guppyIndex, 1);
         gameState.breedingParents = gameState.breedingParents.filter(p => p.id !== guppyId);
+
         updateUI();
+
         const modal = document.getElementById('guppy-list-modal');
         if (modal) {
             modal.remove();
             openGuppyList(); // Refresh the list
         }
+
+        showToast(`${value} 코인 획득!`);
     });
 }
 function showConfirmation(message, onConfirm) {
@@ -297,18 +509,27 @@ function showConfirmation(message, onConfirm) {
         <div class="modal-content text-center">
             <p id="confirm-message" class="text-lg mb-6">${message}</p>
             <div class="flex justify-center space-x-4">
-                <button id="confirm-yes-button" class="btn btn-primary py-2 px-8 rounded-lg">예</button>
+                <button id="confirm-yes-button" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-8 rounded-lg">예</button>
                 <button id="confirm-no-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-8 rounded-lg">아니오</button>
             </div>
         </div>`;
     modalContainer.appendChild(confirmModal);
 
     const yesHandler = () => {
-        onConfirm();
-        modalContainer.removeChild(confirmModal);
+        try {
+            onConfirm();
+        } catch (e) {
+            console.error("Error in confirmation handler:", e);
+        } finally {
+            if (modalContainer.contains(confirmModal)) {
+                modalContainer.removeChild(confirmModal);
+            }
+        }
     };
     const noHandler = () => {
-        modalContainer.removeChild(confirmModal);
+        if (modalContainer.contains(confirmModal)) {
+            modalContainer.removeChild(confirmModal);
+        }
     };
 
     confirmModal.querySelector('#confirm-yes-button').addEventListener('click', yesHandler);
@@ -335,23 +556,44 @@ function saveGame() {
     localStorage.setItem('guppyLabSave', JSON.stringify(plainState));
 }
 function loadGame() {
-    const savedData = localStorage.getItem('guppyLabSave');
-    if (savedData) {
-        const loadedState = JSON.parse(savedData);
-        gameState = { ...gameState, ...loadedState };
-        gameState.discoveredPatterns = new Set(loadedState.discoveredPatterns);
+    try {
+        const savedData = localStorage.getItem('guppyLabSave');
+        if (savedData) {
+            console.log("Loading game data...");
+            const loadedState = JSON.parse(savedData);
+            gameState = { ...gameState, ...loadedState };
+            gameState.discoveredPatterns = new Set(loadedState.discoveredPatterns);
 
-        gameState.aquariums.forEach(aqData => {
-            const guppies = aqData.guppies.map(gData => new Guppy(gData.id, gData.pattern, gData.age, gData.parents, gData.hunger, gData.lastBredTime || 0));
-            const decorations = aqData.decorations.map(dData => {
-                const item = SHOP_ITEMS.find(i => i.id === dData.item.id);
-                return new Decoration(item, dData.x);
+            gameState.aquariums.forEach((aqData, index) => {
+                console.log(`Loading aquarium ${index}, guppies: ${aqData.guppies.length}`);
+                const guppies = aqData.guppies.map(gData => {
+                    // Ensure pattern is valid
+                    if (!gData.pattern || !gData.pattern.colors) {
+                        console.warn(`Guppy ${gData.id} has invalid pattern in save, using default`);
+                        gData.pattern = { type: 'spots', colors: [{ r: 200, g: 200, b: 200 }] };
+                    }
+                    // Validate coordinates from save
+                    let safeX = gData.x;
+                    let safeY = gData.y;
+                    if (typeof safeX !== 'number' || !isFinite(safeX)) safeX = null;
+                    if (typeof safeY !== 'number' || !isFinite(safeY)) safeY = null;
+
+                    return new Guppy(gData.id, gData.pattern, gData.age, gData.parents, gData.hunger, gData.lastBredTime || 0, safeX, safeY);
+                });
+                const decorations = aqData.decorations.map(dData => {
+                    const item = SHOP_ITEMS.find(i => i.id === dData.item.id);
+                    return new Decoration(item, dData.x);
+                });
+                aqData.guppies = guppies;
+                aqData.decorations = decorations;
+                aqData.food = [];
             });
-            aqData.guppies = guppies;
-            aqData.decorations = decorations;
-            aqData.food = [];
-        });
-        return true;
+            console.log("Game loaded successfully");
+            return true;
+        }
+    } catch (e) {
+        console.error("Error loading game:", e);
+        localStorage.removeItem('guppyLabSave'); // Clear corrupted save
     }
     return false;
 }
@@ -423,6 +665,21 @@ function tickLoop() {
     saveGame();
 }
 
+function getPatternLabel(patternType) {
+    const labels = {
+        'spots': '점무늬 🐆',
+        'stripes': '줄무늬 🦓',
+        'h_stripes': '가로 줄무늬 ➖',
+        'v_stripes': '세로 줄무늬 ❙',
+        'freckles': '주근깨 ˙˙',
+        'half': '반반 🌓',
+        'rings': '고리 ⭕',
+        'checker': '체크 🏁',
+        'gradient': '그라데이션 🌈'
+    };
+    return labels[patternType] || patternType;
+}
+
 function openGuppyList() {
     const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
     const guppyListModal = document.createElement('div');
@@ -444,15 +701,12 @@ function openGuppyList() {
             return `
             <div class="flex items-center p-2 rounded-lg hover:bg-slate-800">
                 <div class="flex-1 flex items-center cursor-pointer" onclick="showGuppyInfoById(${guppy.id})">
-                    <div class="static-guppy-container mr-4">
-                        <div class="static-guppy" style="background-color: ${toRgbString(guppy.pattern.colors[0])};">
-                            <div class="pattern-overlay" style="${getPatternStyle(guppy.pattern)}"></div>
-                            <div class="static-guppy-tail" style="border-left-color: ${toRgbString({ r: Math.max(0, guppy.pattern.colors[0].r - 30), g: Math.max(0, guppy.pattern.colors[0].g - 30), b: Math.max(0, guppy.pattern.colors[0].b - 30) })};"></div>
-                        </div>
+                    <div class="mr-4 flex-shrink-0" style="width: 80px; height: 30px;">
+                        ${guppy.getGuppySVG()}
                     </div>
                     <div>
                         <p class="font-bold">ID: ${guppy.id} (${guppy.stage === 'fry' ? '치어' : '성어'})</p>
-                        <p class="text-sm text-slate-400">패턴: ${guppy.pattern.type}</p>
+                        <p class="text-sm text-cyan-300 font-bold">${getPatternLabel(guppy.pattern.type)}</p>
                         <div class="mt-1 space-y-1">${colorsHTML}</div>
                     </div>
                 </div>
@@ -536,6 +790,11 @@ function getPatternStyle(pattern) {
     return '';
 }
 
+function getPatternKey(pattern) {
+    const colorKey = pattern.colors.map(c => `${c.r},${c.g},${c.b}`).join('|');
+    return `${pattern.type}:${colorKey}`;
+}
+
 function openShop() {
     const shopModal = document.createElement('div');
     shopModal.id = 'shop-modal';
@@ -546,12 +805,11 @@ function openShop() {
             itemPreview = `<div class="flex justify-center items-center h-24">${item.svg}</div>
                 <div><p class="font-bold">${item.name}</p><p class="text-sm text-slate-400">효과: 수질 정화</p></div>`;
         } else if (item.type === 'guppy') {
+            // Create a temp guppy to get the SVG
+            const tempGuppy = new Guppy(`shop-${item.id}`, item.pattern);
             itemPreview = `<div class="flex justify-center items-center h-24">
-                    <div class="static-guppy-container">
-                        <div class="static-guppy" style="background-color: ${toRgbString(item.pattern.colors[0])};">
-                            <div class="pattern-overlay" style="${getPatternStyle(item.pattern)}"></div>
-                            <div class="static-guppy-tail" style="border-left-color: ${toRgbString({ r: Math.max(0, item.pattern.colors[0].r - 30), g: Math.max(0, item.pattern.colors[0].g - 30), b: Math.max(0, item.pattern.colors[0].b - 30) })};"></div>
-                        </div>
+                    <div style="width: 80px; height: 30px;">
+                        ${tempGuppy.getGuppySVG()}
                     </div>
                 </div>
                 <div><p class="font-bold">${item.name}</p><p class="text-sm text-slate-400">기본 혈통</p></div>`;
@@ -611,12 +869,25 @@ function openCollection() {
 
     let collectionHTML = '';
     gameState.discoveredPatterns.forEach(patternKey => {
-        const [type, ...colorsStr] = patternKey.split('-');
-        const colors = colorsStr.map(cs => {
-            const [r, g, b] = cs.split(',');
-            return { r: parseInt(r), g: parseInt(g), b: parseInt(b) };
-        });
+        // Parse pattern key: "type:r,g,b|r,g,b"
+        const [type, colorsStr] = patternKey.split(':');
+
+        let colors = [];
+        if (colorsStr) {
+            colors = colorsStr.split('|').map(cs => {
+                const [r, g, b] = cs.split(',').map(Number);
+                return { r, g, b };
+            });
+        } else {
+            // Fallback for old keys or errors
+            colors = [{ r: 200, g: 200, b: 200 }];
+        }
+
         const pattern = { type, colors };
+
+        // Create temp guppy for SVG
+        const tempGuppy = new Guppy(`collection-${patternKey}`, pattern);
+
         const colorsHTML = pattern.colors.map(c => `
             <div class="flex items-center space-x-2">
                 <div class="w-4 h-4 rounded-full border border-slate-600" style="background-color: ${toRgbString(c)}"></div>
@@ -625,14 +896,11 @@ function openCollection() {
 
         collectionHTML += `
             <div class="flex items-center p-2 rounded-lg border border-slate-700">
-                <div class="static-guppy-container mr-4">
-                    <div class="static-guppy" style="background-color: ${toRgbString(pattern.colors[0])};">
-                        <div class="pattern-overlay" style="${getPatternStyle(pattern)}"></div>
-                        <div class="static-guppy-tail" style="border-left-color: ${toRgbString({ r: Math.max(0, pattern.colors[0].r - 30), g: Math.max(0, pattern.colors[0].g - 30), b: Math.max(0, pattern.colors[0].b - 30) })};"></div>
-                    </div>
+                <div class="mr-4 flex-shrink-0" style="width: 80px; height: 30px;">
+                    ${tempGuppy.getGuppySVG()}
                 </div>
                 <div>
-                    <p class="font-bold capitalize">${pattern.type}</p>
+                    <p class="font-bold capitalize text-cyan-300">${getPatternLabel(pattern.type)}</p>
                     <div class="flex flex-col space-y-1 mt-1">${colorsHTML}</div>
                 </div>
             </div>`;
@@ -787,15 +1055,12 @@ function getGuppyCardHTML(guppy) {
 
     let html = `
         <div class="flex justify-center mb-4">
-            <div class="static-guppy-container">
-                <div class="static-guppy" style="background-color: ${toRgbString(guppy.pattern.colors[0])};">
-                    <div class="pattern-overlay" style="${getPatternStyle(guppy.pattern)}"></div>
-                    <div class="static-guppy-tail" style="border-left-color: ${toRgbString({ r: Math.max(0, guppy.pattern.colors[0].r - 30), g: Math.max(0, guppy.pattern.colors[0].g - 30), b: Math.max(0, guppy.pattern.colors[0].b - 30) })};"></div>
-                </div>
+            <div style="width: 120px; height: 60px;">
+                ${guppy.getGuppySVG()}
             </div>
         </div>
         <p class="font-bold">ID: ${guppy.id || '새로운 구피'}</p>
-        <p class="text-sm">패턴: ${guppy.pattern.type}</p>
+        <p class="text-sm text-cyan-300 font-bold">${getPatternLabel(guppy.pattern.type)}</p>
         <div class="mt-1 space-y-1 text-left inline-block">${colorsHTML}</div>
     `;
     return html;
@@ -853,92 +1118,7 @@ function openMoveGuppyModal() {
 }
 
 // --- 이벤트 리스너 ---
-startButton.addEventListener('click', () => {
-    introWrapper.classList.add('hidden');
-    mainAppScreen.classList.remove('hidden');
-    mainAppScreen.classList.add('flex');
-    if (!gameInitialized) {
-        init();
-        gameInitialized = true;
-    }
-});
 
-feedButton.addEventListener('click', () => {
-    if (gameState.coins >= FEED_COST) {
-        gameState.coins -= FEED_COST;
-        const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
-        for (let i = 0; i < 15; i++) {
-            const x = Math.random() * (aquarium.clientWidth - 10);
-            const y = Math.random() * 20;
-            currentAq.food.push(new Food(x, y));
-        }
-    } else { showToast('코인이 부족합니다!'); }
-});
-cleanButton.addEventListener('click', () => {
-    gameState.aquariums[gameState.currentAquariumIndex].waterQuality = 100;
-    updateUI();
-});
-breedButton.addEventListener('click', () => startBreeding());
-
-infoBreedButton.addEventListener('click', () => {
-    const guppy = findGuppyById(gameState.currentInfoGuppyId);
-    if (guppy) startBreeding(guppy);
-});
-
-infoRehomeButton.addEventListener('click', () => {
-    rehomeGuppy(gameState.currentInfoGuppyId);
-    guppyInfoPanel.classList.add('hidden');
-});
-
-infoMoveButton.addEventListener('click', openMoveGuppyModal);
-
-closeInfoPanelButton.addEventListener('click', () => guppyInfoPanel.classList.add('hidden'));
-
-prevAquariumButton.addEventListener('click', () => switchAquarium(-1));
-nextAquariumButton.addEventListener('click', () => switchAquarium(1));
-
-document.body.addEventListener('click', (e) => {
-    if (e.target.classList.contains('rehome-button')) {
-        const guppyId = parseInt(e.target.dataset.guppyId);
-        rehomeGuppy(guppyId);
-    }
-    if (!e.target.closest('.guppy') && !e.target.closest('#guppy-info-panel') && !e.target.closest('#guppy-list-modal')) {
-        guppyInfoPanel.classList.add('hidden');
-    }
-    if (e.target.id === 'aquarium') {
-        if (gameState.isBreedingMode) {
-            cancelBreeding();
-            showToast('교배가 취소되었습니다.');
-        }
-    }
-    if (e.target.classList.contains('close-modal-button') || e.target.classList.contains('modal-overlay')) {
-        const modal = e.target.closest('.modal-overlay');
-        if (modal) {
-            if (modal.id === 'breed-modal') cancelBreeding();
-            modal.remove();
-        }
-    }
-    if (e.target.classList.contains('buy-button')) {
-        buyItem(e.target.dataset.itemId);
-    }
-    if (e.target.classList.contains('move-to-aq-button')) {
-        const targetIndex = parseInt(e.target.dataset.targetIndex);
-        const guppyToMove = findGuppyById(gameState.currentInfoGuppyId);
-        const sourceAq = gameState.aquariums[gameState.currentAquariumIndex];
-
-        const guppyIndex = sourceAq.guppies.findIndex(g => g.id === guppyToMove.id);
-        if (guppyIndex > -1) {
-            sourceAq.guppies.splice(guppyIndex, 1);
-            guppyToMove.destroy();
-
-            gameState.aquariums[targetIndex].guppies.push(guppyToMove);
-
-            guppyInfoPanel.classList.add('hidden');
-            e.target.closest('.modal-overlay').remove();
-            showToast(`구피를 수조 ${targetIndex + 1}(으)로 옮겼습니다.`);
-        }
-    }
-});
 
 function openModal(type) {
     const modal = document.createElement('div');
@@ -978,11 +1158,6 @@ function openModal(type) {
     modalContainer.appendChild(modal);
 }
 
-manualButton.addEventListener('click', () => openModal('manual'));
-guppyListButton.addEventListener('click', openGuppyList);
-shopButton.addEventListener('click', openShop);
-collectionButton.addEventListener('click', openCollection);
-
 function init() {
     if (!loadGame()) {
         const p1 = { type: 'spots', colors: [{ r: 255, g: 255, b: 255 }, { r: 255, g: 0, b: 0 }] };
@@ -1006,4 +1181,188 @@ function init() {
     renderCurrentAquarium();
     setInterval(tickLoop, 1000);
     requestAnimationFrame(renderLoop);
+}
+
+function startGame() {
+    console.log("Guppy Lab: Starting game...");
+    if (introWrapper && mainAppScreen) {
+        introWrapper.classList.add('hidden');
+        mainAppScreen.classList.remove('hidden');
+        mainAppScreen.style.display = 'flex';
+
+        if (!gameInitialized) {
+            init();
+            gameInitialized = true;
+            console.log("Guppy Lab: Game initialized");
+        }
+    } else {
+        console.error("Guppy Lab: Critical elements missing for start game", { introWrapper, mainAppScreen });
+    }
+}
+
+function setupEventListeners() {
+    console.log("Guppy Lab: Setting up event listeners");
+
+    // --- Main UI Buttons ---
+    if (manualButton) manualButton.addEventListener('click', () => openModal('manual'));
+    if (guppyListButton) guppyListButton.addEventListener('click', openGuppyList);
+    if (shopButton) shopButton.addEventListener('click', openShop);
+    if (collectionButton) collectionButton.addEventListener('click', openCollection);
+
+    if (feedButton) feedButton.addEventListener('click', () => {
+        if (gameState.coins >= FEED_COST) {
+            gameState.coins -= FEED_COST;
+            updateUI();
+            // Scatter food
+            const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
+            for (let i = 0; i < 15; i++) {
+                const x = Math.random() * (aquarium.clientWidth - 10);
+                const y = Math.random() * 20;
+                currentAq.food.push(new Food(x, y));
+            }
+        } else {
+            showToast('코인이 부족합니다!');
+        }
+    });
+
+    if (cleanButton) cleanButton.addEventListener('click', () => {
+        gameState.aquariums[gameState.currentAquariumIndex].waterQuality = 100;
+        updateUI();
+        showToast('수질이 깨끗해졌습니다!');
+    });
+
+    if (breedButton) breedButton.addEventListener('click', () => {
+        if (gameState.isBreedingMode) {
+            cancelBreeding();
+            breedButton.textContent = '교배 시작하기';
+            breedButton.classList.add('btn-primary');
+            breedButton.classList.remove('bg-gray-500');
+        } else {
+            startBreeding();
+            breedButton.textContent = '교배 취소';
+            breedButton.classList.remove('btn-primary');
+            breedButton.classList.add('bg-gray-500');
+        }
+    });
+
+    // --- Navigation ---
+    if (prevAquariumButton) prevAquariumButton.addEventListener('click', () => switchAquarium(-1));
+    if (nextAquariumButton) nextAquariumButton.addEventListener('click', () => switchAquarium(1));
+
+    // --- Info Panel ---
+    if (closeInfoPanelButton) closeInfoPanelButton.addEventListener('click', () => {
+        guppyInfoPanel.classList.add('hidden');
+    });
+
+    if (infoBreedButton) infoBreedButton.addEventListener('click', () => {
+        const guppy = findGuppyById(gameState.currentInfoGuppyId);
+        if (guppy) {
+            // If we are already in breeding mode, just select this one
+            if (!gameState.isBreedingMode) {
+                startBreeding(guppy);
+                // Update main breed button state
+                breedButton.textContent = '교배 취소';
+                breedButton.classList.remove('btn-primary');
+                breedButton.classList.add('bg-gray-500');
+            } else {
+                selectBreedingGuppy(guppy);
+            }
+            guppyInfoPanel.classList.add('hidden');
+        }
+    });
+
+    if (infoRehomeButton) infoRehomeButton.addEventListener('click', () => {
+        rehomeGuppy(gameState.currentInfoGuppyId);
+        guppyInfoPanel.classList.add('hidden');
+    });
+
+    if (infoMoveButton) infoMoveButton.addEventListener('click', openMoveGuppyModal);
+
+    // --- Global Click Delegation ---
+    document.body.addEventListener('click', (e) => {
+        // Rehome button in list
+        if (e.target.classList.contains('rehome-button')) {
+            const guppyId = parseInt(e.target.dataset.guppyId);
+            rehomeGuppy(guppyId);
+        }
+
+        // Close info panel when clicking outside
+        if (!e.target.closest('.guppy') &&
+            !e.target.closest('#guppy-info-panel') &&
+            !e.target.closest('#guppy-list-modal') &&
+            !e.target.closest('.modal-overlay')) { // Added modal overlay check to prevent closing when clicking modals
+            guppyInfoPanel.classList.add('hidden');
+        }
+
+        // Cancel breeding if clicking on background
+        if (e.target.id === 'aquarium') {
+            if (gameState.isBreedingMode) {
+                cancelBreeding();
+                showToast('교배가 취소되었습니다.');
+                breedButton.textContent = '교배 시작하기';
+                breedButton.classList.add('btn-primary');
+                breedButton.classList.remove('bg-gray-500');
+            }
+        }
+
+        // Close modals
+        if (e.target.classList.contains('close-modal-button') || e.target.classList.contains('modal-overlay')) {
+            const modal = e.target.closest('.modal-overlay');
+            if (modal) {
+                if (modal.id === 'breed-modal') cancelBreeding();
+                modal.remove();
+            }
+        }
+
+        // Buy items
+        if (e.target.classList.contains('buy-button')) {
+            buyItem(e.target.dataset.itemId);
+        }
+
+        // Move guppy to another aquarium
+        if (e.target.classList.contains('move-to-aq-button')) {
+            const targetIndex = parseInt(e.target.dataset.targetIndex);
+            const guppyToMove = findGuppyById(gameState.currentInfoGuppyId);
+            const sourceAq = gameState.aquariums[gameState.currentAquariumIndex];
+
+            if (guppyToMove) {
+                const guppyIndex = sourceAq.guppies.findIndex(g => g.id === guppyToMove.id);
+                if (guppyIndex > -1) {
+                    sourceAq.guppies.splice(guppyIndex, 1);
+
+                    // Safe destroy
+                    if (typeof guppyToMove.destroy === 'function') {
+                        guppyToMove.destroy();
+                    } else {
+                        // Fallback manual removal
+                        if (guppyToMove.element) guppyToMove.element.remove();
+                        const selector = `.guppy[data-id="${guppyToMove.id}"]`;
+                        const el = document.querySelector(selector);
+                        if (el) el.remove();
+                    }
+
+                    // Add to target aquarium
+                    // IMPORTANT: We must ensure it's an instance when adding to new aquarium, 
+                    // although loadGame usually handles this, pushing a plain object might cause issues later if not re-instantiated.
+                    // For now, pushing the object is fine as long as we don't expect it to have methods immediately without reload/re-render.
+                    // Ideally, we should re-instantiate it if it's a plain object.
+                    let guppyInstance = guppyToMove;
+                    if (!(guppyToMove instanceof Guppy)) {
+                        guppyInstance = new Guppy(guppyToMove.id, guppyToMove.pattern, guppyToMove.age, guppyToMove.parents, guppyToMove.hunger, guppyToMove.lastBredTime, guppyToMove.x, guppyToMove.y);
+                    }
+                    // Reset element reference for the new aquarium (it will be created when rendered)
+                    guppyInstance.element = null;
+
+                    gameState.aquariums[targetIndex].guppies.push(guppyInstance);
+
+                    guppyInfoPanel.classList.add('hidden');
+                    const modal = e.target.closest('.modal-overlay');
+                    if (modal) modal.remove();
+
+                    showToast(`구피를 수조 ${targetIndex + 1}(으)로 옮겼습니다.`);
+                    updateUI(); // Update counts etc
+                }
+            }
+        }
+    });
 }
