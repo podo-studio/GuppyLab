@@ -570,7 +570,7 @@ function saveGame() {
     localStorage.setItem('guppyLabSave', JSON.stringify(plainState));
 }
 
-function exportSaveFile() {
+async function exportSaveFile() {
     const plainState = JSON.parse(JSON.stringify(gameState));
     plainState.aquariums.forEach(aq => {
         aq.guppies.forEach(g => {
@@ -582,15 +582,43 @@ function exportSaveFile() {
     });
     plainState.discoveredPatterns = Array.from(plainState.discoveredPatterns);
 
-    const blob = new Blob([JSON.stringify(plainState)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", url);
-    downloadAnchorNode.setAttribute("download", "guppy_lab_save.json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-    URL.revokeObjectURL(url);
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[-:T]/g, '').slice(0, 14); // YYYYMMDDHHmmss
+    const filename = `GuppyLab_${timestamp}.json`;
+    const jsonString = JSON.stringify(plainState);
+
+    try {
+        if (window.showSaveFilePicker) {
+            const handle = await window.showSaveFilePicker({
+                suggestedName: filename,
+                types: [{
+                    description: 'JSON File',
+                    accept: { 'application/json': ['.json'] },
+                }],
+            });
+            const writable = await handle.createWritable();
+            await writable.write(jsonString);
+            await writable.close();
+            showToast('게임이 저장되었습니다!');
+        } else {
+            // Fallback for browsers not supporting File System Access API
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", url);
+            downloadAnchorNode.setAttribute("download", filename);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            URL.revokeObjectURL(url);
+            showToast('게임이 저장되었습니다!');
+        }
+    } catch (err) {
+        if (err.name !== 'AbortError') {
+            console.error('Save failed:', err);
+            showToast('저장에 실패했습니다.');
+        }
+    }
 }
 
 function importSaveFile(event) {
