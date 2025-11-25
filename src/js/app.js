@@ -1,5 +1,5 @@
 // --- DOM 요소 ---
-let introWrapper, mainAppScreen, startButton, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle;
+let introWrapper, mainAppScreen, startButton, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Guppy Lab: DOM Content Loaded");
@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     prevAquariumButton = document.getElementById('prev-aquarium');
     nextAquariumButton = document.getElementById('next-aquarium');
     aquariumTitle = document.getElementById('aquarium-title');
+    saveButton = document.getElementById('save-button');
+    loadButton = document.getElementById('load-button');
+    loadFileInput = document.getElementById('load-file-input');
 
     if (startButton) {
         console.log("Guppy Lab: Start button found, attaching listener");
@@ -35,6 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize other UI listeners here if needed, or keep them where they are but ensure elements exist
     setupEventListeners();
+
+    if (saveButton) saveButton.addEventListener('click', exportSaveFile);
+    if (loadButton) loadButton.addEventListener('click', () => loadFileInput.click());
+    if (loadFileInput) loadFileInput.addEventListener('change', importSaveFile);
 });
 
 // --- 게임 설정 및 데이터 ---
@@ -562,39 +569,98 @@ function saveGame() {
     plainState.discoveredPatterns = Array.from(plainState.discoveredPatterns);
     localStorage.setItem('guppyLabSave', JSON.stringify(plainState));
 }
+
+function exportSaveFile() {
+    const plainState = JSON.parse(JSON.stringify(gameState));
+    plainState.aquariums.forEach(aq => {
+        aq.guppies.forEach(g => {
+            delete g.element;
+            delete g.target;
+        });
+        aq.decorations.forEach(d => delete d.element);
+        aq.food = [];
+    });
+    plainState.discoveredPatterns = Array.from(plainState.discoveredPatterns);
+
+    const blob = new Blob([JSON.stringify(plainState)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", url);
+    downloadAnchorNode.setAttribute("download", "guppy_lab_save.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    URL.revokeObjectURL(url);
+}
+
+function importSaveFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const loadedState = JSON.parse(e.target.result);
+            restoreGameState(loadedState);
+            showToast('게임을 성공적으로 불러왔습니다!');
+        } catch (error) {
+            console.error("Error importing save file:", error);
+            showToast('세이브 파일을 불러오는데 실패했습니다.');
+        }
+        event.target.value = ''; // Reset input
+    };
+    reader.readAsText(file);
+}
+
+function restoreGameState(loadedState) {
+    gameState = { ...gameState, ...loadedState };
+    gameState.discoveredPatterns = new Set(loadedState.discoveredPatterns);
+
+    // Clear existing elements
+    gameState.aquariums.forEach(aq => {
+        if (aq.guppies) aq.guppies.forEach(g => { if (g.element) g.element.remove(); });
+        if (aq.decorations) aq.decorations.forEach(d => { if (d.element) d.element.remove(); });
+    });
+    aquarium.innerHTML = ''; // Clear aquarium container
+
+    gameState.aquariums.forEach((aqData, index) => {
+        console.log(`Loading aquarium ${index}, guppies: ${aqData.guppies.length}`);
+        const guppies = aqData.guppies.map(gData => {
+            if (!gData.pattern || !gData.pattern.colors) {
+                console.warn(`Guppy ${gData.id} has invalid pattern in save, using default`);
+                gData.pattern = { type: 'spots', colors: [{ r: 200, g: 200, b: 200 }] };
+            }
+            let safeX = gData.x;
+            let safeY = gData.y;
+            if (typeof safeX !== 'number' || !isFinite(safeX)) safeX = null;
+            if (typeof safeY !== 'number' || !isFinite(safeY)) safeY = null;
+
+            return new Guppy(gData.id, gData.pattern, gData.age, gData.parents, gData.hunger, gData.lastBredTime || 0, safeX, safeY);
+        });
+        const decorations = aqData.decorations.map(dData => {
+            const item = SHOP_ITEMS.find(i => i.id === dData.item.id);
+            return new Decoration(item, dData.x);
+        });
+        aqData.guppies = guppies;
+        aqData.decorations = decorations;
+        aqData.food = [];
+    });
+
+    // Re-create elements for current aquarium
+    const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
+    currentAq.guppies.forEach(g => g.createElement());
+    currentAq.decorations.forEach(d => d.createElement());
+
+    updateUI();
+}
+
 function loadGame() {
     try {
         const savedData = localStorage.getItem('guppyLabSave');
         if (savedData) {
             console.log("Loading game data...");
             const loadedState = JSON.parse(savedData);
-            gameState = { ...gameState, ...loadedState };
-            gameState.discoveredPatterns = new Set(loadedState.discoveredPatterns);
-
-            gameState.aquariums.forEach((aqData, index) => {
-                console.log(`Loading aquarium ${index}, guppies: ${aqData.guppies.length}`);
-                const guppies = aqData.guppies.map(gData => {
-                    // Ensure pattern is valid
-                    if (!gData.pattern || !gData.pattern.colors) {
-                        console.warn(`Guppy ${gData.id} has invalid pattern in save, using default`);
-                        gData.pattern = { type: 'spots', colors: [{ r: 200, g: 200, b: 200 }] };
-                    }
-                    // Validate coordinates from save
-                    let safeX = gData.x;
-                    let safeY = gData.y;
-                    if (typeof safeX !== 'number' || !isFinite(safeX)) safeX = null;
-                    if (typeof safeY !== 'number' || !isFinite(safeY)) safeY = null;
-
-                    return new Guppy(gData.id, gData.pattern, gData.age, gData.parents, gData.hunger, gData.lastBredTime || 0, safeX, safeY);
-                });
-                const decorations = aqData.decorations.map(dData => {
-                    const item = SHOP_ITEMS.find(i => i.id === dData.item.id);
-                    return new Decoration(item, dData.x);
-                });
-                aqData.guppies = guppies;
-                aqData.decorations = decorations;
-                aqData.food = [];
-            });
+            restoreGameState(loadedState);
             console.log("Game loaded successfully");
             return true;
         }
