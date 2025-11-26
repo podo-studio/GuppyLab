@@ -867,7 +867,7 @@ function showGuppyInfo(guppy) {
             </div>
         `).join('');
         pd.innerHTML = `
-            <p>패턴: ${guppy.pattern.type}</p>
+            <p>패턴: ${getPatternLabel(guppy.pattern.type)}</p>
             <div class="mt-1 space-y-1">${colorsHTML}</div>
         `;
         el('info-age').textContent = `나이: ${guppy.age}초`;
@@ -1123,7 +1123,7 @@ function openBreedModal() {
         const { newGuppy, inheritance } = breedGuppies(p1, p2);
         breedModal.querySelector('#breed-result-guppy').innerHTML = getGuppyCardHTML(newGuppy);
 
-        let reportHTML = `<p>패턴: ${newGuppy.pattern.type} (부모 ${inheritance.pattern}에게서 유전)</p>`;
+        let reportHTML = `<p>패턴: ${getPatternLabel(newGuppy.pattern.type)} (부모 ${inheritance.pattern}에게서 유전)</p>`;
         newGuppy.pattern.colors.forEach((childColor, i) => {
             const colorLabel = i === 0 ? '몸통색' : `무늬색${i}`;
             const inheritanceInfo = inheritance.colors[i];
