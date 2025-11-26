@@ -1049,6 +1049,13 @@ function startBreeding(firstParent = null) {
     gameState.breedingParents = firstParent ? [firstParent] : [];
     guppyInfoPanel.classList.add('hidden');
     updateAllGuppySelectionUI();
+
+    if (breedButton) {
+        breedButton.textContent = '교배 취소';
+        breedButton.classList.remove('btn-primary');
+        breedButton.classList.add('bg-gray-500');
+    }
+
     if (firstParent) {
         showToast(`부모 1 선택 완료! 교배할 다른 구피를 선택하세요.`);
     } else {
@@ -1079,6 +1086,12 @@ function cancelBreeding() {
     gameState.isBreedingMode = false;
     gameState.breedingParents = [];
     updateAllGuppySelectionUI();
+
+    if (breedButton) {
+        breedButton.textContent = '교배 시작하기';
+        breedButton.classList.add('btn-primary');
+        breedButton.classList.remove('bg-gray-500');
+    }
 }
 
 function updateAllGuppySelectionUI() {
@@ -1357,14 +1370,8 @@ function setupEventListeners() {
     if (breedButton) breedButton.addEventListener('click', () => {
         if (gameState.isBreedingMode) {
             cancelBreeding();
-            breedButton.textContent = '교배 시작하기';
-            breedButton.classList.add('btn-primary');
-            breedButton.classList.remove('bg-gray-500');
         } else {
             startBreeding();
-            breedButton.textContent = '교배 취소';
-            breedButton.classList.remove('btn-primary');
-            breedButton.classList.add('bg-gray-500');
         }
     });
 
@@ -1383,10 +1390,6 @@ function setupEventListeners() {
             // If we are already in breeding mode, just select this one
             if (!gameState.isBreedingMode) {
                 startBreeding(guppy);
-                // Update main breed button state
-                breedButton.textContent = '교배 취소';
-                breedButton.classList.remove('btn-primary');
-                breedButton.classList.add('bg-gray-500');
             } else {
                 selectBreedingGuppy(guppy);
             }
@@ -1422,9 +1425,6 @@ function setupEventListeners() {
             if (gameState.isBreedingMode) {
                 cancelBreeding();
                 showToast('교배가 취소되었습니다.');
-                breedButton.textContent = '교배 시작하기';
-                breedButton.classList.add('btn-primary');
-                breedButton.classList.remove('bg-gray-500');
             }
         }
 
