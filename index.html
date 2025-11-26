@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guppy Lab v2.9 - 자동 번식</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="src/css/styles.css">
 </head>
@@ -13,37 +14,56 @@
 <body class="bg-slate-900 text-slate-200 overflow-hidden">
     <!-- START: Intro Screen Wrapper -->
     <div id="intro-wrapper"
-        class="relative flex flex-col justify-center items-center h-screen text-center p-4 w-full z-50 bg-slate-900">
-        <!-- Main intro content -->
-        <div id="intro-screen">
-            <h1 class="text-6xl font-bold text-cyan-300 mb-4" style="text-shadow: 0 0 15px rgba(6, 182, 212, 0.8);">
-                Guppy Lab 🐠</h1>
-            <p class="text-xl text-slate-300 mb-8">나만의 특별한 구피를 만들어보세요!</p>
+        class="relative flex flex-col justify-center items-center h-screen text-center p-4 w-full overflow-hidden">
+        <!-- Background Layers -->
+        <div class="intro-bg absolute inset-0 z-0"></div>
+        <div class="intro-light-rays absolute inset-0 z-0 opacity-30"></div>
+        <div class="intro-particles absolute inset-0 z-0">
+            <!-- CSS-only bubbles for intro -->
+            <div class="intro-bubble b1"></div>
+            <div class="intro-bubble b2"></div>
+            <div class="intro-bubble b3"></div>
+            <div class="intro-bubble b4"></div>
+            <div class="intro-bubble b5"></div>
+        </div>
 
-            <div class="flex flex-col space-y-4 w-full max-w-md mx-auto">
-                <button id="new-game-button"
-                    class="bg-cyan-500 hover:bg-cyan-400 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg shadow-cyan-500/50 transform hover:scale-105 transition-transform duration-300 w-full">
-                    새 게임
+        <!-- Main intro content -->
+        <div id="intro-screen" class="relative z-10 flex flex-col items-center justify-center h-full max-w-md mx-auto">
+            <div class="mb-12">
+                <h1
+                    class="intro-title text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 to-cyan-500 mb-2">
+                    Guppy Lab
+                </h1>
+                <p class="intro-subtitle text-xl text-cyan-100/70 font-light tracking-widest">
+                    VIRTUAL AQUARIUM
+                </p>
+            </div>
+
+            <div class="flex flex-col space-y-6 w-full px-8">
+                <button id="new-game-button" class="intro-btn group relative w-full py-4 rounded-2xl overflow-hidden">
+                    <div class="absolute inset-0 bg-white/5 group-hover:bg-white/10 transition-colors duration-300">
+                    </div>
+                    <div
+                        class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -translate-x-full group-hover:translate-x-full">
+                    </div>
+                    <span class="relative z-10 text-xl font-medium text-white tracking-wider">새 게임 시작</span>
                 </button>
-                <button id="intro-load-button"
-                    class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg transform hover:scale-105 transition-transform duration-300 w-full">
-                    불러오기
+
+                <button id="intro-load-button" class="intro-btn group relative w-full py-4 rounded-2xl overflow-hidden">
+                    <div class="absolute inset-0 bg-white/5 group-hover:bg-white/10 transition-colors duration-300">
+                    </div>
+                    <span
+                        class="relative z-10 text-xl font-medium text-slate-300 group-hover:text-white transition-colors tracking-wider">불러오기</span>
                 </button>
                 <input type="file" id="intro-load-file-input" class="hidden" accept=".json">
             </div>
         </div>
+
         <!-- Studio info footer -->
-        <div class="absolute bottom-8 w-full">
-            <img src="images/emblem.png" alt="포도 스튜디오 엠블럼" class="w-20 h-20 mx-auto mb-2">
-            <p class="text-sm text-gray-400 font-jua">
-                세상에서 가장 달콤한 게임
-            </p>
-            <a href="https://podo-studio.github.io/home/" target="_blank"
-                class="text-sm text-blue-400 hover:text-blue-300 underline font-jua mt-1 inline-block">
-                홈페이지 바로가기
-            </a>
-            <p class="text-xs text-gray-500 mt-2 font-jua">
-                © 2025 Podo Studio. All Rights Reserved.
+        <div class="absolute bottom-8 w-full z-10 opacity-60 hover:opacity-100 transition-opacity duration-300">
+            <img src="images/emblem.png" alt="포도 스튜디오 엠블럼" class="w-12 h-12 mx-auto mb-3 opacity-80">
+            <p class="text-xs text-cyan-200/50 font-jua tracking-wider">
+                DESIGNED BY PODO STUDIO
             </p>
         </div>
     </div>
