@@ -88,12 +88,36 @@ const SHOP_ITEMS = [
     { id: 'aquarium_new', type: 'aquarium', name: '새로운 수조', price: 500 },
 ];
 
+const COLLECTION_TARGETS = [
+    { id: 'panda', name: '판다 구피', hint: '점무늬 + 흰색/검정', criteria: { patternType: 'spots', bodyColor: { r: 255, g: 255, b: 255 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
+    { id: 'bumblebee', name: '꿀벌 구피', hint: '줄무늬 + 노랑/검정', criteria: { patternType: 'stripes', bodyColor: { r: 255, g: 255, b: 0 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
+    { id: 'tiger', name: '호랑이 구피', hint: '줄무늬 + 주황/검정', criteria: { patternType: 'stripes', bodyColor: { r: 255, g: 165, b: 0 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
+    { id: 'zebra', name: '얼룩말 구피', hint: '세로 줄무늬 + 흰색/검정', criteria: { patternType: 'v_stripes', bodyColor: { r: 255, g: 255, b: 255 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
+    { id: 'watermelon', name: '수박 구피', hint: '줄무늬 + 초록/검정', criteria: { patternType: 'stripes', bodyColor: { r: 0, g: 255, b: 0 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
+    { id: 'mint_choco', name: '민트초코 구피', hint: '주근깨 + 민트/갈색', criteria: { patternType: 'freckles', bodyColor: { r: 0, g: 255, b: 255 }, patternColor: { r: 139, g: 69, b: 19 }, tolerance: 60 } },
+    { id: 'nemo', name: '니모 구피', hint: '줄무늬 + 주황/흰색', criteria: { patternType: 'stripes', bodyColor: { r: 255, g: 165, b: 0 }, patternColor: { r: 255, g: 255, b: 255 }, tolerance: 50 } },
+    { id: 'blue_sky', name: '푸른 하늘 구피', hint: '그라데이션 + 하늘/흰색', criteria: { patternType: 'gradient', bodyColor: { r: 135, g: 206, b: 235 }, patternColor: { r: 255, g: 255, b: 255 }, tolerance: 50 } },
+    { id: 'sunset', name: '노을 구피', hint: '그라데이션 + 주황/보라', criteria: { patternType: 'gradient', bodyColor: { r: 255, g: 165, b: 0 }, patternColor: { r: 128, g: 0, b: 128 }, tolerance: 50 } },
+    { id: 'fire', name: '불꽃 구피', hint: '그라데이션 + 빨강/노랑', criteria: { patternType: 'gradient', bodyColor: { r: 255, g: 0, b: 0 }, patternColor: { r: 255, g: 255, b: 0 }, tolerance: 50 } },
+    { id: 'ocean', name: '심해 구피', hint: '그라데이션 + 남색/청록', criteria: { patternType: 'gradient', bodyColor: { r: 0, g: 0, b: 128 }, patternColor: { r: 0, g: 255, b: 255 }, tolerance: 50 } },
+    { id: 'matrix', name: '매트릭스 구피', hint: '가로 줄무늬 + 검정/초록', criteria: { patternType: 'h_stripes', bodyColor: { r: 0, g: 0, b: 0 }, patternColor: { r: 0, g: 255, b: 0 }, tolerance: 50 } },
+    { id: 'goldfish', name: '금붕어 구피', hint: '그라데이션 + 금색/주황', criteria: { patternType: 'gradient', bodyColor: { r: 255, g: 215, b: 0 }, patternColor: { r: 255, g: 165, b: 0 }, tolerance: 50 } },
+    { id: 'ghost', name: '유령 구피', hint: '모든 패턴 + 흰색/흰색', criteria: { patternType: 'any', bodyColor: { r: 255, g: 255, b: 255 }, patternColor: { r: 255, g: 255, b: 255 }, tolerance: 30 } },
+    { id: 'shadow', name: '그림자 구피', hint: '모든 패턴 + 검정/검정', criteria: { patternType: 'any', bodyColor: { r: 0, g: 0, b: 0 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 30 } },
+    { id: 'love', name: '사랑 구피', hint: '점무늬 + 분홍/빨강', criteria: { patternType: 'spots', bodyColor: { r: 255, g: 192, b: 203 }, patternColor: { r: 255, g: 0, b: 0 }, tolerance: 50 } },
+    { id: 'toxic', name: '독극물 구피', hint: '고리 + 초록/보라', criteria: { patternType: 'rings', bodyColor: { r: 0, g: 255, b: 0 }, patternColor: { r: 128, g: 0, b: 128 }, tolerance: 50 } },
+    { id: 'cotton_candy', name: '솜사탕 구피', hint: '그라데이션 + 분홍/하늘', criteria: { patternType: 'gradient', bodyColor: { r: 255, g: 192, b: 203 }, patternColor: { r: 135, g: 206, b: 235 }, tolerance: 50 } },
+    { id: 'leopard', name: '표범 구피', hint: '점무늬 + 노랑/갈색', criteria: { patternType: 'spots', bodyColor: { r: 255, g: 255, b: 0 }, patternColor: { r: 139, g: 69, b: 19 }, tolerance: 50 } },
+    { id: 'galaxy', name: '우주 구피', hint: '주근깨 + 검정/보라', criteria: { patternType: 'freckles', bodyColor: { r: 0, g: 0, b: 0 }, patternColor: { r: 128, g: 0, b: 128 }, tolerance: 50 } },
+];
+
 let gameState = {
     aquariums: [{ guppies: [], decorations: [], waterQuality: 100, food: [] }],
     currentAquariumIndex: 0,
     nextGuppyId: 0,
     coins: 100,
-    discoveredPatterns: new Set(),
+    discoveredPatterns: new Set(), // Keep for backward compatibility or general discovery
+    unlockedCollection: [], // Array of unlocked target IDs
     isBreedingMode: false,
     breedingParents: [],
     currentInfoGuppyId: null,
@@ -467,6 +491,8 @@ function breedGuppies(parent1, parent2) {
     const newId = gameState.nextGuppyId++;
     const newGuppy = new Guppy(newId, newPattern);
 
+    checkCollectionUnlock(newGuppy);
+
     newGuppy.x = (parent1.x + parent2.x) / 2;
     newGuppy.y = (parent1.y + parent2.y) / 2;
 
@@ -595,6 +621,7 @@ async function exportSaveFile() {
         aq.food = [];
     });
     plainState.discoveredPatterns = Array.from(plainState.discoveredPatterns);
+    // unlockedCollection is already an array, so it saves directly
 
     const now = new Date();
     const timestamp = now.toISOString().replace(/[-:T]/g, '').slice(0, 14); // YYYYMMDDHHmmss
@@ -683,6 +710,7 @@ function handleIntroLoad(event) {
 function restoreGameState(loadedState) {
     gameState = { ...gameState, ...loadedState };
     gameState.discoveredPatterns = new Set(loadedState.discoveredPatterns);
+    if (!gameState.unlockedCollection) gameState.unlockedCollection = [];
 
     // Clear existing elements
     gameState.aquariums.forEach(aq => {
@@ -979,6 +1007,7 @@ function buyItem(itemId) {
             if (!gameState.discoveredPatterns.has(patternKey)) {
                 gameState.discoveredPatterns.add(patternKey);
             }
+            checkCollectionUnlock(newGuppy);
         } else if (item.type === 'aquarium') {
             gameState.aquariums.push({ guppies: [], decorations: [], waterQuality: 100, food: [] });
             switchAquarium(gameState.aquariums.length - 1 - gameState.currentAquariumIndex);
@@ -996,53 +1025,83 @@ function openCollection() {
     collectionModal.id = 'collection-modal';
     collectionModal.className = 'modal-overlay';
 
-    let collectionHTML = '';
-    gameState.discoveredPatterns.forEach(patternKey => {
-        // Parse pattern key: "type:r,g,b|r,g,b"
-        const [type, colorsStr] = patternKey.split(':');
+    const gridHTML = COLLECTION_TARGETS.map(target => {
+        const isUnlocked = gameState.unlockedCollection.includes(target.id);
 
-        let colors = [];
-        if (colorsStr) {
-            colors = colorsStr.split('|').map(cs => {
-                const [r, g, b] = cs.split(',').map(Number);
-                return { r, g, b };
-            });
+        let contentHTML = '';
+        if (isUnlocked) {
+            // Create temp guppy for display
+            const tempPattern = {
+                type: target.criteria.patternType === 'any' ? 'spots' : target.criteria.patternType,
+                colors: [target.criteria.bodyColor, target.criteria.patternColor]
+            };
+            const tempGuppy = new Guppy(`col-${target.id}`, tempPattern);
+
+            contentHTML = `
+                <div class="h-16 flex items-center justify-center mb-2">
+                    <div style="width: 60px; height: 30px;">${tempGuppy.getGuppySVG()}</div>
+                </div>
+                <p class="font-bold text-cyan-300 text-sm">${target.name}</p>
+                <p class="text-xs text-slate-400 mt-1">${target.hint}</p>
+            `;
         } else {
-            // Fallback for old keys or errors
-            colors = [{ r: 200, g: 200, b: 200 }];
+            contentHTML = `
+                <div class="h-16 flex items-center justify-center mb-2 text-4xl opacity-20">❓</div>
+                <p class="font-bold text-slate-500 text-sm">???</p>
+                <p class="text-xs text-slate-600 mt-1">${target.hint}</p>
+            `;
         }
 
-        const pattern = { type, colors };
-
-        // Create temp guppy for SVG
-        const tempGuppy = new Guppy(`collection-${patternKey}`, pattern);
-
-        const colorsHTML = pattern.colors.map(c => `
-            <div class="flex items-center space-x-2">
-                <div class="w-4 h-4 rounded-full border border-slate-600" style="background-color: ${toRgbString(c)}"></div>
-                <p class="text-xs text-slate-400">R:${c.r} G:${c.g} B:${c.b}</p>
-            </div>`).join('');
-
-        collectionHTML += `
-            <div class="flex items-center p-2 rounded-lg border border-slate-700">
-                <div class="mr-4 flex-shrink-0" style="width: 80px; height: 30px;">
-                    ${tempGuppy.getGuppySVG()}
-                </div>
-                <div>
-                    <p class="font-bold capitalize text-cyan-300">${getPatternLabel(pattern.type)}</p>
-                    <div class="flex flex-col space-y-1 mt-1">${colorsHTML}</div>
-                </div>
-            </div>`;
-    });
+        return `
+            <div class="bg-slate-800/50 border ${isUnlocked ? 'border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.2)]' : 'border-slate-700'} rounded-lg p-2 text-center flex flex-col justify-between h-32">
+                ${contentHTML}
+            </div>
+        `;
+    }).join('');
 
     collectionModal.innerHTML = `
-        <div class="modal-content">
+        <div class="modal-content !max-w-2xl">
             <button class="close-modal-button absolute top-4 right-4 text-2xl font-bold text-slate-400 hover:text-white">&times;</button>
-            <h2 class="text-3xl font-bold mb-4 text-cyan-300">도감 📖</h2>
-            <p class="mb-4 text-slate-400">지금까지 발견한 구피들입니다. ${gameState.discoveredPatterns.size} / ?</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">${collectionHTML}</div>
+            <h2 class="text-3xl font-bold mb-4 text-cyan-300">특별한 구피 도감 📖</h2>
+            <p class="mb-4 text-slate-400 text-sm">특별한 테마를 가진 구피를 탄생시켜 도감을 완성하세요! (${gameState.unlockedCollection.length} / ${COLLECTION_TARGETS.length})</p>
+            <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 overflow-y-auto max-h-[60vh] p-1">
+                ${gridHTML}
+            </div>
         </div>`;
     modalContainer.appendChild(collectionModal);
+}
+
+function checkCollectionUnlock(guppy) {
+    if (!guppy || !guppy.pattern || !guppy.pattern.colors) return;
+
+    const c1 = guppy.pattern.colors[0]; // Body color
+    const c2 = guppy.pattern.colors[1] || c1; // Pattern color
+
+    COLLECTION_TARGETS.forEach(target => {
+        if (gameState.unlockedCollection.includes(target.id)) return;
+
+        // Check pattern type
+        if (target.criteria.patternType !== 'any' && guppy.pattern.type !== target.criteria.patternType) return;
+
+        // Check colors
+        const isColorMatch = (c, targetC, tol) => {
+            return Math.abs(c.r - targetC.r) <= tol &&
+                Math.abs(c.g - targetC.g) <= tol &&
+                Math.abs(c.b - targetC.b) <= tol;
+        };
+
+        const bodyMatch = isColorMatch(c1, target.criteria.bodyColor, target.criteria.tolerance);
+        const patternMatch = isColorMatch(c2, target.criteria.patternColor, target.criteria.tolerance);
+
+        if (bodyMatch && patternMatch) {
+            gameState.unlockedCollection.push(target.id);
+            showToast(`🎉 도감 등록: ${target.name}!`);
+            // Bonus coins for unlocking
+            gameState.coins += 100;
+            showToast(`+100 코인 (도감 보너스)`);
+            updateUI();
+        }
+    });
 }
 
 function showToast(message) {
@@ -1335,6 +1394,7 @@ function startNewGame() {
         breedingParents: [],
         currentInfoGuppyId: null,
         isPaused: false,
+        unlockedCollection: [],
     };
     gameInitialized = true;
     init(true); // Create default guppies
