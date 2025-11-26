@@ -18,10 +18,18 @@
             <h1 class="text-6xl font-bold text-cyan-300 mb-4" style="text-shadow: 0 0 15px rgba(6, 182, 212, 0.8);">
                 Guppy Lab 🐠</h1>
             <p class="text-xl text-slate-300 mb-8">나만의 특별한 구피를 만들어보세요!</p>
-            <button id="start-button"
-                class="bg-cyan-500 hover:bg-cyan-400 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg shadow-cyan-500/50 transform hover:scale-105 transition-transform duration-300">
-                게임 시작
-            </button>
+
+            <div class="flex flex-col space-y-4 w-full max-w-md mx-auto">
+                <button id="new-game-button"
+                    class="bg-cyan-500 hover:bg-cyan-400 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg shadow-cyan-500/50 transform hover:scale-105 transition-transform duration-300 w-full">
+                    새 게임
+                </button>
+                <button id="intro-load-button"
+                    class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg transform hover:scale-105 transition-transform duration-300 w-full">
+                    불러오기
+                </button>
+                <input type="file" id="intro-load-file-input" class="hidden" accept=".json">
+            </div>
         </div>
         <!-- Studio info footer -->
         <div class="absolute bottom-8 w-full">

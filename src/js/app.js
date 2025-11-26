@@ -1,11 +1,13 @@
 // --- DOM 요소 ---
-let introWrapper, mainAppScreen, startButton, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput;
+let introWrapper, mainAppScreen, newGameButton, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Guppy Lab: DOM Content Loaded");
     introWrapper = document.getElementById('intro-wrapper');
     mainAppScreen = document.getElementById('main-app-screen');
-    startButton = document.getElementById('start-button');
+    newGameButton = document.getElementById('new-game-button');
+    introLoadButton = document.getElementById('intro-load-button');
+    introLoadFileInput = document.getElementById('intro-load-file-input');
     aquarium = document.getElementById('aquarium');
     coinsDisplay = document.getElementById('coins-display');
     waterQualityBar = document.getElementById('water-quality-bar');
@@ -29,11 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
     loadButton = document.getElementById('load-button');
     loadFileInput = document.getElementById('load-file-input');
 
-    if (startButton) {
-        console.log("Guppy Lab: Start button found, attaching listener");
-        startButton.addEventListener('click', startGame);
-    } else {
-        console.error("Guppy Lab: Start button NOT found!");
+    if (newGameButton) {
+        newGameButton.addEventListener('click', startNewGame);
+    }
+    if (introLoadButton) {
+        introLoadButton.addEventListener('click', () => introLoadFileInput.click());
+    }
+    if (introLoadFileInput) {
+        introLoadFileInput.addEventListener('change', handleIntroLoad);
     }
 
     // Initialize other UI listeners here if needed, or keep them where they are but ensure elements exist
@@ -557,17 +562,8 @@ function updateUI() {
     updateAquariumNav();
 }
 function saveGame() {
-    const plainState = JSON.parse(JSON.stringify(gameState));
-    plainState.aquariums.forEach(aq => {
-        aq.guppies.forEach(g => {
-            delete g.element; // Don't save DOM elements
-            delete g.target;
-        });
-        aq.decorations.forEach(d => delete d.element);
-        aq.food = [];
-    });
-    plainState.discoveredPatterns = Array.from(plainState.discoveredPatterns);
-    localStorage.setItem('guppyLabSave', JSON.stringify(plainState));
+    // Auto-save disabled as per user request.
+    // Only manual save to external file is supported.
 }
 
 async function exportSaveFile() {
@@ -640,6 +636,32 @@ function importSaveFile(event) {
     reader.readAsText(file);
 }
 
+
+
+function handleIntroLoad(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const loadedState = JSON.parse(e.target.result);
+            restoreGameState(loadedState);
+
+            gameInitialized = true;
+            init(false); // Don't create default guppies
+            showGameScreen();
+
+            showToast('게임을 성공적으로 불러왔습니다!');
+        } catch (error) {
+            console.error("Error importing save file:", error);
+            showToast('세이브 파일을 불러오는데 실패했습니다.');
+        }
+        event.target.value = ''; // Reset input
+    };
+    reader.readAsText(file);
+}
+
 function restoreGameState(loadedState) {
     gameState = { ...gameState, ...loadedState };
     gameState.discoveredPatterns = new Set(loadedState.discoveredPatterns);
@@ -683,19 +705,7 @@ function restoreGameState(loadedState) {
 }
 
 function loadGame() {
-    try {
-        const savedData = localStorage.getItem('guppyLabSave');
-        if (savedData) {
-            console.log("Loading game data...");
-            const loadedState = JSON.parse(savedData);
-            restoreGameState(loadedState);
-            console.log("Game loaded successfully");
-            return true;
-        }
-    } catch (e) {
-        console.error("Error loading game:", e);
-        localStorage.removeItem('guppyLabSave'); // Clear corrupted save
-    }
+    // LocalStorage load disabled.
     return false;
 }
 function renderLoop() {
@@ -763,7 +773,7 @@ function tickLoop() {
         });
     }
     updateUI();
-    saveGame();
+    // saveGame(); // Auto-save disabled
 }
 
 function getPatternLabel(patternType) {
@@ -1247,7 +1257,7 @@ function openModal(type) {
                     <li><b>수조 관리</b>: 상점에서 새 수조를 구매하고, 수조 옆 화살표로 이동할 수 있습니다. 구피 정보창에서 다른 수조로 구피를 옮길 수도 있습니다.</li>
                     <li><b>상세 정보</b>: 우측 상단의 물고기(🐟) 버튼을 눌러 현재 수조의 구피 목록을 열고, 목록에서 구피를 클릭해 상세 정보를 확인하세요.</li>
                     <li><b>코인 얻기</b>: 새로운 조합의 구피를 탄생시키면 50코인을 얻습니다.</li>
-                    <li><b>자동 저장</b>: 게임은 1초마다 자동으로 저장됩니다.</li>
+                    <li><b>저장</b>: 게임은 자동으로 저장되지 않습니다. 우측 상단의 저장 버튼을 눌러 파일을 저장하세요.</li>
                 </ul>`;
             break;
     }
@@ -1259,8 +1269,8 @@ function openModal(type) {
     modalContainer.appendChild(modal);
 }
 
-function init() {
-    if (!loadGame()) {
+function init(createDefaults = true) {
+    if (createDefaults) {
         const p1 = { type: 'spots', colors: [{ r: 255, g: 255, b: 255 }, { r: 255, g: 0, b: 0 }] };
         const p2 = { type: 'stripes', colors: [{ r: 20, g: 20, b: 255 }, { r: 255, g: 255, b: 0 }] };
         const guppy1 = new Guppy(gameState.nextGuppyId++, p1);
@@ -1284,20 +1294,32 @@ function init() {
     requestAnimationFrame(renderLoop);
 }
 
-function startGame() {
-    console.log("Guppy Lab: Starting game...");
+function startNewGame() {
+    // Reset game state to default
+    gameState = {
+        aquariums: [{ guppies: [], decorations: [], waterQuality: 100, food: [] }],
+        currentAquariumIndex: 0,
+        nextGuppyId: 0,
+        coins: 100,
+        discoveredPatterns: new Set(),
+        isBreedingMode: false,
+        breedingParents: [],
+        currentInfoGuppyId: null,
+        isPaused: false,
+    };
+    gameInitialized = true;
+    init(true); // Create default guppies
+    showGameScreen();
+}
+
+function showGameScreen() {
+    console.log("Guppy Lab: Showing game screen...");
     if (introWrapper && mainAppScreen) {
         introWrapper.classList.add('hidden');
         mainAppScreen.classList.remove('hidden');
         mainAppScreen.style.display = 'flex';
-
-        if (!gameInitialized) {
-            init();
-            gameInitialized = true;
-            console.log("Guppy Lab: Game initialized");
-        }
     } else {
-        console.error("Guppy Lab: Critical elements missing for start game", { introWrapper, mainAppScreen });
+        console.error("Guppy Lab: Critical elements missing for game screen", { introWrapper, mainAppScreen });
     }
 }
 
