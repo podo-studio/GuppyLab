@@ -1,5 +1,5 @@
 // --- DOM 요소 ---
-let introWrapper, mainAppScreen, newGameButton, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput;
+let introWrapper, mainAppScreen, newGameButton, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Guppy Lab: DOM Content Loaded");
@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     saveButton = document.getElementById('save-button');
     loadButton = document.getElementById('load-button');
     loadFileInput = document.getElementById('load-file-input');
+    menuToggleButton = document.getElementById('menu-toggle-button');
+    gameMenu = document.getElementById('game-menu');
 
     if (newGameButton) {
         newGameButton.addEventListener('click', startNewGame);
@@ -47,6 +49,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saveButton) saveButton.addEventListener('click', exportSaveFile);
     if (loadButton) loadButton.addEventListener('click', () => loadFileInput.click());
     if (loadFileInput) loadFileInput.addEventListener('change', importSaveFile);
+
+    if (menuToggleButton) {
+        menuToggleButton.addEventListener('click', () => {
+            gameMenu.classList.toggle('hidden');
+            gameMenu.classList.toggle('flex');
+        });
+    }
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (gameMenu && !gameMenu.classList.contains('hidden') &&
+            !gameMenu.contains(e.target) &&
+            !menuToggleButton.contains(e.target)) {
+            gameMenu.classList.add('hidden');
+            gameMenu.classList.remove('flex');
+        }
+    });
 });
 
 // --- 게임 설정 및 데이터 ---
@@ -1051,9 +1069,8 @@ function startBreeding(firstParent = null) {
     updateAllGuppySelectionUI();
 
     if (breedButton) {
-        breedButton.textContent = '교배 취소';
-        breedButton.classList.remove('btn-primary');
-        breedButton.classList.add('bg-gray-500');
+        breedButton.querySelector('span:nth-child(2)').textContent = '교배 취소';
+        breedButton.classList.add('text-red-400');
     }
 
     if (firstParent) {
@@ -1088,9 +1105,8 @@ function cancelBreeding() {
     updateAllGuppySelectionUI();
 
     if (breedButton) {
-        breedButton.textContent = '교배 시작하기';
-        breedButton.classList.add('btn-primary');
-        breedButton.classList.remove('bg-gray-500');
+        breedButton.querySelector('span:nth-child(2)').textContent = '교배';
+        breedButton.classList.remove('text-red-400');
     }
 }
 
