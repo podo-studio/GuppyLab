@@ -1434,6 +1434,11 @@ function openModal(type) {
             content = `
                 <h2 class="text-3xl font-bold mb-4 text-cyan-300">Guppy Lab 게임 매뉴얼</h2>
                 <p class="text-slate-300">다양한 색상과 패턴을 가진 구피들을 교배시켜 세상에 하나뿐인 특별한 구피 컬렉션을 만드는 것이 목표입니다.</p>
+                <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">게임 모드</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-300">
+                    <li><b>개발자 버전</b>: 상점 가격이 저렴하고, 교배 시 보상을 받으며, 물고기 판매 가격이 높습니다.</li>
+                    <li><b>일반 버전</b>: 상점 가격이 매 게임마다 변동(500~10,000코인)되며, 교배 시 500코인이 소모됩니다. 물고기 판매 가격은 나이에 비례하며 최대 200코인입니다.</li>
+                </ul>
                 <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">구피 관리하기</h3>
                 <ul class="list-disc list-inside space-y-2 text-slate-300">
                     <li><b>먹이주기</b>: 구피들이 배고파 수면에서 입질을 하면 '먹이주기' 버튼(10코인)을 눌러주세요.</li>
@@ -1442,14 +1447,14 @@ function openModal(type) {
                 </ul>
                 <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">교배 (브리딩)</h3>
                 <ul class="list-disc list-inside space-y-2 text-slate-300">
-                    <li><b>수동 교배</b>: '교배 시작하기' 버튼을 누르거나 구피 정보창에서 '교배'를 선택해 직접 짝을 맺어줄 수 있습니다.</li>
+                    <li><b>수동 교배</b>: '교배 시작하기' 버튼을 누르거나 구피 정보창에서 '교배'를 선택해 직접 짝을 맺어줄 수 있습니다. (일반 버전: 500코인 소모)</li>
                     <li><b>자동 번식</b>: 허기가 20 미만인 성어들은 서로 만나면 스스로 번식하기도 합니다.</li>
                 </ul>
                 <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">기타 팁</h3>
                 <ul class="list-disc list-inside space-y-2 text-slate-300">
                     <li><b>수조 관리</b>: 상점에서 새 수조를 구매하고, 수조 옆 화살표로 이동할 수 있습니다. 구피 정보창에서 다른 수조로 구피를 옮길 수도 있습니다.</li>
                     <li><b>상세 정보</b>: 우측 상단의 물고기(🐟) 버튼을 눌러 현재 수조의 구피 목록을 열고, 목록에서 구피를 클릭해 상세 정보를 확인하세요.</li>
-                    <li><b>코인 얻기</b>: 새로운 조합의 구피를 탄생시키면 50코인을 얻습니다.</li>
+                    <li><b>코인 얻기</b>: 새로운 조합의 구피를 탄생시키면 50코인을 얻습니다. (개발자 버전 전용)</li>
                     <li><b>저장</b>: 게임은 자동으로 저장되지 않습니다. 우측 상단의 저장 버튼을 눌러 파일을 저장하세요.</li>
                 </ul>`;
             break;
