@@ -64,10 +64,26 @@ document.addEventListener('DOMContentLoaded', () => {
     gameMenu = document.getElementById('game-menu');
 
     if (devModeButton) {
-        devModeButton.addEventListener('click', () => startNewGame('developer'));
+        devModeButton.addEventListener('click', () => {
+            console.log("Dev mode button clicked");
+            try {
+                startNewGame('developer');
+            } catch (e) {
+                console.error("Error starting dev game:", e);
+                alert("Error starting game: " + e.message);
+            }
+        });
     }
     if (normalModeButton) {
-        normalModeButton.addEventListener('click', () => startNewGame('normal'));
+        normalModeButton.addEventListener('click', () => {
+            console.log("Normal mode button clicked");
+            try {
+                startNewGame('normal');
+            } catch (e) {
+                console.error("Error starting normal game:", e);
+                alert("Error starting game: " + e.message);
+            }
+        });
     }
     if (introLoadButton) {
         introLoadButton.addEventListener('click', () => introLoadFileInput.click());
@@ -1523,60 +1539,66 @@ function init() {
 }
 
 function startNewGame(mode = 'developer') {
-    // Reset game state to default
-    gameState = {
-        aquariums: [{ guppies: [], decorations: [], waterQuality: 100, food: [] }],
-        currentAquariumIndex: 0,
-        nextGuppyId: 0,
-        coins: 100,
-        discoveredPatterns: new Set(),
-        isBreedingMode: false,
-        breedingParents: [],
-        currentInfoGuppyId: null,
-        isPaused: false,
-        unlockedCollection: [],
-        gameMode: mode,
-        shopPrices: {},
-    };
+    console.log("Starting new game...", mode);
+    try {
+        // Reset game state to default
+        gameState = {
+            aquariums: [{ guppies: [], decorations: [], waterQuality: 100, food: [] }],
+            currentAquariumIndex: 0,
+            nextGuppyId: 0,
+            coins: 100,
+            discoveredPatterns: new Set(),
+            isBreedingMode: false,
+            breedingParents: [],
+            currentInfoGuppyId: null,
+            isPaused: false,
+            unlockedCollection: [],
+            gameMode: mode,
+            shopPrices: {},
+        };
 
-    if (mode === 'normal') {
-        // Randomize Shop Prices
-        SHOP_ITEMS.forEach(item => {
-            const randomPrice = Math.floor(Math.random() * (10000 - 500 + 1)) + 500;
-            gameState.shopPrices[item.id] = Math.round(randomPrice / 100) * 100;
-        });
+        if (mode === 'normal') {
+            // Randomize Shop Prices
+            SHOP_ITEMS.forEach(item => {
+                const randomPrice = Math.floor(Math.random() * (10000 - 500 + 1)) + 500;
+                gameState.shopPrices[item.id] = Math.round(randomPrice / 100) * 100;
+            });
 
-        // Create initial cheapest pair
-        let cheapestItem = null;
-        let minPrice = Infinity;
+            // Create initial cheapest pair
+            let cheapestItem = null;
+            let minPrice = Infinity;
 
-        SHOP_ITEMS.filter(i => i.type === 'guppy' && i.gender === 'male').forEach(item => {
-            const price = gameState.shopPrices[item.id];
-            if (price < minPrice) {
-                minPrice = price;
-                cheapestItem = item;
+            SHOP_ITEMS.filter(i => i.type === 'guppy' && i.gender === 'male').forEach(item => {
+                const price = gameState.shopPrices[item.id];
+                if (price < minPrice) {
+                    minPrice = price;
+                    cheapestItem = item;
+                }
+            });
+
+            if (cheapestItem) {
+                const male = new Guppy(gameState.nextGuppyId++, cheapestItem.pattern, 0, null, 0, 0, null, null, 'male');
+                gameState.aquariums[0].guppies.push(male);
+                male.createElement();
+
+                // Find female version or reuse pattern
+                // Assuming female ID is usually male ID + '_f' or just same pattern
+                const female = new Guppy(gameState.nextGuppyId++, cheapestItem.pattern, 0, null, 0, 0, null, null, 'female');
+                gameState.aquariums[0].guppies.push(female);
+                female.createElement();
             }
-        });
-
-        if (cheapestItem) {
-            const male = new Guppy(gameState.nextGuppyId++, cheapestItem.pattern, 0, null, 0, 0, null, null, 'male');
-            gameState.aquariums[0].guppies.push(male);
-            male.createElement();
-
-            // Find female version or reuse pattern
-            // Assuming female ID is usually male ID + '_f' or just same pattern
-            const female = new Guppy(gameState.nextGuppyId++, cheapestItem.pattern, 0, null, 0, 0, null, null, 'female');
-            gameState.aquariums[0].guppies.push(female);
-            female.createElement();
+        } else {
+            createDefaultGuppies();
         }
-    } else {
-        createDefaultGuppies();
-    }
 
-    gameInitialized = true;
-    init();
-    showGameScreen();
-    showToast(mode === 'developer' ? t('msg_start_dev') : t('msg_start_normal'));
+        gameInitialized = true;
+        init();
+        showGameScreen();
+        showToast(mode === 'developer' ? t('msg_start_dev') : t('msg_start_normal'));
+    } catch (e) {
+        console.error("Error in startNewGame:", e);
+        alert("Failed to start game: " + e.message);
+    }
 }
 
 function showGameScreen() {

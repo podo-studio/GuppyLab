@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guppy Lab v1.0</title>
+    <title>Guppy Lab v1.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="src/css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
@@ -61,7 +61,7 @@
 
             <div class="mt-16 opacity-50 flex flex-col items-center space-y-2">
                 <p class="text-xs text-cyan-200/50 font-jua tracking-wider">DESIGNED BY PODO STUDIO</p>
-                <p class="text-xs text-slate-600 font-mono">v1.0</p>
+                <p class="text-xs text-slate-600 font-mono">v1.1</p>
             </div>
         </div>
     </div>
@@ -76,7 +76,8 @@
                     <span class="text-xl mr-2">💰</span>
                     <span id="coins-display" class="font-bold text-yellow-400 text-xl font-mono">0</span>
                 </div>
-                <div class="w-48 bg-slate-700 rounded-full h-4 overflow-hidden border border-slate-600 relative group">
+                <div
+                    class="w-24 md:w-48 bg-slate-700 rounded-full h-4 overflow-hidden border border-slate-600 relative group">
                     <div id="water-quality-bar"
                         class="bg-gradient-to-r from-cyan-500 to-blue-500 h-full transition-all duration-500"
                         style="width: 100%"></div>
@@ -86,7 +87,7 @@
             </div>
 
             <div id="aquarium-title"
-                class="absolute top-6 left-1/2 transform -translate-x-1/2 text-white/80 font-bold text-sm pointer-events-none">
+                class="absolute top-6 left-1/2 transform -translate-x-1/2 text-white/80 font-bold text-xs md:text-sm pointer-events-none whitespace-nowrap">
                 수조 1</div>
 
             <div class="flex items-center space-x-2">
@@ -134,29 +135,32 @@
 
             <!-- Action Bar -->
             <div
-                class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-6 bg-slate-900/80 backdrop-blur-md px-8 py-4 rounded-2xl border border-slate-700/50 shadow-2xl">
+                class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4 md:space-x-6 bg-slate-900/80 backdrop-blur-md px-6 py-3 md:px-8 md:py-4 rounded-2xl border border-slate-700/50 shadow-2xl w-max">
                 <button id="feed-button" class="flex flex-col items-center space-y-1 group">
                     <div
-                        class="w-12 h-12 bg-amber-500/20 group-hover:bg-amber-500/40 rounded-xl flex items-center justify-center border border-amber-500/50 transition-all duration-300 group-hover:scale-110">
-                        <span class="text-2xl">🪱</span>
+                        class="w-10 h-10 md:w-12 md:h-12 bg-amber-500/20 group-hover:bg-amber-500/40 rounded-xl flex items-center justify-center border border-amber-500/50 transition-all duration-300 group-hover:scale-110">
+                        <span class="text-xl md:text-2xl">🪱</span>
                     </div>
-                    <span class="text-xs font-bold text-slate-300 group-hover:text-white transition-colors"
+                    <span
+                        class="text-[10px] md:text-xs font-bold text-slate-300 group-hover:text-white transition-colors whitespace-nowrap"
                         data-i18n="action_feed">먹이주기</span>
                 </button>
                 <button id="clean-button" class="flex flex-col items-center space-y-1 group">
                     <div
-                        class="w-12 h-12 bg-blue-500/20 group-hover:bg-blue-500/40 rounded-xl flex items-center justify-center border border-blue-500/50 transition-all duration-300 group-hover:scale-110">
-                        <span class="text-2xl">🧹</span>
+                        class="w-10 h-10 md:w-12 md:h-12 bg-blue-500/20 group-hover:bg-blue-500/40 rounded-xl flex items-center justify-center border border-blue-500/50 transition-all duration-300 group-hover:scale-110">
+                        <span class="text-xl md:text-2xl">🧹</span>
                     </div>
-                    <span class="text-xs font-bold text-slate-300 group-hover:text-white transition-colors"
+                    <span
+                        class="text-[10px] md:text-xs font-bold text-slate-300 group-hover:text-white transition-colors whitespace-nowrap"
                         data-i18n="action_clean">청소하기</span>
                 </button>
                 <button id="breed-button" class="flex flex-col items-center space-y-1 group">
                     <div
-                        class="w-12 h-12 bg-pink-500/20 group-hover:bg-pink-500/40 rounded-xl flex items-center justify-center border border-pink-500/50 transition-all duration-300 group-hover:scale-110">
-                        <span class="text-2xl">💕</span>
+                        class="w-10 h-10 md:w-12 md:h-12 bg-pink-500/20 group-hover:bg-pink-500/40 rounded-xl flex items-center justify-center border border-pink-500/50 transition-all duration-300 group-hover:scale-110">
+                        <span class="text-xl md:text-2xl">💕</span>
                     </div>
-                    <span class="text-xs font-bold text-slate-300 group-hover:text-white transition-colors"
+                    <span
+                        class="text-[10px] md:text-xs font-bold text-slate-300 group-hover:text-white transition-colors whitespace-nowrap"
                         data-i18n="action_breed">교배</span>
                 </button>
             </div>
