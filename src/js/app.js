@@ -701,7 +701,7 @@ function updateUI() {
     const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
     coinsDisplay.textContent = gameState.coins;
     waterQualityBar.style.width = `${currentAq.waterQuality}%`;
-    aquariumTitle.textContent = `수조 ${gameState.currentAquariumIndex + 1} / ${gameState.aquariums.length}`;
+    aquariumTitle.textContent = t('aquarium_title', { current: gameState.currentAquariumIndex + 1, total: gameState.aquariums.length });
     updateAquariumNav();
 }
 function saveGame() {
