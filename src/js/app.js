@@ -76,15 +76,24 @@ const BREED_COOLDOWN = 20000; // 20 seconds
 const PATTERN_TYPES = ['spots', 'stripes', 'h_stripes', 'v_stripes', 'freckles', 'half', 'rings', 'checker', 'gradient'];
 const SHOP_ITEMS = [
     { id: 'plant1', type: 'decoration', name: '네온 수초', price: 50, effect: { waterQuality: 0.02 }, svg: `<svg width="50" height="100" viewBox="0 0 50 100"><path d="M25 100 C 10 80, 40 60, 25 40 S 10 20, 25 0" stroke="cyan" stroke-width="4" fill="none" /></svg>` },
-    { id: 'guppy_spots', type: 'guppy', name: '점무늬 구피', price: 100, pattern: { type: 'spots', colors: [{ r: 255, g: 100, b: 100 }, { r: 255, g: 200, b: 200 }] } },
-    { id: 'guppy_stripes', type: 'guppy', name: '대각선 줄무늬 구피', price: 120, pattern: { type: 'stripes', colors: [{ r: 100, g: 100, b: 255 }, { r: 200, g: 200, b: 255 }] } },
-    { id: 'guppy_h_stripes', type: 'guppy', name: '가로 줄무늬 구피', price: 130, pattern: { type: 'h_stripes', colors: [{ r: 100, g: 255, b: 100 }, { r: 200, g: 255, b: 200 }] } },
-    { id: 'guppy_v_stripes', type: 'guppy', name: '세로 줄무늬 구피', price: 130, pattern: { type: 'v_stripes', colors: [{ r: 255, g: 255, b: 100 }, { r: 255, g: 255, b: 200 }] } },
-    { id: 'guppy_freckles', type: 'guppy', name: '주근깨 구피', price: 140, pattern: { type: 'freckles', colors: [{ r: 255, g: 150, b: 50 }, { r: 255, g: 200, b: 150 }] } },
-    { id: 'guppy_half', type: 'guppy', name: '반반 구피', price: 150, pattern: { type: 'half', colors: [{ r: 50, g: 50, b: 50 }, { r: 200, g: 200, b: 200 }] } },
-    { id: 'guppy_rings', type: 'guppy', name: '고리 구피', price: 160, pattern: { type: 'rings', colors: [{ r: 255, g: 50, b: 255 }, { r: 255, g: 150, b: 255 }] } },
-    { id: 'guppy_checker', type: 'guppy', name: '체크 구피', price: 170, pattern: { type: 'checker', colors: [{ r: 50, g: 255, b: 255 }, { r: 150, g: 255, b: 255 }] } },
-    { id: 'guppy_gradient', type: 'guppy', name: '그라데이션 구피', price: 200, pattern: { type: 'gradient', colors: [{ r: 255, g: 100, b: 255 }, { r: 100, g: 255, b: 255 }] } },
+    { id: 'guppy_spots', type: 'guppy', name: '점무늬 구피 (수컷)', price: 100, gender: 'male', pattern: { type: 'spots', colors: [{ r: 255, g: 100, b: 100 }, { r: 255, g: 200, b: 200 }] } },
+    { id: 'guppy_spots_f', type: 'guppy', name: '점무늬 구피 (암컷)', price: 100, gender: 'female', pattern: { type: 'spots', colors: [{ r: 255, g: 100, b: 100 }, { r: 255, g: 200, b: 200 }] } },
+    { id: 'guppy_stripes', type: 'guppy', name: '대각선 줄무늬 구피 (수컷)', price: 120, gender: 'male', pattern: { type: 'stripes', colors: [{ r: 100, g: 100, b: 255 }, { r: 200, g: 200, b: 255 }] } },
+    { id: 'guppy_stripes_f', type: 'guppy', name: '대각선 줄무늬 구피 (암컷)', price: 120, gender: 'female', pattern: { type: 'stripes', colors: [{ r: 100, g: 100, b: 255 }, { r: 200, g: 200, b: 255 }] } },
+    { id: 'guppy_h_stripes', type: 'guppy', name: '가로 줄무늬 구피 (수컷)', price: 130, gender: 'male', pattern: { type: 'h_stripes', colors: [{ r: 100, g: 255, b: 100 }, { r: 200, g: 255, b: 200 }] } },
+    { id: 'guppy_h_stripes_f', type: 'guppy', name: '가로 줄무늬 구피 (암컷)', price: 130, gender: 'female', pattern: { type: 'h_stripes', colors: [{ r: 100, g: 255, b: 100 }, { r: 200, g: 255, b: 200 }] } },
+    { id: 'guppy_v_stripes', type: 'guppy', name: '세로 줄무늬 구피 (수컷)', price: 130, gender: 'male', pattern: { type: 'v_stripes', colors: [{ r: 255, g: 255, b: 100 }, { r: 255, g: 255, b: 200 }] } },
+    { id: 'guppy_v_stripes_f', type: 'guppy', name: '세로 줄무늬 구피 (암컷)', price: 130, gender: 'female', pattern: { type: 'v_stripes', colors: [{ r: 255, g: 255, b: 100 }, { r: 255, g: 255, b: 200 }] } },
+    { id: 'guppy_freckles', type: 'guppy', name: '주근깨 구피 (수컷)', price: 140, gender: 'male', pattern: { type: 'freckles', colors: [{ r: 255, g: 150, b: 50 }, { r: 255, g: 200, b: 150 }] } },
+    { id: 'guppy_freckles_f', type: 'guppy', name: '주근깨 구피 (암컷)', price: 140, gender: 'female', pattern: { type: 'freckles', colors: [{ r: 255, g: 150, b: 50 }, { r: 255, g: 200, b: 150 }] } },
+    { id: 'guppy_half', type: 'guppy', name: '반반 구피 (수컷)', price: 150, gender: 'male', pattern: { type: 'half', colors: [{ r: 50, g: 50, b: 50 }, { r: 200, g: 200, b: 200 }] } },
+    { id: 'guppy_half_f', type: 'guppy', name: '반반 구피 (암컷)', price: 150, gender: 'female', pattern: { type: 'half', colors: [{ r: 50, g: 50, b: 50 }, { r: 200, g: 200, b: 200 }] } },
+    { id: 'guppy_rings', type: 'guppy', name: '고리 구피 (수컷)', price: 160, gender: 'male', pattern: { type: 'rings', colors: [{ r: 255, g: 50, b: 255 }, { r: 255, g: 150, b: 255 }] } },
+    { id: 'guppy_rings_f', type: 'guppy', name: '고리 구피 (암컷)', price: 160, gender: 'female', pattern: { type: 'rings', colors: [{ r: 255, g: 50, b: 255 }, { r: 255, g: 150, b: 255 }] } },
+    { id: 'guppy_checker', type: 'guppy', name: '체크 구피 (수컷)', price: 170, gender: 'male', pattern: { type: 'checker', colors: [{ r: 50, g: 255, b: 255 }, { r: 150, g: 255, b: 255 }] } },
+    { id: 'guppy_checker_f', type: 'guppy', name: '체크 구피 (암컷)', price: 170, gender: 'female', pattern: { type: 'checker', colors: [{ r: 50, g: 255, b: 255 }, { r: 150, g: 255, b: 255 }] } },
+    { id: 'guppy_gradient', type: 'guppy', name: '그라데이션 구피 (수컷)', price: 200, gender: 'male', pattern: { type: 'gradient', colors: [{ r: 255, g: 100, b: 255 }, { r: 100, g: 255, b: 255 }] } },
+    { id: 'guppy_gradient_f', type: 'guppy', name: '그라데이션 구피 (암컷)', price: 200, gender: 'female', pattern: { type: 'gradient', colors: [{ r: 255, g: 100, b: 255 }, { r: 100, g: 255, b: 255 }] } },
     { id: 'aquarium_new', type: 'aquarium', name: '새로운 수조', price: 500 },
 ];
 
@@ -157,9 +166,10 @@ class Food {
 }
 
 class Guppy {
-    constructor(id, pattern, age = 0, parents = null, hunger = 0, lastBredTime = 0, x = null, y = null) {
+    constructor(id, pattern, age = 0, parents = null, hunger = 0, lastBredTime = 0, x = null, y = null, gender = 'male') {
         this.id = id; this.pattern = pattern; this.age = age; this.parents = parents; this.hunger = hunger;
         this.lastBredTime = lastBredTime;
+        this.gender = gender;
         this.stage = this.age >= ADULT_AGE ? 'adult' : 'fry';
 
         const containerWidth = aquarium.clientWidth || 800;
@@ -205,10 +215,22 @@ class Guppy {
     }
 
     getGuppySVG() {
-        const bodyPath = "M10,15 Q25,5 45,15 Q25,25 10,15 Z";
-        const tailPath = "M40,15 Q55,0 65,5 Q70,15 65,25 Q55,30 40,15 Z";
-        const dorsalFinPath = "M25,10 Q35,0 40,10 Z";
-        const pectoralFinPath = "M28,18 Q35,22 28,24 Z";
+        let bodyPath, tailPath, dorsalFinPath, pectoralFinPath;
+
+        if (this.gender === 'female') {
+            // Female: Rounder belly, round fan-shaped tail, less flashy fins
+            bodyPath = "M10,15 Q25,0 45,15 Q25,35 10,15 Z"; // Rounder belly
+            tailPath = "M40,15 Q45,5 55,10 Q60,15 55,20 Q45,25 40,15 Z"; // Round fan shape
+            dorsalFinPath = "M25,10 Q30,5 35,10 Z"; // Smaller dorsal fin
+            pectoralFinPath = "M28,18 Q32,20 28,22 Z"; // Smaller pectoral fin
+        } else {
+            // Male: Streamlined body, flowing tail (Original)
+            bodyPath = "M10,15 Q25,5 45,15 Q25,25 10,15 Z";
+            tailPath = "M40,15 Q55,0 65,5 Q70,15 65,25 Q55,30 40,15 Z";
+            dorsalFinPath = "M25,10 Q35,0 40,10 Z";
+            pectoralFinPath = "M28,18 Q35,22 28,24 Z";
+        }
+
         const eyeCircle = '<circle cx="15" cy="13" r="1.5" fill="black" /><circle cx="16" cy="12" r="0.5" fill="white" />';
 
         // Calculate colors for static rendering
@@ -489,7 +511,8 @@ function breedGuppies(parent1, parent2) {
         showToast('+50 코인! (새로운 조합)');
     }
     const newId = gameState.nextGuppyId++;
-    const newGuppy = new Guppy(newId, newPattern);
+    const newGender = Math.random() < 0.5 ? 'male' : 'female';
+    const newGuppy = new Guppy(newId, newPattern, 0, null, 0, 0, null, null, newGender);
 
     checkCollectionUnlock(newGuppy);
 
@@ -731,7 +754,7 @@ function restoreGameState(loadedState) {
             if (typeof safeX !== 'number' || !isFinite(safeX)) safeX = null;
             if (typeof safeY !== 'number' || !isFinite(safeY)) safeY = null;
 
-            return new Guppy(gData.id, gData.pattern, gData.age, gData.parents, gData.hunger, gData.lastBredTime || 0, safeX, safeY);
+            return new Guppy(gData.id, gData.pattern, gData.age, gData.parents, gData.hunger, gData.lastBredTime || 0, safeX, safeY, gData.gender || 'male');
         });
         const decorations = aqData.decorations.map(dData => {
             const item = SHOP_ITEMS.find(i => i.id === dData.item.id);
@@ -801,6 +824,9 @@ function tickLoop() {
                 if (g1.hunger < 20 && (now - g1.lastBredTime > BREED_COOLDOWN)) {
                     for (let j = i + 1; j < adults.length; j++) {
                         const g2 = adults[j];
+
+                        // Check gender compatibility (Male + Female)
+                        if (g1.gender === g2.gender) continue;
 
                         if (g2.hunger < 20 && (now - g2.lastBredTime > BREED_COOLDOWN)) {
                             const distance = Math.hypot(g1.x - g2.x, g1.y - g2.y);
@@ -888,7 +914,7 @@ function openGuppyList() {
                         ${guppy.getGuppySVG()}
                     </div>
                     <div>
-                        <p class="font-bold">ID: ${guppy.id} (${guppy.stage === 'fry' ? '치어' : '성어'})</p>
+                        <p class="font-bold">ID: ${guppy.id} (${guppy.stage === 'fry' ? '치어' : '성어'}) <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
                         <p class="text-sm text-cyan-300 font-bold">${getPatternLabel(guppy.pattern.type)}</p>
                         <div class="mt-1 space-y-1">${colorsHTML}</div>
                     </div>
@@ -930,7 +956,7 @@ function showGuppyInfo(guppy) {
     try {
         gameState.currentInfoGuppyId = guppy.id;
         const el = (id) => document.getElementById(id);
-        el('info-id').textContent = `ID: ${guppy.id}`;
+        el('info-id').innerHTML = `ID: ${guppy.id} <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span>`;
         const pd = el('info-pattern-details');
         const colorsHTML = guppy.pattern.colors.map(c => `
             <div class="flex items-center space-x-2 text-sm">
@@ -989,7 +1015,7 @@ function openShop() {
                 <div><p class="font-bold">${item.name}</p><p class="text-sm text-slate-400">효과: 수질 정화</p></div>`;
         } else if (item.type === 'guppy') {
             // Create a temp guppy to get the SVG
-            const tempGuppy = new Guppy(`shop-${item.id}`, item.pattern);
+            const tempGuppy = new Guppy(`shop-${item.id}`, item.pattern, 0, null, 0, 0, null, null, item.gender || 'male');
             itemPreview = `<div class="flex justify-center items-center h-24">
                     <div style="width: 80px; height: 30px;">
                         ${tempGuppy.getGuppySVG()}
@@ -1035,7 +1061,7 @@ function buyItem(itemId) {
             newDeco.createElement();
         } else if (item.type === 'guppy') {
             const newId = gameState.nextGuppyId++;
-            const newGuppy = new Guppy(newId, item.pattern);
+            const newGuppy = new Guppy(newId, item.pattern, 0, null, 0, 0, null, null, item.gender || 'male');
             gameState.aquariums[gameState.currentAquariumIndex].guppies.push(newGuppy);
             newGuppy.createElement();
             const patternKey = getPatternKey(item.pattern);
@@ -1108,6 +1134,7 @@ function openCollection() {
 
 function checkCollectionUnlock(guppy) {
     if (!guppy || !guppy.pattern || !guppy.pattern.colors) return;
+    if (guppy.gender === 'female') return; // Only males are registered in the encyclopedia
 
     const c1 = guppy.pattern.colors[0]; // Body color
     const c2 = guppy.pattern.colors[1] || c1; // Pattern color
@@ -1180,6 +1207,14 @@ function selectBreedingGuppy(guppy) {
         return;
     }
     if (gameState.breedingParents.length > 0 && gameState.breedingParents[0].id === guppy.id) return;
+
+    if (gameState.breedingParents.length === 1) {
+        const p1 = gameState.breedingParents[0];
+        if (p1.gender === guppy.gender) {
+            showToast('암수 한 쌍이어야 교배할 수 있습니다.');
+            return;
+        }
+    }
 
     gameState.breedingParents.push(guppy);
     updateAllGuppySelectionUI();
@@ -1293,7 +1328,7 @@ function getGuppyCardHTML(guppy) {
                 ${guppy.getGuppySVG()}
             </div>
         </div>
-        <p class="font-bold">ID: ${guppy.id || '새로운 구피'}</p>
+        <p class="font-bold">ID: ${guppy.id || '새로운 구피'} <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
         <p class="text-sm text-cyan-300 font-bold">${getPatternLabel(guppy.pattern.type)}</p>
         <div class="mt-1 space-y-1 text-left inline-block">${colorsHTML}</div>
     `;
@@ -1396,8 +1431,8 @@ function init(createDefaults = true) {
     if (createDefaults) {
         const p1 = { type: 'spots', colors: [{ r: 255, g: 255, b: 255 }, { r: 255, g: 0, b: 0 }] };
         const p2 = { type: 'stripes', colors: [{ r: 20, g: 20, b: 255 }, { r: 255, g: 255, b: 0 }] };
-        const guppy1 = new Guppy(gameState.nextGuppyId++, p1);
-        const guppy2 = new Guppy(gameState.nextGuppyId++, p2);
+        const guppy1 = new Guppy(gameState.nextGuppyId++, p1, 0, null, 0, 0, null, null, 'male');
+        const guppy2 = new Guppy(gameState.nextGuppyId++, p2, 0, null, 0, 0, null, null, 'female');
         gameState.aquariums[0].guppies.push(guppy1, guppy2);
         gameState.discoveredPatterns.add(getPatternKey(p1));
         gameState.discoveredPatterns.add(getPatternKey(p2));
