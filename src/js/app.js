@@ -101,8 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Language Selector Listeners
     document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            setLanguage(e.target.dataset.lang);
+        btn.addEventListener('click', () => {
+            setLanguage(btn.dataset.lang);
         });
     });
 
