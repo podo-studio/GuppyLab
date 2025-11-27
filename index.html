@@ -5,217 +5,210 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guppy Lab v2.9 - 자동 번식</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="src/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
 </head>
 
-<body class="bg-slate-900 text-slate-200 overflow-hidden">
-    <!-- START: Intro Screen Wrapper -->
+<body class="bg-slate-900 text-white overflow-hidden select-none font-sans">
+
+    <!-- Intro Screen -->
     <div id="intro-wrapper"
-        class="relative flex flex-col justify-center items-center h-screen text-center p-4 w-full overflow-hidden">
-        <!-- Background Layers -->
-        <div class="intro-bg absolute inset-0 z-0"></div>
-        <div class="intro-light-rays absolute inset-0 z-0 opacity-30"></div>
-        <div class="intro-particles absolute inset-0 z-0">
-            <!-- CSS-only bubbles for intro -->
-            <div class="intro-bubble b1"></div>
-            <div class="intro-bubble b2"></div>
-            <div class="intro-bubble b3"></div>
-            <div class="intro-bubble b4"></div>
-            <div class="intro-bubble b5"></div>
-        </div>
+        class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 transition-opacity duration-1000">
+        <div class="text-center space-y-8">
+            <h1 class="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 mb-4 font-jua tracking-widest"
+                data-i18n="game_title">Guppy Lab</h1>
+            <p class="text-xl text-slate-400 font-light tracking-wide mb-12" data-i18n="game_subtitle">나만의 구피 수조를 만들어보세요
+            </p>
 
-        <!-- Main intro content -->
-        <div id="intro-screen" class="relative z-10 flex flex-col items-center justify-center h-full max-w-md mx-auto">
-            <div class="mb-12">
-                <h1
-                    class="intro-title text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 to-cyan-500 mb-2">
-                    Guppy Lab
-                </h1>
-                <p class="intro-subtitle text-xl text-cyan-100/70 font-light tracking-widest">
-                    VIRTUAL AQUARIUM
-                </p>
-            </div>
+            <div class="flex flex-col space-y-4 w-64 mx-auto">
+                <button id="dev-mode-button"
+                    class="group relative px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all duration-300 border border-slate-700 hover:border-cyan-500 shadow-lg hover:shadow-cyan-500/20 overflow-hidden">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <span class="relative z-10 text-lg font-medium text-cyan-300 tracking-wider"
+                        data-i18n="btn_dev_mode">개발자 버전</span>
+                </button>
 
-            <div class="flex flex-col space-y-6 w-full px-8">
-                <div class="flex space-x-4 w-full">
-                    <button id="dev-mode-button"
-                        class="intro-btn group relative flex-1 py-4 rounded-2xl overflow-hidden">
-                        <div class="absolute inset-0 bg-white/5 group-hover:bg-white/10 transition-colors duration-300">
-                        </div>
-                        <div
-                            class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -translate-x-full group-hover:translate-x-full">
-                        </div>
-                        <span class="relative z-10 text-lg font-medium text-cyan-300 tracking-wider">개발자 버전</span>
-                    </button>
-                    <button id="normal-mode-button"
-                        class="intro-btn group relative flex-1 py-4 rounded-2xl overflow-hidden">
-                        <div class="absolute inset-0 bg-white/5 group-hover:bg-white/10 transition-colors duration-300">
-                        </div>
-                        <div
-                            class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -translate-x-full group-hover:translate-x-full">
-                        </div>
-                        <span class="relative z-10 text-lg font-medium text-white tracking-wider">일반 버전</span>
+                <button id="normal-mode-button"
+                    class="group relative px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all duration-300 border border-slate-700 hover:border-blue-500 shadow-lg hover:shadow-blue-500/20 overflow-hidden">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <span class="relative z-10 text-lg font-medium text-white tracking-wider"
+                        data-i18n="btn_normal_mode">일반 버전</span>
+                </button>
+
+                <div class="relative">
+                    <input type="file" id="intro-load-file-input" class="hidden" accept=".json">
+                    <button id="intro-load-button"
+                        class="w-full group relative px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all duration-300 border border-slate-700 hover:border-slate-500 shadow-lg overflow-hidden">
+                        <span
+                            class="relative z-10 text-xl font-medium text-slate-300 group-hover:text-white transition-colors tracking-wider"
+                            data-i18n="btn_load_game">불러오기</span>
                     </button>
                 </div>
-
-                <button id="intro-load-button" class="intro-btn group relative w-full py-4 rounded-2xl overflow-hidden">
-                    <div class="absolute inset-0 bg-white/5 group-hover:bg-white/10 transition-colors duration-300">
-                    </div>
-                    <span
-                        class="relative z-10 text-xl font-medium text-slate-300 group-hover:text-white transition-colors tracking-wider">불러오기</span>
-                </button>
-                <input type="file" id="intro-load-file-input" class="hidden" accept=".json">
             </div>
-        </div>
 
-        <!-- Studio info footer -->
-        <div class="absolute bottom-8 w-full z-10 opacity-60 hover:opacity-100 transition-opacity duration-300">
-            <img src="images/emblem.png" alt="포도 스튜디오 엠블럼" class="w-12 h-12 mx-auto mb-3 opacity-80">
-            <p class="text-xs text-cyan-200/50 font-jua tracking-wider">
-                DESIGNED BY PODO STUDIO
-            </p>
+            <!-- Language Selector -->
+            <div class="flex justify-center space-x-4 mt-8">
+                <button class="lang-btn text-2xl hover:scale-110 transition-transform" data-lang="ko">🇰🇷</button>
+                <button class="lang-btn text-2xl hover:scale-110 transition-transform" data-lang="en">🇺🇸</button>
+                <button class="lang-btn text-2xl hover:scale-110 transition-transform" data-lang="zh">🇨🇳</button>
+                <button class="lang-btn text-2xl hover:scale-110 transition-transform" data-lang="ja">🇯🇵</button>
+            </div>
+
+            <div class="mt-16 opacity-50">
+                <p class="text-xs text-cyan-200/50 font-jua tracking-wider">DESIGNED BY PODO STUDIO</p>
+            </div>
         </div>
     </div>
-    <!-- END: Intro Screen Wrapper -->
 
-    <div id="main-app-screen" class="hidden relative w-full h-full overflow-hidden">
-        <!-- Layer 0: Full Screen Aquarium Background -->
-        <div id="aquarium-container" class="absolute inset-0 z-0">
-            <div id="aquarium"
-                class="w-full h-full relative overflow-hidden bg-gradient-to-b from-slate-900 to-slate-800"></div>
-            <!-- Navigation Arrows (Floating) -->
-            <div id="prev-aquarium"
-                class="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 text-white/50 hover:text-white text-4xl cursor-pointer hidden">
-                &lt;</div>
-            <div id="next-aquarium"
-                class="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 text-white/50 hover:text-white text-4xl cursor-pointer hidden">
-                &gt;</div>
-        </div>
-
-        <!-- Layer 1: UI Overlay -->
-        <div id="ui-overlay" class="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-4">
-
-            <!-- Top Bar: Stats & Menu -->
-            <div class="pointer-events-auto flex justify-between items-start">
-                <div class="flex flex-col space-y-2">
-                    <!-- Coins -->
-                    <div class="glass-panel px-4 py-2 rounded-full flex items-center space-x-2">
-                        <span class="text-xl">💰</span>
-                        <span id="coins-display" class="font-bold text-white text-lg">0</span>
-                    </div>
-                    <!-- Water Quality -->
-                    <div class="glass-panel px-4 py-2 rounded-full flex items-center space-x-2">
-                        <span class="text-xl">💧</span>
-                        <div class="w-24 h-3 bg-slate-700/50 rounded-full overflow-hidden">
-                            <div id="water-quality-bar" class="h-full bg-cyan-400 transition-all duration-500"
-                                style="width: 100%;"></div>
-                        </div>
-                    </div>
+    <!-- Main App Screen -->
+    <div id="main-app-screen" class="hidden flex-col h-screen bg-slate-900">
+        <!-- Header -->
+        <header
+            class="h-16 bg-slate-800/80 border-b border-slate-700 flex items-center justify-between px-6 relative z-20 shadow-md">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center bg-slate-900/50 rounded-lg px-4 py-2 border border-slate-700">
+                    <span class="text-xl mr-2">💰</span>
+                    <span id="coins-display" class="font-bold text-yellow-400 text-xl font-mono">0</span>
                 </div>
-
-                <!-- Menu Button & Secondary Actions -->
-                <div class="flex space-x-2">
-                    <button id="menu-toggle-button"
-                        class="glass-btn w-12 h-12 rounded-full text-2xl flex items-center justify-center">☰</button>
+                <div class="w-48 bg-slate-700 rounded-full h-4 overflow-hidden border border-slate-600 relative group">
+                    <div id="water-quality-bar"
+                        class="bg-gradient-to-r from-cyan-500 to-blue-500 h-full transition-all duration-500"
+                        style="width: 100%"></div>
+                    <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white drop-shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                        data-i18n="label_water_quality">수질</div>
                 </div>
             </div>
 
-            <!-- Aquarium Title (Floating Center Top) -->
             <div id="aquarium-title"
                 class="absolute top-6 left-1/2 transform -translate-x-1/2 text-white/80 font-bold text-sm pointer-events-none">
-                수조 1
+                수조 1</div>
+
+            <div class="flex items-center space-x-2">
+                <button id="menu-toggle-button"
+                    class="p-2 rounded-lg hover:bg-slate-700 text-2xl transition-colors">☰</button>
+                <div id="game-menu"
+                    class="hidden absolute top-16 right-6 bg-slate-800 border border-slate-700 rounded-lg shadow-xl flex-col w-48 py-2 z-50">
+                    <button id="shop-button"
+                        class="text-left px-4 py-3 hover:bg-slate-700 flex items-center space-x-3 transition-colors"><span>🛍️</span>
+                        <span data-i18n="menu_shop">상점</span></button>
+                    <button id="collection-button"
+                        class="text-left px-4 py-3 hover:bg-slate-700 flex items-center space-x-3 transition-colors"><span>📖</span>
+                        <span data-i18n="menu_collection">도감</span></button>
+                    <button id="guppy-list-button"
+                        class="text-left px-4 py-3 hover:bg-slate-700 flex items-center space-x-3 transition-colors"><span>🐟</span>
+                        <span data-i18n="menu_guppy_list">구피 목록</span></button>
+                    <div class="h-px bg-slate-700 my-1"></div>
+                    <button id="save-button"
+                        class="text-left px-4 py-3 hover:bg-slate-700 flex items-center space-x-3 transition-colors"><span>💾</span>
+                        <span data-i18n="menu_save">저장</span></button>
+                    <input type="file" id="load-file-input" class="hidden" accept=".json">
+                    <button id="load-button"
+                        class="text-left px-4 py-3 hover:bg-slate-700 flex items-center space-x-3 transition-colors"><span>📂</span>
+                        <span data-i18n="menu_load">불러오기</span></button>
+                    <div class="h-px bg-slate-700 my-1"></div>
+                    <button id="manual-button"
+                        class="text-left px-4 py-3 hover:bg-slate-700 flex items-center space-x-3 transition-colors"><span>❓</span>
+                        <span data-i18n="menu_help">도움말</span></button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Game Area -->
+        <main class="flex-1 relative overflow-hidden bg-gradient-to-b from-slate-800 to-slate-900">
+            <!-- Aquarium Navigation -->
+            <button id="prev-aquarium"
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full backdrop-blur-sm transition-all text-2xl hidden">&lt;</button>
+            <button id="next-aquarium"
+                class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full backdrop-blur-sm transition-all text-2xl hidden">&gt;</button>
+
+            <!-- Aquarium Container -->
+            <div id="aquarium" class="w-full h-full relative cursor-crosshair">
+                <!-- Fish and items will be here -->
             </div>
 
-            <!-- Bottom Dock: Primary Actions -->
-            <div class="pointer-events-auto mb-4">
-                <div class="glass-panel p-2 rounded-2xl flex justify-around items-center">
-                    <button id="feed-button"
-                        class="dock-btn flex flex-col items-center justify-center space-y-1 p-2 rounded-xl hover:bg-white/10 transition-colors">
-                        <span class="text-2xl">🍤</span>
-                        <span class="text-xs font-bold">먹이주기</span>
-                        <span class="text-[10px] text-cyan-300">10💰</span>
-                    </button>
-                    <button id="clean-button"
-                        class="dock-btn flex flex-col items-center justify-center space-y-1 p-2 rounded-xl hover:bg-white/10 transition-colors">
+            <!-- Action Bar -->
+            <div
+                class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-6 bg-slate-900/80 backdrop-blur-md px-8 py-4 rounded-2xl border border-slate-700/50 shadow-2xl">
+                <button id="feed-button" class="flex flex-col items-center space-y-1 group">
+                    <div
+                        class="w-12 h-12 bg-amber-500/20 group-hover:bg-amber-500/40 rounded-xl flex items-center justify-center border border-amber-500/50 transition-all duration-300 group-hover:scale-110">
+                        <span class="text-2xl">🪱</span>
+                    </div>
+                    <span class="text-xs font-bold text-slate-300 group-hover:text-white transition-colors"
+                        data-i18n="action_feed">먹이주기</span>
+                </button>
+                <button id="clean-button" class="flex flex-col items-center space-y-1 group">
+                    <div
+                        class="w-12 h-12 bg-blue-500/20 group-hover:bg-blue-500/40 rounded-xl flex items-center justify-center border border-blue-500/50 transition-all duration-300 group-hover:scale-110">
                         <span class="text-2xl">🧹</span>
-                        <span class="text-xs font-bold">청소하기</span>
-                    </button>
-                    <button id="breed-button"
-                        class="dock-btn flex flex-col items-center justify-center space-y-1 p-2 rounded-xl hover:bg-white/10 transition-colors">
+                    </div>
+                    <span class="text-xs font-bold text-slate-300 group-hover:text-white transition-colors"
+                        data-i18n="action_clean">청소하기</span>
+                </button>
+                <button id="breed-button" class="flex flex-col items-center space-y-1 group">
+                    <div
+                        class="w-12 h-12 bg-pink-500/20 group-hover:bg-pink-500/40 rounded-xl flex items-center justify-center border border-pink-500/50 transition-all duration-300 group-hover:scale-110">
                         <span class="text-2xl">💕</span>
-                        <span class="text-xs font-bold">교배</span>
-                    </button>
-                </div>
+                    </div>
+                    <span class="text-xs font-bold text-slate-300 group-hover:text-white transition-colors"
+                        data-i18n="action_breed">교배</span>
+                </button>
             </div>
-        </div>
 
-        <!-- Hidden Menu (Slide-in or Modal) -->
-        <div id="game-menu"
-            class="hidden absolute top-16 right-4 w-48 glass-panel rounded-xl p-2 z-20 flex-col space-y-2 pointer-events-auto">
-            <button id="shop-button"
-                class="menu-item w-full text-left px-4 py-2 rounded-lg hover:bg-white/10 flex items-center space-x-2">
-                <span>🛍️</span> <span>상점</span>
-            </button>
-            <button id="collection-button"
-                class="menu-item w-full text-left px-4 py-2 rounded-lg hover:bg-white/10 flex items-center space-x-2">
-                <span>📖</span> <span>도감</span>
-            </button>
-            <button id="guppy-list-button"
-                class="menu-item w-full text-left px-4 py-2 rounded-lg hover:bg-white/10 flex items-center space-x-2">
-                <span>🐟</span> <span>구피 목록</span>
-            </button>
-            <div class="h-px bg-white/20 my-1"></div>
-            <button id="save-button"
-                class="menu-item w-full text-left px-4 py-2 rounded-lg hover:bg-white/10 flex items-center space-x-2">
-                <span>💾</span> <span>저장</span>
-            </button>
-            <button id="load-button"
-                class="menu-item w-full text-left px-4 py-2 rounded-lg hover:bg-white/10 flex items-center space-x-2">
-                <span>📂</span> <span>불러오기</span>
-            </button>
-            <button id="manual-button"
-                class="menu-item w-full text-left px-4 py-2 rounded-lg hover:bg-white/10 flex items-center space-x-2">
-                <span>❓</span> <span>도움말</span>
-            </button>
-            <input type="file" id="load-file-input" class="hidden" accept=".json">
-        </div>
-
-        <!-- Guppy Info Panel (Floating Bottom Sheet) -->
-        <div id="guppy-info-panel"
-            class="hidden absolute bottom-24 left-4 right-4 glass-panel p-4 rounded-xl z-20 pointer-events-auto">
-            <div class="flex justify-between items-start mb-2">
-                <div>
-                    <h3 class="font-bold text-lg text-cyan-300">구피 정보</h3>
+            <!-- Guppy Info Panel -->
+            <div id="guppy-info-panel"
+                class="absolute top-4 right-4 w-64 bg-slate-800/90 backdrop-blur-md border border-slate-600 rounded-xl p-4 shadow-2xl hidden transform transition-all duration-300">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="font-bold text-lg text-cyan-300" data-i18n="info_title">구피 정보</h3>
+                    <button id="close-info-panel" class="text-slate-400 hover:text-white">&times;</button>
+                </div>
+                <div class="space-y-3">
                     <p id="info-id" class="text-xs text-slate-400">ID: #0</p>
+                    <div id="info-pattern-details" class="bg-slate-900/50 p-2 rounded-lg"></div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div class="bg-slate-700/50 p-2 rounded">
+                            <span class="text-xs text-slate-400 block" data-i18n="label_age">나이</span>
+                            <span id="info-age" class="font-bold">0</span>
+                        </div>
+                        <div class="bg-slate-700/50 p-2 rounded">
+                            <span class="text-xs text-slate-400 block" data-i18n="label_stage">단계</span>
+                            <span id="info-stage" class="font-bold">-</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-400 mb-1">
+                            <span data-i18n="label_hunger">포만감</span>
+                            <span id="info-hunger">100/100</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+                            <div class="bg-green-500 h-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col space-y-2 pt-2">
+                        <button id="info-breed-button"
+                            class="w-full bg-pink-600 hover:bg-pink-500 text-white text-sm font-bold py-1.5 rounded transition-colors"
+                            data-i18n="info_breed">교배</button>
+                        <button id="info-move-button"
+                            class="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-1.5 rounded transition-colors hidden"
+                            data-i18n="info_move">수조 이동</button>
+                        <button id="info-rehome-button"
+                            class="w-full bg-red-600 hover:bg-red-500 text-white text-sm font-bold py-1.5 rounded transition-colors"
+                            data-i18n="info_rehome">분양 보내기</button>
+                    </div>
                 </div>
-                <button id="close-info-panel" class="text-slate-400 hover:text-white p-1">✕</button>
             </div>
-
-            <div class="flex space-x-4">
-                <div class="flex-1 space-y-1 text-sm">
-                    <div id="info-pattern-details"></div>
-                    <p id="info-age"></p>
-                    <p id="info-stage"></p>
-                    <p id="info-hunger"></p>
-                </div>
-                <div class="flex flex-col space-y-2 justify-center">
-                    <button id="info-breed-button"
-                        class="btn-sm bg-pink-500/80 hover:bg-pink-500 text-white py-1 px-3 rounded text-xs">교배</button>
-                    <button id="info-move-button"
-                        class="btn-sm bg-blue-500/80 hover:bg-blue-500 text-white py-1 px-3 rounded text-xs">이동</button>
-                    <button id="info-rehome-button"
-                        class="btn-sm bg-red-500/80 hover:bg-red-500 text-white py-1 px-3 rounded text-xs">분양</button>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
 
-    <!-- 모달들 -->
+    <!-- Modal Container -->
     <div id="modal-container"></div>
 
+    <script src="src/js/translations.js"></script>
     <script src="src/js/app.js"></script>
 </body>
 

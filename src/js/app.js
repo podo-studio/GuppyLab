@@ -1,5 +1,34 @@
 // --- DOM 요소 ---
 let introWrapper, mainAppScreen, devModeButton, normalModeButton, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
+let currentLanguage = localStorage.getItem('guppy_lang') || 'ko';
+
+function t(key, params = {}) {
+    const lang = currentLanguage;
+    let text = TRANSLATIONS[lang][key] || TRANSLATIONS['en'][key] || key;
+    Object.keys(params).forEach(param => {
+        text = text.replace(`{${param}}`, params[param]);
+    });
+    return text;
+}
+
+function setLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('guppy_lang', lang);
+    document.documentElement.lang = lang;
+
+    // Update static elements
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        el.textContent = t(key);
+    });
+
+    // Update dynamic elements if visible
+    if (gameInitialized) {
+        updateUI();
+        // Re-render open modals if any (simplified: just close or refresh)
+        // For now, let's just update main UI. Modals might need re-opening.
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Guppy Lab: DOM Content Loaded");
@@ -69,6 +98,16 @@ document.addEventListener('DOMContentLoaded', () => {
             gameMenu.classList.remove('flex');
         }
     });
+
+    // Language Selector Listeners
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            setLanguage(e.target.dataset.lang);
+        });
+    });
+
+    // Initialize Language
+    setLanguage(currentLanguage);
 });
 
 // --- 게임 설정 및 데이터 ---
@@ -79,49 +118,49 @@ const FEED_COST = 10;
 const BREED_COOLDOWN = 20000; // 20 seconds
 const PATTERN_TYPES = ['spots', 'stripes', 'h_stripes', 'v_stripes', 'freckles', 'half', 'rings', 'checker', 'gradient'];
 const SHOP_ITEMS = [
-    { id: 'plant1', type: 'decoration', name: '네온 수초', price: 50, effect: { waterQuality: 0.02 }, svg: `<svg width="50" height="100" viewBox="0 0 50 100"><path d="M25 100 C 10 80, 40 60, 25 40 S 10 20, 25 0" stroke="cyan" stroke-width="4" fill="none" /></svg>` },
-    { id: 'guppy_spots', type: 'guppy', name: '점무늬 구피 (수컷)', price: 100, gender: 'male', pattern: { type: 'spots', colors: [{ r: 255, g: 100, b: 100 }, { r: 255, g: 200, b: 200 }] } },
-    { id: 'guppy_spots_f', type: 'guppy', name: '점무늬 구피 (암컷)', price: 100, gender: 'female', pattern: { type: 'spots', colors: [{ r: 255, g: 100, b: 100 }, { r: 255, g: 200, b: 200 }] } },
-    { id: 'guppy_stripes', type: 'guppy', name: '대각선 줄무늬 구피 (수컷)', price: 120, gender: 'male', pattern: { type: 'stripes', colors: [{ r: 100, g: 100, b: 255 }, { r: 200, g: 200, b: 255 }] } },
-    { id: 'guppy_stripes_f', type: 'guppy', name: '대각선 줄무늬 구피 (암컷)', price: 120, gender: 'female', pattern: { type: 'stripes', colors: [{ r: 100, g: 100, b: 255 }, { r: 200, g: 200, b: 255 }] } },
-    { id: 'guppy_h_stripes', type: 'guppy', name: '가로 줄무늬 구피 (수컷)', price: 130, gender: 'male', pattern: { type: 'h_stripes', colors: [{ r: 100, g: 255, b: 100 }, { r: 200, g: 255, b: 200 }] } },
-    { id: 'guppy_h_stripes_f', type: 'guppy', name: '가로 줄무늬 구피 (암컷)', price: 130, gender: 'female', pattern: { type: 'h_stripes', colors: [{ r: 100, g: 255, b: 100 }, { r: 200, g: 255, b: 200 }] } },
-    { id: 'guppy_v_stripes', type: 'guppy', name: '세로 줄무늬 구피 (수컷)', price: 130, gender: 'male', pattern: { type: 'v_stripes', colors: [{ r: 255, g: 255, b: 100 }, { r: 255, g: 255, b: 200 }] } },
-    { id: 'guppy_v_stripes_f', type: 'guppy', name: '세로 줄무늬 구피 (암컷)', price: 130, gender: 'female', pattern: { type: 'v_stripes', colors: [{ r: 255, g: 255, b: 100 }, { r: 255, g: 255, b: 200 }] } },
-    { id: 'guppy_freckles', type: 'guppy', name: '주근깨 구피 (수컷)', price: 140, gender: 'male', pattern: { type: 'freckles', colors: [{ r: 255, g: 150, b: 50 }, { r: 255, g: 200, b: 150 }] } },
-    { id: 'guppy_freckles_f', type: 'guppy', name: '주근깨 구피 (암컷)', price: 140, gender: 'female', pattern: { type: 'freckles', colors: [{ r: 255, g: 150, b: 50 }, { r: 255, g: 200, b: 150 }] } },
-    { id: 'guppy_half', type: 'guppy', name: '반반 구피 (수컷)', price: 150, gender: 'male', pattern: { type: 'half', colors: [{ r: 50, g: 50, b: 50 }, { r: 200, g: 200, b: 200 }] } },
-    { id: 'guppy_half_f', type: 'guppy', name: '반반 구피 (암컷)', price: 150, gender: 'female', pattern: { type: 'half', colors: [{ r: 50, g: 50, b: 50 }, { r: 200, g: 200, b: 200 }] } },
-    { id: 'guppy_rings', type: 'guppy', name: '고리 구피 (수컷)', price: 160, gender: 'male', pattern: { type: 'rings', colors: [{ r: 255, g: 50, b: 255 }, { r: 255, g: 150, b: 255 }] } },
-    { id: 'guppy_rings_f', type: 'guppy', name: '고리 구피 (암컷)', price: 160, gender: 'female', pattern: { type: 'rings', colors: [{ r: 255, g: 50, b: 255 }, { r: 255, g: 150, b: 255 }] } },
-    { id: 'guppy_checker', type: 'guppy', name: '체크 구피 (수컷)', price: 170, gender: 'male', pattern: { type: 'checker', colors: [{ r: 50, g: 255, b: 255 }, { r: 150, g: 255, b: 255 }] } },
-    { id: 'guppy_checker_f', type: 'guppy', name: '체크 구피 (암컷)', price: 170, gender: 'female', pattern: { type: 'checker', colors: [{ r: 50, g: 255, b: 255 }, { r: 150, g: 255, b: 255 }] } },
-    { id: 'guppy_gradient', type: 'guppy', name: '그라데이션 구피 (수컷)', price: 200, gender: 'male', pattern: { type: 'gradient', colors: [{ r: 255, g: 100, b: 255 }, { r: 100, g: 255, b: 255 }] } },
-    { id: 'guppy_gradient_f', type: 'guppy', name: '그라데이션 구피 (암컷)', price: 200, gender: 'female', pattern: { type: 'gradient', colors: [{ r: 255, g: 100, b: 255 }, { r: 100, g: 255, b: 255 }] } },
-    { id: 'aquarium_new', type: 'aquarium', name: '새로운 수조', price: 500 },
+    { id: 'plant1', type: 'decoration', nameKey: 'item_plant1', price: 50, effect: { waterQuality: 0.02 }, svg: `<svg width="50" height="100" viewBox="0 0 50 100"><path d="M25 100 C 10 80, 40 60, 25 40 S 10 20, 25 0" stroke="cyan" stroke-width="4" fill="none" /></svg>` },
+    { id: 'guppy_spots', type: 'guppy', nameKey: 'item_guppy_spots', price: 100, gender: 'male', pattern: { type: 'spots', colors: [{ r: 255, g: 100, b: 100 }, { r: 255, g: 200, b: 200 }] } },
+    { id: 'guppy_spots_f', type: 'guppy', nameKey: 'item_guppy_spots', price: 100, gender: 'female', pattern: { type: 'spots', colors: [{ r: 255, g: 100, b: 100 }, { r: 255, g: 200, b: 200 }] } },
+    { id: 'guppy_stripes', type: 'guppy', nameKey: 'item_guppy_stripes', price: 120, gender: 'male', pattern: { type: 'stripes', colors: [{ r: 100, g: 100, b: 255 }, { r: 200, g: 200, b: 255 }] } },
+    { id: 'guppy_stripes_f', type: 'guppy', nameKey: 'item_guppy_stripes', price: 120, gender: 'female', pattern: { type: 'stripes', colors: [{ r: 100, g: 100, b: 255 }, { r: 200, g: 200, b: 255 }] } },
+    { id: 'guppy_h_stripes', type: 'guppy', nameKey: 'item_guppy_h_stripes', price: 130, gender: 'male', pattern: { type: 'h_stripes', colors: [{ r: 100, g: 255, b: 100 }, { r: 200, g: 255, b: 200 }] } },
+    { id: 'guppy_h_stripes_f', type: 'guppy', nameKey: 'item_guppy_h_stripes', price: 130, gender: 'female', pattern: { type: 'h_stripes', colors: [{ r: 100, g: 255, b: 100 }, { r: 200, g: 255, b: 200 }] } },
+    { id: 'guppy_v_stripes', type: 'guppy', nameKey: 'item_guppy_v_stripes', price: 130, gender: 'male', pattern: { type: 'v_stripes', colors: [{ r: 255, g: 255, b: 100 }, { r: 255, g: 255, b: 200 }] } },
+    { id: 'guppy_v_stripes_f', type: 'guppy', nameKey: 'item_guppy_v_stripes', price: 130, gender: 'female', pattern: { type: 'v_stripes', colors: [{ r: 255, g: 255, b: 100 }, { r: 255, g: 255, b: 200 }] } },
+    { id: 'guppy_freckles', type: 'guppy', nameKey: 'item_guppy_freckles', price: 140, gender: 'male', pattern: { type: 'freckles', colors: [{ r: 255, g: 150, b: 50 }, { r: 255, g: 200, b: 150 }] } },
+    { id: 'guppy_freckles_f', type: 'guppy', nameKey: 'item_guppy_freckles', price: 140, gender: 'female', pattern: { type: 'freckles', colors: [{ r: 255, g: 150, b: 50 }, { r: 255, g: 200, b: 150 }] } },
+    { id: 'guppy_half', type: 'guppy', nameKey: 'item_guppy_half', price: 150, gender: 'male', pattern: { type: 'half', colors: [{ r: 50, g: 50, b: 50 }, { r: 200, g: 200, b: 200 }] } },
+    { id: 'guppy_half_f', type: 'guppy', nameKey: 'item_guppy_half', price: 150, gender: 'female', pattern: { type: 'half', colors: [{ r: 50, g: 50, b: 50 }, { r: 200, g: 200, b: 200 }] } },
+    { id: 'guppy_rings', type: 'guppy', nameKey: 'item_guppy_rings', price: 160, gender: 'male', pattern: { type: 'rings', colors: [{ r: 255, g: 50, b: 255 }, { r: 255, g: 150, b: 255 }] } },
+    { id: 'guppy_rings_f', type: 'guppy', nameKey: 'item_guppy_rings', price: 160, gender: 'female', pattern: { type: 'rings', colors: [{ r: 255, g: 50, b: 255 }, { r: 255, g: 150, b: 255 }] } },
+    { id: 'guppy_checker', type: 'guppy', nameKey: 'item_guppy_checker', price: 170, gender: 'male', pattern: { type: 'checker', colors: [{ r: 50, g: 255, b: 255 }, { r: 150, g: 255, b: 255 }] } },
+    { id: 'guppy_checker_f', type: 'guppy', nameKey: 'item_guppy_checker', price: 170, gender: 'female', pattern: { type: 'checker', colors: [{ r: 50, g: 255, b: 255 }, { r: 150, g: 255, b: 255 }] } },
+    { id: 'guppy_gradient', type: 'guppy', nameKey: 'item_guppy_gradient', price: 200, gender: 'male', pattern: { type: 'gradient', colors: [{ r: 255, g: 100, b: 255 }, { r: 100, g: 255, b: 255 }] } },
+    { id: 'guppy_gradient_f', type: 'guppy', nameKey: 'item_guppy_gradient', price: 200, gender: 'female', pattern: { type: 'gradient', colors: [{ r: 255, g: 100, b: 255 }, { r: 100, g: 255, b: 255 }] } },
+    { id: 'aquarium_new', type: 'aquarium', nameKey: 'item_aquarium_new', price: 500 },
 ];
 
 const COLLECTION_TARGETS = [
-    { id: 'panda', name: '판다 구피', hint: '점무늬 + 흰색/검정', criteria: { patternType: 'spots', bodyColor: { r: 255, g: 255, b: 255 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
-    { id: 'bumblebee', name: '꿀벌 구피', hint: '줄무늬 + 노랑/검정', criteria: { patternType: 'stripes', bodyColor: { r: 255, g: 255, b: 0 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
-    { id: 'tiger', name: '호랑이 구피', hint: '줄무늬 + 주황/검정', criteria: { patternType: 'stripes', bodyColor: { r: 255, g: 165, b: 0 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
-    { id: 'zebra', name: '얼룩말 구피', hint: '세로 줄무늬 + 흰색/검정', criteria: { patternType: 'v_stripes', bodyColor: { r: 255, g: 255, b: 255 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
-    { id: 'watermelon', name: '수박 구피', hint: '줄무늬 + 초록/검정', criteria: { patternType: 'stripes', bodyColor: { r: 0, g: 255, b: 0 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
-    { id: 'mint_choco', name: '민트초코 구피', hint: '주근깨 + 민트/갈색', criteria: { patternType: 'freckles', bodyColor: { r: 0, g: 255, b: 255 }, patternColor: { r: 139, g: 69, b: 19 }, tolerance: 60 } },
-    { id: 'nemo', name: '니모 구피', hint: '줄무늬 + 주황/흰색', criteria: { patternType: 'stripes', bodyColor: { r: 255, g: 165, b: 0 }, patternColor: { r: 255, g: 255, b: 255 }, tolerance: 50 } },
-    { id: 'blue_sky', name: '푸른 하늘 구피', hint: '그라데이션 + 하늘/흰색', criteria: { patternType: 'gradient', bodyColor: { r: 135, g: 206, b: 235 }, patternColor: { r: 255, g: 255, b: 255 }, tolerance: 50 } },
-    { id: 'sunset', name: '노을 구피', hint: '그라데이션 + 주황/보라', criteria: { patternType: 'gradient', bodyColor: { r: 255, g: 165, b: 0 }, patternColor: { r: 128, g: 0, b: 128 }, tolerance: 50 } },
-    { id: 'fire', name: '불꽃 구피', hint: '그라데이션 + 빨강/노랑', criteria: { patternType: 'gradient', bodyColor: { r: 255, g: 0, b: 0 }, patternColor: { r: 255, g: 255, b: 0 }, tolerance: 50 } },
-    { id: 'ocean', name: '심해 구피', hint: '그라데이션 + 남색/청록', criteria: { patternType: 'gradient', bodyColor: { r: 0, g: 0, b: 128 }, patternColor: { r: 0, g: 255, b: 255 }, tolerance: 50 } },
-    { id: 'matrix', name: '매트릭스 구피', hint: '가로 줄무늬 + 검정/초록', criteria: { patternType: 'h_stripes', bodyColor: { r: 0, g: 0, b: 0 }, patternColor: { r: 0, g: 255, b: 0 }, tolerance: 50 } },
-    { id: 'goldfish', name: '금붕어 구피', hint: '그라데이션 + 금색/주황', criteria: { patternType: 'gradient', bodyColor: { r: 255, g: 215, b: 0 }, patternColor: { r: 255, g: 165, b: 0 }, tolerance: 50 } },
-    { id: 'ghost', name: '유령 구피', hint: '모든 패턴 + 흰색/흰색', criteria: { patternType: 'any', bodyColor: { r: 255, g: 255, b: 255 }, patternColor: { r: 255, g: 255, b: 255 }, tolerance: 30 } },
-    { id: 'shadow', name: '그림자 구피', hint: '모든 패턴 + 검정/검정', criteria: { patternType: 'any', bodyColor: { r: 0, g: 0, b: 0 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 30 } },
-    { id: 'love', name: '사랑 구피', hint: '점무늬 + 분홍/빨강', criteria: { patternType: 'spots', bodyColor: { r: 255, g: 192, b: 203 }, patternColor: { r: 255, g: 0, b: 0 }, tolerance: 50 } },
-    { id: 'toxic', name: '독극물 구피', hint: '고리 + 초록/보라', criteria: { patternType: 'rings', bodyColor: { r: 0, g: 255, b: 0 }, patternColor: { r: 128, g: 0, b: 128 }, tolerance: 50 } },
-    { id: 'cotton_candy', name: '솜사탕 구피', hint: '그라데이션 + 분홍/하늘', criteria: { patternType: 'gradient', bodyColor: { r: 255, g: 192, b: 203 }, patternColor: { r: 135, g: 206, b: 235 }, tolerance: 50 } },
-    { id: 'leopard', name: '표범 구피', hint: '점무늬 + 노랑/갈색', criteria: { patternType: 'spots', bodyColor: { r: 255, g: 255, b: 0 }, patternColor: { r: 139, g: 69, b: 19 }, tolerance: 50 } },
-    { id: 'galaxy', name: '우주 구피', hint: '주근깨 + 검정/보라', criteria: { patternType: 'freckles', bodyColor: { r: 0, g: 0, b: 0 }, patternColor: { r: 128, g: 0, b: 128 }, tolerance: 50 } },
+    { id: 'panda', nameKey: 'col_panda', hintKey: 'col_panda_hint', criteria: { patternType: 'spots', bodyColor: { r: 255, g: 255, b: 255 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
+    { id: 'bumblebee', nameKey: 'col_bumblebee', hintKey: 'col_bumblebee_hint', criteria: { patternType: 'stripes', bodyColor: { r: 255, g: 255, b: 0 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
+    { id: 'tiger', nameKey: 'col_tiger', hintKey: 'col_tiger_hint', criteria: { patternType: 'stripes', bodyColor: { r: 255, g: 165, b: 0 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
+    { id: 'zebra', nameKey: 'col_zebra', hintKey: 'col_zebra_hint', criteria: { patternType: 'v_stripes', bodyColor: { r: 255, g: 255, b: 255 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
+    { id: 'watermelon', nameKey: 'col_watermelon', hintKey: 'col_watermelon_hint', criteria: { patternType: 'stripes', bodyColor: { r: 0, g: 255, b: 0 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 50 } },
+    { id: 'mint_choco', nameKey: 'col_mint_choco', hintKey: 'col_mint_choco_hint', criteria: { patternType: 'freckles', bodyColor: { r: 0, g: 255, b: 255 }, patternColor: { r: 139, g: 69, b: 19 }, tolerance: 60 } },
+    { id: 'nemo', nameKey: 'col_nemo', hintKey: 'col_nemo_hint', criteria: { patternType: 'stripes', bodyColor: { r: 255, g: 165, b: 0 }, patternColor: { r: 255, g: 255, b: 255 }, tolerance: 50 } },
+    { id: 'blue_sky', nameKey: 'col_blue_sky', hintKey: 'col_blue_sky_hint', criteria: { patternType: 'gradient', bodyColor: { r: 135, g: 206, b: 235 }, patternColor: { r: 255, g: 255, b: 255 }, tolerance: 50 } },
+    { id: 'sunset', nameKey: 'col_sunset', hintKey: 'col_sunset_hint', criteria: { patternType: 'gradient', bodyColor: { r: 255, g: 165, b: 0 }, patternColor: { r: 128, g: 0, b: 128 }, tolerance: 50 } },
+    { id: 'fire', nameKey: 'col_fire', hintKey: 'col_fire_hint', criteria: { patternType: 'gradient', bodyColor: { r: 255, g: 0, b: 0 }, patternColor: { r: 255, g: 255, b: 0 }, tolerance: 50 } },
+    { id: 'ocean', nameKey: 'col_ocean', hintKey: 'col_ocean_hint', criteria: { patternType: 'gradient', bodyColor: { r: 0, g: 0, b: 128 }, patternColor: { r: 0, g: 255, b: 255 }, tolerance: 50 } },
+    { id: 'matrix', nameKey: 'col_matrix', hintKey: 'col_matrix_hint', criteria: { patternType: 'h_stripes', bodyColor: { r: 0, g: 0, b: 0 }, patternColor: { r: 0, g: 255, b: 0 }, tolerance: 50 } },
+    { id: 'goldfish', nameKey: 'col_goldfish', hintKey: 'col_goldfish_hint', criteria: { patternType: 'gradient', bodyColor: { r: 255, g: 215, b: 0 }, patternColor: { r: 255, g: 165, b: 0 }, tolerance: 50 } },
+    { id: 'ghost', nameKey: 'col_ghost', hintKey: 'col_ghost_hint', criteria: { patternType: 'any', bodyColor: { r: 255, g: 255, b: 255 }, patternColor: { r: 255, g: 255, b: 255 }, tolerance: 30 } },
+    { id: 'shadow', nameKey: 'col_shadow', hintKey: 'col_shadow_hint', criteria: { patternType: 'any', bodyColor: { r: 0, g: 0, b: 0 }, patternColor: { r: 0, g: 0, b: 0 }, tolerance: 30 } },
+    { id: 'love', nameKey: 'col_love', hintKey: 'col_love_hint', criteria: { patternType: 'spots', bodyColor: { r: 255, g: 192, b: 203 }, patternColor: { r: 255, g: 0, b: 0 }, tolerance: 50 } },
+    { id: 'toxic', nameKey: 'col_toxic', hintKey: 'col_toxic_hint', criteria: { patternType: 'rings', bodyColor: { r: 0, g: 255, b: 0 }, patternColor: { r: 128, g: 0, b: 128 }, tolerance: 50 } },
+    { id: 'cotton_candy', nameKey: 'col_cotton_candy', hintKey: 'col_cotton_candy_hint', criteria: { patternType: 'gradient', bodyColor: { r: 255, g: 192, b: 203 }, patternColor: { r: 135, g: 206, b: 235 }, tolerance: 50 } },
+    { id: 'leopard', nameKey: 'col_leopard', hintKey: 'col_leopard_hint', criteria: { patternType: 'spots', bodyColor: { r: 255, g: 255, b: 0 }, patternColor: { r: 139, g: 69, b: 19 }, tolerance: 50 } },
+    { id: 'galaxy', nameKey: 'col_galaxy', hintKey: 'col_galaxy_hint', criteria: { patternType: 'freckles', bodyColor: { r: 0, g: 0, b: 0 }, patternColor: { r: 128, g: 0, b: 128 }, tolerance: 50 } },
 ];
 
 let gameState = {
@@ -516,11 +555,11 @@ function breedGuppies(parent1, parent2) {
     if (gameState.gameMode === 'developer' && !gameState.discoveredPatterns.has(patternKey)) {
         gameState.discoveredPatterns.add(patternKey);
         gameState.coins += 50;
-        showToast('+50 코인! (새로운 조합)');
+        showToast(t('msg_coin_reward', { amount: 50 }));
     } else if (gameState.gameMode === 'normal' && !gameState.discoveredPatterns.has(patternKey)) {
         // Normal Mode: Just discover, no coin reward
         gameState.discoveredPatterns.add(patternKey);
-        showToast('새로운 조합 발견!');
+        showToast(t('msg_new_discovery'));
     }
     const newId = gameState.nextGuppyId++;
     const newGender = Math.random() < 0.5 ? 'male' : 'female';
@@ -570,10 +609,10 @@ function rehomeGuppy(guppyId) {
     const guppy = currentAq.guppies[guppyIndex];
     const value = calculateGuppyValue(guppy);
     if (value === 0) {
-        showToast('치어는 분양 보낼 수 없습니다.');
+        showToast(t('msg_fry_rehome_fail'));
         return;
     }
-    showConfirmation(`${value} 코인을 받고 이 구피를 분양 보내시겠습니까?`, () => {
+    showConfirmation(t('msg_rehome_confirm', { amount: value }), () => {
         console.log(`Rehoming guppy ${guppyId}...`);
         gameState.coins += value;
 
@@ -605,7 +644,7 @@ function rehomeGuppy(guppyId) {
             openGuppyList(); // Refresh the list
         }
 
-        showToast(`${value} 코인 획득!`);
+        showToast(t('msg_coin_earned', { amount: value }));
     });
 }
 function showConfirmation(message, onConfirm) {
@@ -616,8 +655,8 @@ function showConfirmation(message, onConfirm) {
         <div class="modal-content text-center">
             <p id="confirm-message" class="text-lg mb-6">${message}</p>
             <div class="flex justify-center space-x-4">
-                <button id="confirm-yes-button" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-8 rounded-lg">예</button>
-                <button id="confirm-no-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-8 rounded-lg">아니오</button>
+                <button id="confirm-yes-button" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-8 rounded-lg">${t('modal_confirm_yes')}</button>
+                <button id="confirm-no-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-8 rounded-lg">${t('modal_confirm_no')}</button>
             </div>
         </div>`;
     modalContainer.appendChild(confirmModal);
@@ -685,7 +724,7 @@ async function exportSaveFile() {
             const writable = await handle.createWritable();
             await writable.write(jsonString);
             await writable.close();
-            showToast('게임이 저장되었습니다!');
+            showToast(t('msg_save_success'));
         } else {
             // Fallback for browsers not supporting File System Access API
             const blob = new Blob([jsonString], { type: "application/json" });
@@ -697,12 +736,12 @@ async function exportSaveFile() {
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
             URL.revokeObjectURL(url);
-            showToast('게임이 저장되었습니다!');
+            showToast(t('msg_save_success'));
         }
     } catch (err) {
         if (err.name !== 'AbortError') {
             console.error('Save failed:', err);
-            showToast('저장에 실패했습니다.');
+            showToast(t('msg_save_fail'));
         }
     }
 }
@@ -716,17 +755,15 @@ function importSaveFile(event) {
         try {
             const loadedState = JSON.parse(e.target.result);
             restoreGameState(loadedState);
-            showToast('게임을 성공적으로 불러왔습니다!');
+            showToast(t('msg_load_success'));
         } catch (error) {
             console.error("Error importing save file:", error);
-            showToast('세이브 파일을 불러오는데 실패했습니다.');
+            showToast(t('msg_load_fail'));
         }
         event.target.value = ''; // Reset input
     };
     reader.readAsText(file);
 }
-
-
 
 function handleIntroLoad(event) {
     const file = event.target.files[0];
@@ -742,10 +779,10 @@ function handleIntroLoad(event) {
             init(false); // Don't create default guppies
             showGameScreen();
 
-            showToast('게임을 성공적으로 불러왔습니다!');
+            showToast(t('msg_load_success'));
         } catch (error) {
             console.error("Error importing save file:", error);
-            showToast('세이브 파일을 불러오는데 실패했습니다.');
+            showToast(t('msg_load_fail'));
         }
         event.target.value = ''; // Reset input
     };
@@ -882,7 +919,7 @@ function tickLoop() {
                                 g2.hunger = 50;
 
                                 if (aqIndex === gameState.currentAquariumIndex) {
-                                    showToast('새로운 치어가 태어났습니다!');
+                                    showToast(t('msg_new_fry'));
                                 }
                                 break;
                             }
@@ -897,18 +934,7 @@ function tickLoop() {
 }
 
 function getPatternLabel(patternType) {
-    const labels = {
-        'spots': '점무늬 ●',
-        'stripes': '줄무늬 //',
-        'h_stripes': '가로 줄무늬 =',
-        'v_stripes': '세로 줄무늬 ||',
-        'freckles': '주근깨 ::',
-        'half': '반반 🌗',
-        'rings': '고리 ◎',
-        'checker': '체크 ▦',
-        'gradient': '그라데이션 🌈'
-    };
-    return labels[patternType] || patternType;
+    return t(`pattern_${patternType}`);
 }
 
 function openGuppyList() {
@@ -918,11 +944,11 @@ function openGuppyList() {
     guppyListModal.className = 'modal-overlay';
     let listContent = '';
     if (currentAq.guppies.length === 0) {
-        listContent = '<p class="text-slate-400">이 수조에는 구피가 없습니다.</p>';
+        listContent = `<p class="text-slate-400">${t('msg_empty_tank')}</p>`;
     } else {
         listContent = currentAq.guppies.map(guppy => {
             const value = calculateGuppyValue(guppy);
-            const colorsHTML = guppy.pattern.colors.map(c => `
+            const colorsHTML = guppy.pattern.colors.map((c, i) => `
                 <div class="flex items-center space-x-1 text-xs">
                     <div class="w-3 h-3 rounded-full border border-slate-600" style="background-color: ${toRgbString(c)}"></div>
                     <span class="text-slate-500">R:${c.r} G:${c.g} B:${c.b}</span>
@@ -936,13 +962,13 @@ function openGuppyList() {
                         ${guppy.getGuppySVG()}
                     </div>
                     <div>
-                        <p class="font-bold">ID: ${guppy.id} (${guppy.stage === 'fry' ? '치어' : '성어'}) <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
+                        <p class="font-bold">ID: ${guppy.id} (${guppy.stage === 'fry' ? t('stage_fry') : t('stage_adult')}) <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
                         <p class="text-sm text-cyan-300 font-bold">${getPatternLabel(guppy.pattern.type)}</p>
                         <div class="mt-1 space-y-1">${colorsHTML}</div>
                     </div>
                 </div>
                 <button data-guppy-id="${guppy.id}" class="rehome-button ml-4 bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-sm ${guppy.stage === 'fry' ? 'opacity-50 cursor-not-allowed' : ''}" ${guppy.stage === 'fry' ? 'disabled' : ''}>
-                    분양 (${value}💰)
+                    ${t('info_rehome')} (${value}💰)
                 </button>
             </div>`;
         }).join('');
@@ -951,7 +977,7 @@ function openGuppyList() {
     guppyListModal.innerHTML = `
         <div class="modal-content">
             <button class="close-modal-button absolute top-4 right-4 text-2xl font-bold text-slate-400 hover:text-white">&times;</button>
-            <h2 class="text-3xl font-bold mb-4 text-cyan-300">내 구피 목록 (수조 ${gameState.currentAquariumIndex + 1})</h2>
+            <h2 class="text-3xl font-bold mb-4 text-cyan-300">${t('modal_guppy_list_title', { index: gameState.currentAquariumIndex + 1 })}</h2>
             <div class="space-y-3">${listContent}</div>
         </div>
     `;
@@ -978,7 +1004,7 @@ function showGuppyInfo(guppy) {
     try {
         gameState.currentInfoGuppyId = guppy.id;
         const el = (id) => document.getElementById(id);
-        el('info-id').innerHTML = `ID: ${guppy.id} <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span>`;
+        el('info-id').innerHTML = t('info_id', { id: guppy.id }) + ` <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span>`;
         const pd = el('info-pattern-details');
         const colorsHTML = guppy.pattern.colors.map(c => `
             <div class="flex items-center space-x-2 text-sm">
@@ -987,12 +1013,12 @@ function showGuppyInfo(guppy) {
             </div>
         `).join('');
         pd.innerHTML = `
-            <p>패턴: ${getPatternLabel(guppy.pattern.type)}</p>
+            <p>${t('pattern_' + guppy.pattern.type)}</p>
             <div class="mt-1 space-y-1">${colorsHTML}</div>
         `;
-        el('info-age').textContent = `나이: ${guppy.age}초`;
-        el('info-stage').textContent = `단계: ${guppy.stage === 'fry' ? '치어' : '성어'}`;
-        el('info-hunger').textContent = `허기: ${guppy.hunger} / ${MAX_HUNGER}`;
+        el('info-age').textContent = t('info_age', { age: guppy.age });
+        el('info-stage').textContent = t('info_stage', { stage: guppy.stage === 'fry' ? t('stage_fry') : t('stage_adult') });
+        el('info-hunger').textContent = t('info_hunger', { current: Math.round(guppy.hunger), max: MAX_HUNGER });
         infoMoveButton.classList.toggle('hidden', gameState.aquariums.length <= 1);
         guppyInfoPanel.classList.remove('hidden');
     } catch (e) {
@@ -1032,9 +1058,10 @@ function openShop() {
     shopModal.className = 'modal-overlay';
     const itemsHTML = SHOP_ITEMS.map(item => {
         let itemPreview = '';
+        const itemName = t(item.nameKey);
         if (item.type === 'decoration') {
             itemPreview = `<div class="flex justify-center items-center h-24">${item.svg}</div>
-                <div><p class="font-bold">${item.name}</p><p class="text-sm text-slate-400">효과: 수질 정화</p></div>`;
+                <div><p class="font-bold">${itemName}</p><p class="text-sm text-slate-400">${t('shop_effect_water')}</p></div>`;
         } else if (item.type === 'guppy') {
             // Create a temp guppy to get the SVG
             const tempGuppy = new Guppy(`shop-${item.id}`, item.pattern, 0, null, 0, 0, null, null, item.gender || 'male');
@@ -1043,7 +1070,7 @@ function openShop() {
                         ${tempGuppy.getGuppySVG()}
                     </div>
                 </div>
-                <div><p class="font-bold">${item.name}</p><p class="text-sm text-slate-400">기본 혈통</p></div>`;
+                <div><p class="font-bold">${itemName}</p><p class="text-sm text-slate-400">${t('shop_desc_basic')}</p></div>`;
         } else if (item.type === 'aquarium') {
             itemPreview = `<div class="flex justify-center items-center h-24">
                     <svg width="60" height="60" viewBox="0 0 100 100">
@@ -1055,7 +1082,7 @@ function openShop() {
                         <rect x="10" y="20" width="80" height="5" fill="#0288d1" />
                     </svg>
                 </div>
-                <div><p class="font-bold">${item.name}</p><p class="text-sm text-slate-400">구피를 더 키워보세요</p></div>`;
+                <div><p class="font-bold">${itemName}</p><p class="text-sm text-slate-400">${t('shop_desc_tank')}</p></div>`;
         }
         const price = gameState.gameMode === 'normal' && gameState.shopPrices[item.id] ? gameState.shopPrices[item.id] : item.price;
         return `<div class="border border-slate-700 rounded-lg p-2 text-center flex flex-col justify-between">
@@ -1067,7 +1094,7 @@ function openShop() {
     shopModal.innerHTML = `
         <div class="modal-content">
             <button class="close-modal-button absolute top-4 right-4 text-2xl font-bold text-slate-400 hover:text-white">&times;</button>
-            <h2 class="text-3xl font-bold mb-4 text-cyan-300">상점 🛍️</h2>
+            <h2 class="text-3xl font-bold mb-4 text-cyan-300">${t('shop_title')}</h2>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">${itemsHTML}</div>
         </div>`;
     modalContainer.appendChild(shopModal);
@@ -1102,7 +1129,7 @@ function buyItem(itemId) {
         if (modal) modal.remove();
         updateUI();
     } else {
-        showToast('코인이 부족합니다!');
+        showToast(t('msg_coin_lack'));
     }
 }
 
@@ -1113,6 +1140,8 @@ function openCollection() {
 
     const gridHTML = COLLECTION_TARGETS.map(target => {
         const isUnlocked = gameState.unlockedCollection.includes(target.id);
+        const targetName = t(target.nameKey);
+        const targetHint = t(target.hintKey);
 
         let contentHTML = '';
         if (isUnlocked) {
@@ -1127,14 +1156,14 @@ function openCollection() {
                 <div class="h-16 flex items-center justify-center mb-2">
                     <div style="width: 60px; height: 30px;">${tempGuppy.getGuppySVG()}</div>
                 </div>
-                <p class="font-bold text-cyan-300 text-sm">${target.name}</p>
-                <p class="text-xs text-slate-400 mt-1">${target.hint}</p>
+                <p class="font-bold text-cyan-300 text-sm">${targetName}</p>
+                <p class="text-xs text-slate-400 mt-1">${targetHint}</p>
             `;
         } else {
             contentHTML = `
                 <div class="h-16 flex items-center justify-center mb-2 text-4xl opacity-20">❓</div>
-                <p class="font-bold text-slate-500 text-sm">???</p>
-                <p class="text-xs text-slate-600 mt-1">${target.hint}</p>
+                <p class="font-bold text-slate-500 text-sm">${t('collection_unknown')}</p>
+                <p class="text-xs text-slate-600 mt-1">${targetHint}</p>
             `;
         }
 
@@ -1148,8 +1177,8 @@ function openCollection() {
     collectionModal.innerHTML = `
         <div class="modal-content !max-w-2xl">
             <button class="close-modal-button absolute top-4 right-4 text-2xl font-bold text-slate-400 hover:text-white">&times;</button>
-            <h2 class="text-3xl font-bold mb-4 text-cyan-300">특별한 구피 도감 📖</h2>
-            <p class="mb-4 text-slate-400 text-sm">특별한 테마를 가진 구피를 탄생시켜 도감을 완성하세요! (${gameState.unlockedCollection.length} / ${COLLECTION_TARGETS.length})</p>
+            <h2 class="text-3xl font-bold mb-4 text-cyan-300">${t('collection_title')}</h2>
+            <p class="mb-4 text-slate-400 text-sm">${t('collection_desc', { current: gameState.unlockedCollection.length, total: COLLECTION_TARGETS.length })}</p>
             <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 overflow-y-auto max-h-[60vh] p-1">
                 ${gridHTML}
             </div>
@@ -1182,10 +1211,10 @@ function checkCollectionUnlock(guppy) {
 
         if (bodyMatch && patternMatch) {
             gameState.unlockedCollection.push(target.id);
-            showToast(`🎉 도감 등록: ${target.name}!`);
+            showToast(t('msg_collection_unlock', { name: t(target.nameKey) }));
             // Bonus coins for unlocking
             gameState.coins += 100;
-            showToast(`+100 코인 (도감 보너스)`);
+            showToast(t('msg_collection_bonus', { amount: 100 }));
             updateUI();
         }
     });
@@ -1215,20 +1244,20 @@ function startBreeding(firstParent = null) {
     updateAllGuppySelectionUI();
 
     if (breedButton) {
-        breedButton.querySelector('span:nth-child(2)').textContent = '교배 취소';
+        breedButton.querySelector('span:nth-child(2)').textContent = t('breed_cancel');
         breedButton.classList.add('text-red-400');
     }
 
     if (firstParent) {
-        showToast(`부모 1 선택 완료! 교배할 다른 구피를 선택하세요.`);
+        showToast(t('msg_breed_start_1'));
     } else {
-        showToast('교배할 첫 번째 구피를 선택하세요.');
+        showToast(t('msg_breed_start_first'));
     }
 }
 
 function selectBreedingGuppy(guppy) {
     if (guppy.stage !== 'adult') {
-        showToast('성어만 교배할 수 있습니다.');
+        showToast(t('msg_breed_only_adult'));
         return;
     }
     if (gameState.breedingParents.length > 0 && gameState.breedingParents[0].id === guppy.id) return;
@@ -1236,7 +1265,7 @@ function selectBreedingGuppy(guppy) {
     if (gameState.breedingParents.length === 1) {
         const p1 = gameState.breedingParents[0];
         if (p1.gender === guppy.gender) {
-            showToast('암수 한 쌍이어야 교배할 수 있습니다.');
+            showToast(t('msg_breed_same_gender'));
             return;
         }
     }
@@ -1248,7 +1277,7 @@ function selectBreedingGuppy(guppy) {
         openBreedModal();
         gameState.isBreedingMode = false;
     } else {
-        showToast(`부모 1 선택 완료! 교배할 다른 구피를 선택하세요.`);
+        showToast(t('msg_breed_start_1'));
     }
 }
 
@@ -1259,7 +1288,7 @@ function cancelBreeding() {
     updateAllGuppySelectionUI();
 
     if (breedButton) {
-        breedButton.querySelector('span:nth-child(2)').textContent = '교배';
+        breedButton.querySelector('span:nth-child(2)').textContent = t('breed_button');
         breedButton.classList.remove('text-red-400');
     }
 }
@@ -1282,21 +1311,21 @@ function openBreedModal() {
     breedModal.innerHTML = `
         <div class="modal-content">
             <button class="close-modal-button absolute top-4 right-4 text-2xl font-bold text-slate-400 hover:text-white">&times;</button>
-            <h2 class="text-3xl font-bold mb-4 text-cyan-300">교배 연구소</h2>
+            <h2 class="text-3xl font-bold mb-4 text-cyan-300">${t('modal_breed_lab')}</h2>
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div class="text-center p-2 border border-slate-700 rounded-lg">${getGuppyCardHTML(p1)}</div>
                 <div class="text-center p-2 border border-slate-700 rounded-lg">${getGuppyCardHTML(p2)}</div>
             </div>
             <div id="breed-action-container" class="text-center mb-4">
-                <button id="final-breed-button" class="btn btn-primary font-bold py-2 px-8 rounded-lg">교배 실행${breedCostText}</button>
+                <button id="final-breed-button" class="btn btn-primary font-bold py-2 px-8 rounded-lg">${t('modal_breed_exec')}${breedCostText}</button>
             </div>
             <div id="breed-result-container" class="hidden">
-                <h3 class="text-xl font-semibold mt-6 mb-2 text-cyan-400">결과</h3>
+                <h3 class="text-xl font-semibold mt-6 mb-2 text-cyan-400">${t('modal_breed_result')}</h3>
                 <div id="breed-result-guppy" class="flex justify-center items-center p-2 border border-slate-700 rounded-lg"></div>
-                <h4 class="text-lg font-semibold mt-4 mb-2 text-cyan-400">유전 보고서</h4>
+                <h4 class="text-lg font-semibold mt-4 mb-2 text-cyan-400">${t('modal_breed_report')}</h4>
                 <div id="breed-report" class="text-sm bg-slate-900/50 p-3 rounded-lg border border-slate-700 space-y-1"></div>
                 <div class="text-center mt-4">
-                    <button id="breed-result-close-button" class="btn w-1/2">닫기</button>
+                    <button id="breed-result-close-button" class="btn w-1/2">${t('modal_breed_close')}</button>
                 </div>
             </div>
         </div>
@@ -1306,20 +1335,20 @@ function openBreedModal() {
     breedModal.querySelector('#final-breed-button').addEventListener('click', () => {
         if (gameState.gameMode === 'normal') {
             if (gameState.coins < 500) {
-                showToast('교배 비용이 부족합니다! (500 코인 필요)');
+                showToast(t('msg_breed_cost_lack', { cost: 500 }));
                 return;
             }
             gameState.coins -= 500;
-            showToast('교배 비용 500 코인을 지불했습니다.');
+            showToast(t('msg_breed_cost_paid', { cost: 500 }));
             updateUI();
         }
 
         const { newGuppy, inheritance } = breedGuppies(p1, p2);
         breedModal.querySelector('#breed-result-guppy').innerHTML = getGuppyCardHTML(newGuppy);
 
-        let reportHTML = `<p>패턴: ${getPatternLabel(newGuppy.pattern.type)} (부모 ${inheritance.pattern}에게서 유전)</p>`;
+        let reportHTML = `<p>${t('pattern_inherit', { pattern: getPatternLabel(newGuppy.pattern.type), parent: inheritance.pattern })}</p>`;
         newGuppy.pattern.colors.forEach((childColor, i) => {
-            const colorLabel = i === 0 ? '몸통색' : `무늬색${i}`;
+            const colorLabel = i === 0 ? t('color_body') : t('color_pattern', { index: i });
             const inheritanceInfo = inheritance.colors[i];
             const parentNum = inheritanceInfo.from;
             const parentColor = parentNum === 1
@@ -1334,7 +1363,7 @@ function openBreedModal() {
                             <span>R:${childColor.r} G:${childColor.g} B:${childColor.b}</span>
                         </span>
                     </p>
-                    <p class="text-xs text-slate-400 pl-4">부모 ${parentNum}의 색상(R:${parentColor.r} G:${parentColor.g} B:${parentColor.b})에서 변이</p>
+                    <p class="text-xs text-slate-400 pl-4">${t('color_mutation', { parent: parentNum, r: parentColor.r, g: parentColor.g, b: parentColor.b })}</p>
                 </div>
             `;
         });
@@ -1364,7 +1393,7 @@ function getGuppyCardHTML(guppy) {
                 ${guppy.getGuppySVG()}
             </div>
         </div>
-        <p class="font-bold">ID: ${guppy.id || '새로운 구피'} <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
+        <p class="font-bold">ID: ${guppy.id || 'New'} <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
         <p class="text-sm text-cyan-300 font-bold">${getPatternLabel(guppy.pattern.type)}</p>
         <div class="mt-1 space-y-1 text-left inline-block">${colorsHTML}</div>
     `;
@@ -1408,14 +1437,14 @@ function openMoveGuppyModal() {
     let optionsHTML = '';
     gameState.aquariums.forEach((aq, index) => {
         if (index !== gameState.currentAquariumIndex) {
-            optionsHTML += `<button class="move-to-aq-button btn w-full" data-target-index="${index}">수조 ${index + 1} (으)로 보내기</button>`;
+            optionsHTML += `<button class="move-to-aq-button btn w-full" data-target-index="${index}">${t('modal_move_btn', { index: index + 1 })}</button>`;
         }
     });
 
     moveModal.innerHTML = `
         <div class="modal-content">
             <button class="close-modal-button absolute top-4 right-4 text-2xl font-bold text-slate-400 hover:text-white">&times;</button>
-            <h2 class="text-2xl font-bold mb-4 text-cyan-300">어디로 옮길까요?</h2>
+            <h2 class="text-2xl font-bold mb-4 text-cyan-300">${t('modal_move_title')}</h2>
             <div class="space-y-2">${optionsHTML}</div>
         </div>
     `;
@@ -1433,30 +1462,30 @@ function openModal(type) {
     switch (type) {
         case 'manual':
             content = `
-                <h2 class="text-3xl font-bold mb-4 text-cyan-300">Guppy Lab 게임 매뉴얼</h2>
-                <p class="text-slate-300">다양한 색상과 패턴을 가진 구피들을 교배시켜 세상에 하나뿐인 특별한 구피 컬렉션을 만드는 것이 목표입니다.</p>
-                <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">게임 모드</h3>
+                <h2 class="text-3xl font-bold mb-4 text-cyan-300">${t('manual_title')}</h2>
+                <p class="text-slate-300">${t('manual_intro')}</p>
+                <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">${t('manual_mode_title')}</h3>
                 <ul class="list-disc list-inside space-y-2 text-slate-300">
-                    <li><b>개발자 버전</b>: 상점 가격이 저렴하고, 교배 시 보상을 받으며, 물고기 판매 가격이 높습니다.</li>
-                    <li><b>일반 버전</b>: 상점 가격이 매 게임마다 변동(500~10,000코인)되며, 교배 시 500코인이 소모됩니다. 물고기 판매 가격은 나이에 비례하며 최대 200코인입니다.</li>
+                    <li>${t('manual_mode_dev')}</li>
+                    <li>${t('manual_mode_normal')}</li>
                 </ul>
-                <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">구피 관리하기</h3>
+                <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">${t('manual_manage_title')}</h3>
                 <ul class="list-disc list-inside space-y-2 text-slate-300">
-                    <li><b>먹이주기</b>: 구피들이 배고파 수면에서 입질을 하면 '먹이주기' 버튼(10코인)을 눌러주세요.</li>
-                    <li><b>청소하기</b>: '청소하기' 버튼으로 수질을 100%로 회복시킬 수 있습니다.</li>
-                    <li><b>성장</b>: 구피는 20초가 지나면 '치어'에서 '성어'로 성장하며, 성어만 교배할 수 있습니다.</li>
+                    <li>${t('manual_manage_feed')}</li>
+                    <li>${t('manual_manage_clean')}</li>
+                    <li>${t('manual_manage_grow')}</li>
                 </ul>
-                <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">교배 (브리딩)</h3>
+                <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">${t('manual_breed_title')}</h3>
                 <ul class="list-disc list-inside space-y-2 text-slate-300">
-                    <li><b>수동 교배</b>: '교배 시작하기' 버튼을 누르거나 구피 정보창에서 '교배'를 선택해 직접 짝을 맺어줄 수 있습니다. (일반 버전: 500코인 소모)</li>
-                    <li><b>자동 번식</b>: 허기가 20 미만인 성어들은 서로 만나면 스스로 번식하기도 합니다.</li>
+                    <li>${t('manual_breed_manual')}</li>
+                    <li>${t('manual_breed_auto')}</li>
                 </ul>
-                <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">기타 팁</h3>
+                <h3 class="text-xl font-semibold mt-4 mb-2 text-cyan-400">${t('manual_tips_title')}</h3>
                 <ul class="list-disc list-inside space-y-2 text-slate-300">
-                    <li><b>수조 관리</b>: 상점에서 새 수조를 구매하고, 수조 옆 화살표로 이동할 수 있습니다. 구피 정보창에서 다른 수조로 구피를 옮길 수도 있습니다.</li>
-                    <li><b>상세 정보</b>: 우측 상단의 물고기(🐟) 버튼을 눌러 현재 수조의 구피 목록을 열고, 목록에서 구피를 클릭해 상세 정보를 확인하세요.</li>
-                    <li><b>코인 얻기</b>: 새로운 조합의 구피를 탄생시키면 50코인을 얻습니다. (개발자 버전 전용)</li>
-                    <li><b>저장</b>: 게임은 자동으로 저장되지 않습니다. 우측 상단의 저장 버튼을 눌러 파일을 저장하세요.</li>
+                    <li>${t('manual_tips_tank')}</li>
+                    <li>${t('manual_tips_info')}</li>
+                    <li>${t('manual_tips_coin')}</li>
+                    <li>${t('manual_tips_save')}</li>
                 </ul>`;
             break;
     }
@@ -1547,7 +1576,7 @@ function startNewGame(mode = 'developer') {
     gameInitialized = true;
     init();
     showGameScreen();
-    showToast(`${mode === 'developer' ? '개발자' : '일반'} 모드로 시작합니다!`);
+    showToast(mode === 'developer' ? t('msg_start_dev') : t('msg_start_normal'));
 }
 
 function showGameScreen() {
@@ -1582,14 +1611,14 @@ function setupEventListeners() {
                 currentAq.food.push(new Food(x, y));
             }
         } else {
-            showToast('코인이 부족합니다!');
+            showToast(t('msg_coin_lack'));
         }
     });
 
     if (cleanButton) cleanButton.addEventListener('click', () => {
         gameState.aquariums[gameState.currentAquariumIndex].waterQuality = 100;
         updateUI();
-        showToast('수질이 깨끗해졌습니다!');
+        showToast(t('msg_water_clean'));
     });
 
     if (breedButton) breedButton.addEventListener('click', () => {
@@ -1649,7 +1678,7 @@ function setupEventListeners() {
         if (e.target.id === 'aquarium') {
             if (gameState.isBreedingMode) {
                 cancelBreeding();
-                showToast('교배가 취소되었습니다.');
+                showToast(t('msg_breed_cancel'));
             }
         }
 
@@ -1707,7 +1736,7 @@ function setupEventListeners() {
                     const modal = e.target.closest('.modal-overlay');
                     if (modal) modal.remove();
 
-                    showToast(`구피를 수조 ${targetIndex + 1}(으)로 옮겼습니다.`);
+                    showToast(t('msg_move_success', { target: targetIndex + 1 }));
                     updateUI(); // Update counts etc
                 }
             }
