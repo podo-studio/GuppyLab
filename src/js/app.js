@@ -1,11 +1,12 @@
 // --- DOM 요소 ---
-let introWrapper, mainAppScreen, newGameButton, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
+let introWrapper, mainAppScreen, devModeButton, normalModeButton, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Guppy Lab: DOM Content Loaded");
     introWrapper = document.getElementById('intro-wrapper');
     mainAppScreen = document.getElementById('main-app-screen');
-    newGameButton = document.getElementById('new-game-button');
+    devModeButton = document.getElementById('dev-mode-button');
+    normalModeButton = document.getElementById('normal-mode-button');
     introLoadButton = document.getElementById('intro-load-button');
     introLoadFileInput = document.getElementById('intro-load-file-input');
     aquarium = document.getElementById('aquarium');
@@ -33,8 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
     menuToggleButton = document.getElementById('menu-toggle-button');
     gameMenu = document.getElementById('game-menu');
 
-    if (newGameButton) {
-        newGameButton.addEventListener('click', startNewGame);
+    if (devModeButton) {
+        devModeButton.addEventListener('click', () => startNewGame('developer'));
+    }
+    if (normalModeButton) {
+        normalModeButton.addEventListener('click', () => startNewGame('normal'));
     }
     if (introLoadButton) {
         introLoadButton.addEventListener('click', () => introLoadFileInput.click());
@@ -131,6 +135,8 @@ let gameState = {
     breedingParents: [],
     currentInfoGuppyId: null,
     isPaused: false,
+    gameMode: 'developer', // 'developer' or 'normal'
+    shopPrices: {}, // Stores randomized prices for normal mode
 };
 let gameInitialized = false;
 
@@ -505,10 +511,16 @@ function breedGuppies(parent1, parent2) {
 
     const newPattern = { type: newPatternType, colors: newColors };
     const patternKey = getPatternKey(newPattern);
-    if (!gameState.discoveredPatterns.has(patternKey)) {
+
+    // Developer Mode: Reward for new patterns
+    if (gameState.gameMode === 'developer' && !gameState.discoveredPatterns.has(patternKey)) {
         gameState.discoveredPatterns.add(patternKey);
         gameState.coins += 50;
         showToast('+50 코인! (새로운 조합)');
+    } else if (gameState.gameMode === 'normal' && !gameState.discoveredPatterns.has(patternKey)) {
+        // Normal Mode: Just discover, no coin reward
+        gameState.discoveredPatterns.add(patternKey);
+        showToast('새로운 조합 발견!');
     }
     const newId = gameState.nextGuppyId++;
     const newGender = Math.random() < 0.5 ? 'male' : 'female';
@@ -525,6 +537,15 @@ function breedGuppies(parent1, parent2) {
     return { newGuppy, inheritance };
 }
 function calculateGuppyValue(guppy) {
+    if (gameState.gameMode === 'normal') {
+        // Normal Mode: Price based on age, max 200
+        // Age 20 is adult. Let's say 10 gold per age unit?
+        // Fry (age 0-19): 0 to 190
+        // Adult (age 20+): 200
+        return Math.min(200, guppy.age * 10);
+    }
+
+    // Developer Mode (Original Logic)
     if (guppy.stage !== 'adult') return 0;
     let value = 10;
     const patternValues = { spots: 15, stripes: 20, h_stripes: 20, v_stripes: 20, freckles: 25, half: 30, rings: 35, checker: 40, gradient: 50 };
@@ -1035,9 +1056,10 @@ function openShop() {
                 </div>
                 <div><p class="font-bold">${item.name}</p><p class="text-sm text-slate-400">구피를 더 키워보세요</p></div>`;
         }
+        const price = gameState.gameMode === 'normal' && gameState.shopPrices[item.id] ? gameState.shopPrices[item.id] : item.price;
         return `<div class="border border-slate-700 rounded-lg p-2 text-center flex flex-col justify-between">
             ${itemPreview}
-            <button data-item-id="${item.id}" class="buy-button mt-2 w-full btn">${item.price} 💰</button>
+            <button data-item-id="${item.id}" class="buy-button mt-2 w-full btn">${price} 💰</button>
         </div>`;
     }).join('');
 
@@ -1052,8 +1074,10 @@ function openShop() {
 
 function buyItem(itemId) {
     const item = SHOP_ITEMS.find(i => i.id === itemId);
-    if (gameState.coins >= item.price) {
-        gameState.coins -= item.price;
+    const price = gameState.gameMode === 'normal' && gameState.shopPrices[item.id] ? gameState.shopPrices[item.id] : item.price;
+
+    if (gameState.coins >= price) {
+        gameState.coins -= price;
         if (item.type === 'decoration') {
             const xPos = 10 + Math.random() * 80;
             const newDeco = new Decoration(item, xPos);
@@ -1278,6 +1302,16 @@ function openBreedModal() {
     modalContainer.appendChild(breedModal);
 
     breedModal.querySelector('#final-breed-button').addEventListener('click', () => {
+        if (gameState.gameMode === 'normal') {
+            if (gameState.coins < 500) {
+                showToast('교배 비용이 부족합니다! (500 코인 필요)');
+                return;
+            }
+            gameState.coins -= 500;
+            showToast('교배 비용 500 코인을 지불했습니다.');
+            updateUI();
+        }
+
         const { newGuppy, inheritance } = breedGuppies(p1, p2);
         breedModal.querySelector('#breed-result-guppy').innerHTML = getGuppyCardHTML(newGuppy);
 
@@ -1427,17 +1461,17 @@ function openModal(type) {
     modalContainer.appendChild(modal);
 }
 
-function init(createDefaults = true) {
-    if (createDefaults) {
-        const p1 = { type: 'spots', colors: [{ r: 255, g: 255, b: 255 }, { r: 255, g: 0, b: 0 }] };
-        const p2 = { type: 'stripes', colors: [{ r: 20, g: 20, b: 255 }, { r: 255, g: 255, b: 0 }] };
-        const guppy1 = new Guppy(gameState.nextGuppyId++, p1, 0, null, 0, 0, null, null, 'male');
-        const guppy2 = new Guppy(gameState.nextGuppyId++, p2, 0, null, 0, 0, null, null, 'female');
-        gameState.aquariums[0].guppies.push(guppy1, guppy2);
-        gameState.discoveredPatterns.add(getPatternKey(p1));
-        gameState.discoveredPatterns.add(getPatternKey(p2));
-    }
+function createDefaultGuppies() {
+    const p1 = { type: 'spots', colors: [{ r: 255, g: 255, b: 255 }, { r: 255, g: 0, b: 0 }] };
+    const p2 = { type: 'stripes', colors: [{ r: 20, g: 20, b: 255 }, { r: 255, g: 255, b: 0 }] };
+    const guppy1 = new Guppy(gameState.nextGuppyId++, p1, 0, null, 0, 0, null, null, 'male');
+    const guppy2 = new Guppy(gameState.nextGuppyId++, p2, 0, null, 0, 0, null, null, 'female');
+    gameState.aquariums[0].guppies.push(guppy1, guppy2);
+    gameState.discoveredPatterns.add(getPatternKey(p1));
+    gameState.discoveredPatterns.add(getPatternKey(p2));
+}
 
+function init() {
     for (let i = 0; i < 10; i++) {
         const bubble = document.createElement('div');
         bubble.className = 'bubble';
@@ -1452,7 +1486,7 @@ function init(createDefaults = true) {
     requestAnimationFrame(renderLoop);
 }
 
-function startNewGame() {
+function startNewGame(mode = 'developer') {
     // Reset game state to default
     gameState = {
         aquariums: [{ guppies: [], decorations: [], waterQuality: 100, food: [] }],
@@ -1465,10 +1499,48 @@ function startNewGame() {
         currentInfoGuppyId: null,
         isPaused: false,
         unlockedCollection: [],
+        gameMode: mode,
+        shopPrices: {},
     };
+
+    if (mode === 'normal') {
+        // Randomize Shop Prices
+        SHOP_ITEMS.forEach(item => {
+            const randomPrice = Math.floor(Math.random() * (10000 - 500 + 1)) + 500;
+            gameState.shopPrices[item.id] = Math.round(randomPrice / 100) * 100;
+        });
+
+        // Create initial cheapest pair
+        let cheapestItem = null;
+        let minPrice = Infinity;
+
+        SHOP_ITEMS.filter(i => i.type === 'guppy' && i.gender === 'male').forEach(item => {
+            const price = gameState.shopPrices[item.id];
+            if (price < minPrice) {
+                minPrice = price;
+                cheapestItem = item;
+            }
+        });
+
+        if (cheapestItem) {
+            const male = new Guppy(gameState.nextGuppyId++, cheapestItem.pattern, 0, null, 0, 0, null, null, 'male');
+            gameState.aquariums[0].guppies.push(male);
+            male.createElement();
+
+            // Find female version or reuse pattern
+            // Assuming female ID is usually male ID + '_f' or just same pattern
+            const female = new Guppy(gameState.nextGuppyId++, cheapestItem.pattern, 0, null, 0, 0, null, null, 'female');
+            gameState.aquariums[0].guppies.push(female);
+            female.createElement();
+        }
+    } else {
+        createDefaultGuppies();
+    }
+
     gameInitialized = true;
-    init(true); // Create default guppies
+    init();
     showGameScreen();
+    showToast(`${mode === 'developer' ? '개발자' : '일반'} 모드로 시작합니다!`);
 }
 
 function showGameScreen() {
