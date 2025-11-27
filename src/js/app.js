@@ -1277,6 +1277,7 @@ function openBreedModal() {
     const breedModal = document.createElement('div');
     breedModal.id = 'breed-modal';
     breedModal.className = 'modal-overlay';
+    const breedCostText = gameState.gameMode === 'normal' ? ' (500💰)' : '';
     breedModal.innerHTML = `
         <div class="modal-content">
             <button class="close-modal-button absolute top-4 right-4 text-2xl font-bold text-slate-400 hover:text-white">&times;</button>
@@ -1286,7 +1287,7 @@ function openBreedModal() {
                 <div class="text-center p-2 border border-slate-700 rounded-lg">${getGuppyCardHTML(p2)}</div>
             </div>
             <div id="breed-action-container" class="text-center mb-4">
-                <button id="final-breed-button" class="btn btn-primary font-bold py-2 px-8 rounded-lg">교배 실행</button>
+                <button id="final-breed-button" class="btn btn-primary font-bold py-2 px-8 rounded-lg">교배 실행${breedCostText}</button>
             </div>
             <div id="breed-result-container" class="hidden">
                 <h3 class="text-xl font-semibold mt-6 mb-2 text-cyan-400">결과</h3>
