@@ -775,13 +775,20 @@ function tickLoop() {
             });
 
             // Handle water degradation
-            let waterQualityModifier = 1;
-            aq.decorations.forEach(deco => {
-                if (deco.item.effect && deco.item.effect.waterQuality) {
-                    waterQualityModifier -= deco.item.effect.waterQuality;
-                }
-            });
-            const degradation = aq.guppies.length * 0.1 * waterQualityModifier;
+            const baseAllowedGuppies = 10;
+            const allowedGuppies = baseAllowedGuppies + aq.decorations.length; // Decoration effect: +1 allowed per decoration
+            const extraGuppies = Math.max(0, aq.guppies.length - allowedGuppies);
+
+            // Penalty: 10% increase in pollution speed per extra guppy
+            // Base degradation is 0.1 per guppy.
+            // We apply the penalty multiplier to the total degradation.
+            const pollutionMultiplier = 1 + (extraGuppies * 0.1);
+
+            // Original logic had waterQualityModifier from decorations reducing pollution.
+            // The new requirement replaces this with "Decoration increases allowed count".
+            // So we remove the old decoration modifier logic.
+
+            const degradation = (aq.guppies.length * 0.1) * pollutionMultiplier;
             aq.waterQuality = Math.max(0, aq.waterQuality - degradation);
 
             // Handle automatic breeding
@@ -800,6 +807,25 @@ function tickLoop() {
                             const adultWidth = 50;
 
                             if (distance < adultWidth) {
+                                // Breeding Probability linked to Water Quality
+                                // 100% Water Quality -> 100% Chance
+                                // 50% Water Quality -> 50% Chance
+                                // 0% Water Quality -> 0% Chance
+                                const breedingChance = aq.waterQuality / 100;
+
+                                if (Math.random() > breedingChance) {
+                                    // Breeding failed due to water quality
+                                    // We reset the check timer slightly so they don't spam check every tick, 
+                                    // or we can just let them try again next tick. 
+                                    // To prevent spamming "failed" checks, maybe we should add a small cooldown or just do nothing.
+                                    // If we do nothing, they will try again next tick (1 sec later).
+                                    // Let's add a small random delay to their lastBredTime to prevent immediate retry?
+                                    // Or just let it be. Probability will handle it.
+                                    // But if they stay close, they will try every second.
+                                    // Let's just continue to next pair.
+                                    continue;
+                                }
+
                                 breedGuppies(g1, g2);
 
                                 g1.lastBredTime = now;
