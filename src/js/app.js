@@ -669,7 +669,8 @@ async function exportSaveFile() {
 
     const now = new Date();
     const timestamp = now.toISOString().replace(/[-:T]/g, '').slice(0, 14); // YYYYMMDDHHmmss
-    const filename = `GuppyLab_${timestamp}.json`;
+    const modeLabel = gameState.gameMode || 'unknown';
+    const filename = `GuppyLab_${modeLabel}_${timestamp}.json`;
     const jsonString = JSON.stringify(plainState);
 
     try {
