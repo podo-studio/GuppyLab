@@ -997,7 +997,16 @@ function openShop() {
                 </div>
                 <div><p class="font-bold">${item.name}</p><p class="text-sm text-slate-400">기본 혈통</p></div>`;
         } else if (item.type === 'aquarium') {
-            itemPreview = `<div class="flex justify-center items-center h-24 text-6xl">🐠</div>
+            itemPreview = `<div class="flex justify-center items-center h-24">
+                    <svg width="60" height="60" viewBox="0 0 100 100">
+                        <!-- Glass Tank -->
+                        <rect x="10" y="20" width="80" height="60" rx="2" fill="#e0f7fa" stroke="#4fc3f7" stroke-width="2" fill-opacity="0.3" />
+                        <!-- Water -->
+                        <path d="M12 30 Q 25 25, 50 30 T 88 30 V 78 H 12 Z" fill="#4fc3f7" fill-opacity="0.5" />
+                        <!-- Rim -->
+                        <rect x="10" y="20" width="80" height="5" fill="#0288d1" />
+                    </svg>
+                </div>
                 <div><p class="font-bold">${item.name}</p><p class="text-sm text-slate-400">구피를 더 키워보세요</p></div>`;
         }
         return `<div class="border border-slate-700 rounded-lg p-2 text-center flex flex-col justify-between">
