@@ -1,5 +1,5 @@
 // --- DOM 요소 ---
-let introWrapper, mainAppScreen, startGameButton, modeToggleBtn, modeToggleKnob, labelNormalMode, labelDevMode, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
+let introWrapper, mainAppScreen, startGameButton, modeToggleBtn, modeToggleKnob, labelNormalMode, labelDevMode, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, waterQualityText, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
 let selectedGameMode = 'normal';
 let currentLanguage = localStorage.getItem('guppy_lang') || 'ko';
 
@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     aquarium = document.getElementById('aquarium');
     coinsDisplay = document.getElementById('coins-display');
     waterQualityBar = document.getElementById('water-quality-bar');
+    waterQualityText = document.getElementById('water-quality-text');
     feedButton = document.getElementById('feed-button');
     cleanButton = document.getElementById('clean-button');
     breedButton = document.getElementById('breed-button');
@@ -743,6 +744,7 @@ function updateUI() {
     const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
     coinsDisplay.textContent = gameState.coins;
     waterQualityBar.style.width = `${currentAq.waterQuality}%`;
+    if (waterQualityText) waterQualityText.textContent = `${Math.round(currentAq.waterQuality)}%`;
     aquariumTitle.textContent = t('aquarium_title', { current: gameState.currentAquariumIndex + 1, total: gameState.aquariums.length });
     updateAquariumNav();
 }
