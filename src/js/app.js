@@ -1,5 +1,6 @@
 // --- DOM 요소 ---
-let introWrapper, mainAppScreen, devModeButton, normalModeButton, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
+let introWrapper, mainAppScreen, startGameButton, modeToggleBtn, modeToggleKnob, labelNormalMode, labelDevMode, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
+let selectedGameMode = 'normal';
 let currentLanguage = localStorage.getItem('guppy_lang') || 'ko';
 
 function t(key, params = {}) {
@@ -34,8 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("Guppy Lab: DOM Content Loaded");
     introWrapper = document.getElementById('intro-wrapper');
     mainAppScreen = document.getElementById('main-app-screen');
-    devModeButton = document.getElementById('dev-mode-button');
-    normalModeButton = document.getElementById('normal-mode-button');
+    startGameButton = document.getElementById('start-game-button');
+    modeToggleBtn = document.getElementById('mode-toggle-btn');
+    modeToggleKnob = document.getElementById('mode-toggle-knob');
+    labelNormalMode = document.getElementById('label-normal-mode');
+    labelDevMode = document.getElementById('label-dev-mode');
     introLoadButton = document.getElementById('intro-load-button');
     introLoadFileInput = document.getElementById('intro-load-file-input');
     aquarium = document.getElementById('aquarium');
@@ -63,24 +67,17 @@ document.addEventListener('DOMContentLoaded', () => {
     menuToggleButton = document.getElementById('menu-toggle-button');
     gameMenu = document.getElementById('game-menu');
 
-    if (devModeButton) {
-        devModeButton.addEventListener('click', () => {
-            console.log("Dev mode button clicked");
-            try {
-                startNewGame('developer');
-            } catch (e) {
-                console.error("Error starting dev game:", e);
-                alert("Error starting game: " + e.message);
-            }
-        });
+    if (modeToggleBtn) {
+        modeToggleBtn.addEventListener('click', toggleGameMode);
     }
-    if (normalModeButton) {
-        normalModeButton.addEventListener('click', () => {
-            console.log("Normal mode button clicked");
+
+    if (startGameButton) {
+        startGameButton.addEventListener('click', () => {
+            console.log("Start game button clicked, mode:", selectedGameMode);
             try {
-                startNewGame('normal');
+                startNewGame(selectedGameMode);
             } catch (e) {
-                console.error("Error starting normal game:", e);
+                console.error("Error starting game:", e);
                 alert("Error starting game: " + e.message);
             }
         });
@@ -125,6 +122,51 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Language
     setLanguage(currentLanguage);
 });
+
+function toggleGameMode() {
+    if (selectedGameMode === 'normal') {
+        selectedGameMode = 'developer';
+        if (modeToggleKnob) modeToggleKnob.style.transform = 'translateX(20px)';
+        if (modeToggleBtn) {
+            modeToggleBtn.classList.remove('bg-slate-700');
+            modeToggleBtn.classList.add('bg-cyan-600');
+        }
+
+        if (labelNormalMode) {
+            labelNormalMode.classList.remove('text-blue-400', 'font-bold');
+            labelNormalMode.classList.add('text-slate-600');
+        }
+
+        if (labelDevMode) {
+            labelDevMode.classList.remove('text-slate-600');
+            labelDevMode.classList.add('text-cyan-400', 'font-bold');
+        }
+
+        const startBtnText = document.getElementById('start-btn-text');
+        if (startBtnText) startBtnText.textContent = t('btn_dev_mode');
+
+    } else {
+        selectedGameMode = 'normal';
+        if (modeToggleKnob) modeToggleKnob.style.transform = 'translateX(0)';
+        if (modeToggleBtn) {
+            modeToggleBtn.classList.remove('bg-cyan-600');
+            modeToggleBtn.classList.add('bg-slate-700');
+        }
+
+        if (labelNormalMode) {
+            labelNormalMode.classList.remove('text-slate-600');
+            labelNormalMode.classList.add('text-blue-400', 'font-bold');
+        }
+
+        if (labelDevMode) {
+            labelDevMode.classList.remove('text-cyan-400', 'font-bold');
+            labelDevMode.classList.add('text-slate-600');
+        }
+
+        const startBtnText = document.getElementById('start-btn-text');
+        if (startBtnText) startBtnText.textContent = t('btn_start_game');
+    }
+}
 
 // --- 게임 설정 및 데이터 ---
 const ADULT_AGE = 20;

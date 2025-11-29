@@ -22,22 +22,13 @@
             </p>
 
             <div class="flex flex-col space-y-4 w-64 mx-auto">
-                <button id="dev-mode-button"
-                    class="group relative px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all duration-300 border border-slate-700 hover:border-cyan-500 shadow-lg hover:shadow-cyan-500/20 overflow-hidden">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                    </div>
-                    <span class="relative z-10 text-lg font-medium text-cyan-300 tracking-wider"
-                        data-i18n="btn_dev_mode">개발자 버전</span>
-                </button>
-
-                <button id="normal-mode-button"
+                <button id="start-game-button"
                     class="group relative px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all duration-300 border border-slate-700 hover:border-blue-500 shadow-lg hover:shadow-blue-500/20 overflow-hidden">
                     <div
                         class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
                     </div>
-                    <span class="relative z-10 text-lg font-medium text-white tracking-wider"
-                        data-i18n="btn_normal_mode">일반 버전</span>
+                    <span id="start-btn-text" class="relative z-10 text-lg font-medium text-white tracking-wider"
+                        data-i18n="btn_start_game">게임 시작</span>
                 </button>
 
                 <div class="relative">
@@ -59,7 +50,24 @@
                 <button class="lang-btn text-2xl hover:scale-110 transition-transform" data-lang="ja">🇯🇵</button>
             </div>
 
-            <div class="mt-16 opacity-50 flex flex-col items-center space-y-2">
+            <div class="mt-16 opacity-80 flex flex-col items-center space-y-4">
+                <!-- Mode Toggle -->
+                <div
+                    class="flex items-center space-x-3 pointer-events-auto bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700/50 backdrop-blur-sm">
+                    <span class="text-xs text-blue-400 font-bold transition-colors duration-300" id="label-normal-mode"
+                        data-i18n="mode_normal">일반 모드</span>
+
+                    <button id="mode-toggle-btn"
+                        class="w-10 h-5 bg-slate-700 rounded-full relative transition-colors duration-300 focus:outline-none shadow-inner"
+                        aria-label="Toggle Game Mode">
+                        <div id="mode-toggle-knob"
+                            class="w-3 h-3 bg-slate-400 rounded-full absolute top-1 left-1 transition-all duration-300 shadow-sm">
+                        </div>
+                    </button>
+
+                    <span class="text-xs text-slate-600 font-medium transition-colors duration-300" id="label-dev-mode"
+                        data-i18n="mode_dev">개발자 모드</span>
+                </div>
                 <p class="text-xs text-cyan-200/50 font-jua tracking-wider">DESIGNED BY PODO STUDIO</p>
                 <p class="text-xs text-slate-600 font-mono">v1.1</p>
             </div>
