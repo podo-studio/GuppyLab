@@ -1020,7 +1020,7 @@ function openGuppyList() {
                         ${guppy.getGuppySVG()}
                     </div>
                     <div>
-                        <p class="font-bold">ID: ${guppy.id} (${guppy.stage === 'fry' ? t('stage_fry') : t('stage_adult')}) <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
+                        <p class="font-bold">ID: ${guppy.id} (${guppy.stage === 'fry' ? t('stage_fry') : t('stage_adult')}) <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span> | <span class="text-slate-400 text-sm">${t('info_age', { age: Math.floor(guppy.age) })}</span></p>
                         <p class="text-sm text-cyan-300 font-bold">${getPatternLabel(guppy.pattern.type)}</p>
                         <div class="mt-1 space-y-1">${colorsHTML}</div>
                     </div>
