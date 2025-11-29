@@ -1025,6 +1025,9 @@ function openGuppyList() {
                         <div class="mt-1 space-y-1">${colorsHTML}</div>
                     </div>
                 </div>
+                <button data-guppy-id="${guppy.id}" class="breed-button-list ml-4 bg-pink-900/30 hover:bg-pink-900/50 text-pink-400 border border-pink-500/30 font-bold py-2 px-4 rounded text-sm uppercase tracking-wider ${guppy.stage === 'fry' ? 'hidden' : ''}">
+                    ${t('action_breed')}
+                </button>
                 <button data-guppy-id="${guppy.id}" class="rehome-button ml-4 bg-red-900/30 hover:bg-red-900/50 text-red-400 border border-red-500/30 font-bold py-2 px-4 rounded text-sm uppercase tracking-wider ${guppy.stage === 'fry' ? 'opacity-50 cursor-not-allowed' : ''}" ${guppy.stage === 'fry' ? 'disabled' : ''}>
                     ${t('info_rehome')} (${value}💰)
                 </button>
@@ -1724,6 +1727,23 @@ function setupEventListeners() {
 
     // --- Global Click Delegation ---
     document.body.addEventListener('click', (e) => {
+        // Breed button in list
+        if (e.target.classList.contains('breed-button-list')) {
+            const guppyId = parseInt(e.target.dataset.guppyId);
+            const guppy = findGuppyById(guppyId);
+            if (guppy) {
+                if (gameState.isBreedingMode) {
+                    selectBreedingGuppy(guppy);
+                } else {
+                    startBreeding(guppy);
+                }
+                if (gameState.breedingParents.length === 2) {
+                    const listModal = document.getElementById('guppy-list-modal');
+                    if (listModal) listModal.remove();
+                }
+            }
+        }
+
         // Rehome button in list
         if (e.target.classList.contains('rehome-button')) {
             const guppyId = parseInt(e.target.dataset.guppyId);
