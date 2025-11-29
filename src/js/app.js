@@ -270,10 +270,11 @@ class Food {
 }
 
 class Guppy {
-    constructor(id, pattern, age = 0, parents = null, hunger = 0, lastBredTime = 0, x = null, y = null, gender = 'male') {
+    constructor(id, pattern, age = 0, parents = null, hunger = 0, lastBredTime = 0, x = null, y = null, gender = 'male', name = null) {
         this.id = id; this.pattern = pattern; this.age = age; this.parents = parents; this.hunger = hunger;
         this.lastBredTime = lastBredTime;
         this.gender = gender;
+        this.name = name || t('info_name_default', { id: this.id });
         this.stage = this.age >= ADULT_AGE ? 'adult' : 'fry';
 
         const containerWidth = aquarium.clientWidth || 800;
@@ -622,7 +623,8 @@ function breedGuppies(parent1, parent2) {
     }
     const newId = gameState.nextGuppyId++;
     const newGender = Math.random() < 0.5 ? 'male' : 'female';
-    const newGuppy = new Guppy(newId, newPattern, 0, null, 0, 0, null, null, newGender);
+    const newName = t('info_name_default', { id: newId });
+    const newGuppy = new Guppy(newId, newPattern, 0, null, 0, 0, null, null, newGender, newName);
 
     checkCollectionUnlock(newGuppy);
 
@@ -873,7 +875,7 @@ function restoreGameState(loadedState) {
             if (typeof safeX !== 'number' || !isFinite(safeX)) safeX = null;
             if (typeof safeY !== 'number' || !isFinite(safeY)) safeY = null;
 
-            return new Guppy(gData.id, gData.pattern, gData.age, gData.parents, gData.hunger, gData.lastBredTime || 0, safeX, safeY, gData.gender || 'male');
+            return new Guppy(gData.id, gData.pattern, gData.age, gData.parents, gData.hunger, gData.lastBredTime || 0, safeX, safeY, gData.gender || 'male', gData.name);
         });
         const decorations = aqData.decorations.map(dData => {
             const item = SHOP_ITEMS.find(i => i.id === dData.item.id);
@@ -1022,7 +1024,8 @@ function openGuppyList() {
                         ${guppy.getGuppySVG()}
                     </div>
                     <div>
-                        <p class="font-bold text-cyan-100 font-rajdhani text-lg">ID: ${guppy.id} <span class="text-xs text-slate-400">(${guppy.stage === 'fry' ? t('stage_fry') : t('stage_adult')}, ${t('info_age', { age: guppy.age })})</span> <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
+                        <p class="font-bold text-cyan-100 font-rajdhani text-lg">${guppy.name} <span class="text-xs text-slate-400">#${guppy.id}</span> <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
+                        <p class="text-xs text-slate-400">(${guppy.stage === 'fry' ? t('stage_fry') : t('stage_adult')}, ${t('info_age', { age: guppy.age })})</p>
                         <p class="text-sm text-cyan-400 font-bold uppercase tracking-wider">${getPatternLabel(guppy.pattern.type)}</p>
                         <div class="mt-1 space-y-1">${colorsHTML}</div>
                     </div>
@@ -1067,7 +1070,15 @@ function showGuppyInfo(guppy) {
     try {
         gameState.currentInfoGuppyId = guppy.id;
         const el = (id) => document.getElementById(id);
-        el('info-id').innerHTML = t('info_id', { id: guppy.id }) + ` <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span>`;
+        el('info-id').innerHTML = `
+            <div class="flex items-center space-x-2">
+                <span class="text-lg font-bold text-white">${guppy.name}</span>
+                <span class="text-xs text-slate-500">#${guppy.id}</span>
+                <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span>
+                <button onclick="openRenameModal(${guppy.id})" class="text-slate-400 hover:text-cyan-400 transition-colors" title="${t('action_rename')}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
+            </div>`;
         const pd = el('info-pattern-details');
         const colorsHTML = guppy.pattern.colors.map(c => `
             <div class="flex items-center space-x-2 text-sm">
@@ -1127,7 +1138,7 @@ function openShop() {
                 <div><p class="font-bold">${itemName}</p><p class="text-sm text-slate-400">${t('shop_effect_water')}</p></div>`;
         } else if (item.type === 'guppy') {
             // Create a temp guppy to get the SVG
-            const tempGuppy = new Guppy(`shop-${item.id}`, item.pattern, 0, null, 0, 0, null, null, item.gender || 'male');
+            const tempGuppy = new Guppy(`shop-${item.id}`, item.pattern, 0, null, 0, 0, null, null, item.gender || 'male', t(item.nameKey));
             itemPreview = `<div class="flex justify-center items-center h-24">
                     <div style="width: 80px; height: 30px;">
                         ${tempGuppy.getGuppySVG()}
@@ -1176,7 +1187,8 @@ function buyItem(itemId) {
             newDeco.createElement();
         } else if (item.type === 'guppy') {
             const newId = gameState.nextGuppyId++;
-            const newGuppy = new Guppy(newId, item.pattern, 0, null, 0, 0, null, null, item.gender || 'male');
+            const newName = t('info_name_default', { id: newId });
+            const newGuppy = new Guppy(newId, item.pattern, 0, null, 0, 0, null, null, item.gender || 'male', newName);
             gameState.aquariums[gameState.currentAquariumIndex].guppies.push(newGuppy);
             newGuppy.createElement();
             const patternKey = getPatternKey(item.pattern);
@@ -1456,7 +1468,7 @@ function getGuppyCardHTML(guppy) {
                 ${guppy.getGuppySVG()}
             </div>
         </div>
-        <p class="font-bold">ID: ${guppy.id || 'New'} <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
+        <p class="font-bold">${guppy.name} <span class="text-xs text-slate-500">#${guppy.id || 'New'}</span> <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
         <p class="text-sm text-cyan-300 font-bold">${getPatternLabel(guppy.pattern.type)}</p>
         <div class="mt-1 space-y-1 text-left inline-block">${colorsHTML}</div>
     `;
@@ -1512,6 +1524,54 @@ function openMoveGuppyModal() {
         </div>
     `;
     modalContainer.appendChild(moveModal);
+}
+
+function openRenameModal(guppyId) {
+    const guppy = findGuppyById(guppyId);
+    if (!guppy) return;
+
+    const renameModal = document.createElement('div');
+    renameModal.id = 'rename-modal';
+    renameModal.className = 'modal-overlay';
+    renameModal.innerHTML = `
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4 text-cyan-300">${t('modal_rename_title')}</h2>
+            <input type="text" id="rename-input" class="w-full bg-slate-800 border border-slate-600 text-white rounded p-2 mb-4 focus:outline-none focus:border-cyan-500" value="${guppy.name}" maxlength="12">
+            <div class="flex justify-end space-x-4">
+                <button id="rename-cancel" class="text-slate-400 hover:text-white">${t('modal_rename_cancel')}</button>
+                <button id="rename-confirm" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-6 rounded">${t('modal_rename_confirm')}</button>
+            </div>
+        </div>
+    `;
+    modalContainer.appendChild(renameModal);
+
+    const input = renameModal.querySelector('#rename-input');
+    input.focus();
+    input.select();
+
+    const close = () => renameModal.remove();
+
+    renameModal.querySelector('#rename-cancel').addEventListener('click', close);
+    renameModal.querySelector('#rename-confirm').addEventListener('click', () => {
+        const newName = input.value.trim();
+        if (newName) {
+            guppy.name = newName;
+            showToast(t('msg_rename_success', { name: newName }));
+            showGuppyInfo(guppy); // Refresh info panel
+            // Also refresh list if open
+            const listModal = document.getElementById('guppy-list-modal');
+            if (listModal) {
+                listModal.remove();
+                openGuppyList();
+            }
+            close();
+        }
+    });
+
+    // Allow Enter key to confirm
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') renameModal.querySelector('#rename-confirm').click();
+    });
 }
 
 // --- 이벤트 리스너 ---
