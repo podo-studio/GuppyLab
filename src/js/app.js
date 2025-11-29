@@ -176,7 +176,7 @@ const FEED_COST = 10;
 const BREED_COOLDOWN = 20000; // 20 seconds
 const PATTERN_TYPES = ['spots', 'stripes', 'h_stripes', 'v_stripes', 'freckles', 'half', 'rings', 'checker', 'gradient'];
 const SHOP_ITEMS = [
-    { id: 'plant1', type: 'decoration', nameKey: 'item_plant1', price: 50, effect: { waterQuality: 0.02 }, svg: `<svg width="50" height="100" viewBox="0 0 50 100"><path d="M25 100 C 10 80, 40 60, 25 40 S 10 20, 25 0" stroke="cyan" stroke-width="4" fill="none" /></svg>` },
+    { id: 'plant1', type: 'decoration', nameKey: 'item_plant1', price: 50, effect: { waterQuality: 0.02 }, svg: `<svg width="50" height="100" viewBox="0 0 50 100"><path d="M25 100 C 10 80, 40 60, 25 40 S 10 20, 25 0" stroke="#22d3ee" stroke-width="2" fill="none" filter="drop-shadow(0 0 5px #22d3ee)" /><path d="M25 100 C 5 90, 15 70, 5 60" stroke="#22d3ee" stroke-width="1" fill="none" opacity="0.6" /><path d="M25 100 C 45 90, 35 70, 45 60" stroke="#22d3ee" stroke-width="1" fill="none" opacity="0.6" /></svg>` },
     { id: 'guppy_spots', type: 'guppy', nameKey: 'item_guppy_spots', price: 100, gender: 'male', pattern: { type: 'spots', colors: [{ r: 255, g: 100, b: 100 }, { r: 255, g: 200, b: 200 }] } },
     { id: 'guppy_spots_f', type: 'guppy', nameKey: 'item_guppy_spots', price: 100, gender: 'female', pattern: { type: 'spots', colors: [{ r: 255, g: 100, b: 100 }, { r: 255, g: 200, b: 200 }] } },
     { id: 'guppy_stripes', type: 'guppy', nameKey: 'item_guppy_stripes', price: 120, gender: 'male', pattern: { type: 'stripes', colors: [{ r: 100, g: 100, b: 255 }, { r: 200, g: 200, b: 255 }] } },
@@ -711,10 +711,10 @@ function showConfirmation(message, onConfirm) {
     confirmModal.className = 'modal-overlay';
     confirmModal.innerHTML = `
         <div class="modal-content text-center">
-            <p id="confirm-message" class="text-lg mb-6">${message}</p>
-            <div class="flex justify-center space-x-4">
-                <button id="confirm-yes-button" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-8 rounded-lg">${t('modal_confirm_yes')}</button>
-                <button id="confirm-no-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-8 rounded-lg">${t('modal_confirm_no')}</button>
+            <p id="confirm-message" class="text-xl mb-8 text-cyan-100 font-rajdhani tracking-wide">${message}</p>
+            <div class="flex justify-center space-x-6">
+                <button id="confirm-yes-button" class="bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-500/50 font-bold py-2 px-8 rounded-lg uppercase tracking-wider hover:shadow-[0_0_15px_rgba(34,211,238,0.4)] transition-all">${t('modal_confirm_yes')}</button>
+                <button id="confirm-no-button" class="bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-500/50 font-bold py-2 px-8 rounded-lg uppercase tracking-wider hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all">${t('modal_confirm_no')}</button>
             </div>
         </div>`;
     modalContainer.appendChild(confirmModal);
@@ -1014,18 +1014,18 @@ function openGuppyList() {
             `).join('');
 
             return `
-            <div class="flex items-center p-2 rounded-lg hover:bg-slate-800">
+            <div class="flex items-center p-3 rounded-lg hover:bg-cyan-900/20 border border-transparent hover:border-cyan-500/30 transition-all">
                 <div class="flex-1 flex items-center cursor-pointer" onclick="showGuppyInfoById(${guppy.id})">
                     <div class="mr-4 flex-shrink-0" style="width: 80px; height: 30px;">
                         ${guppy.getGuppySVG()}
                     </div>
                     <div>
-                        <p class="font-bold">ID: ${guppy.id} (${guppy.stage === 'fry' ? t('stage_fry') : t('stage_adult')}) <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span> | <span class="text-slate-400 text-sm">${t('info_age', { age: Math.floor(guppy.age) })}</span></p>
-                        <p class="text-sm text-cyan-300 font-bold">${getPatternLabel(guppy.pattern.type)}</p>
+                        <p class="font-bold text-cyan-100 font-rajdhani text-lg">ID: ${guppy.id} <span class="text-xs text-slate-400">(${guppy.stage === 'fry' ? t('stage_fry') : t('stage_adult')})</span> <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
+                        <p class="text-sm text-cyan-400 font-bold uppercase tracking-wider">${getPatternLabel(guppy.pattern.type)}</p>
                         <div class="mt-1 space-y-1">${colorsHTML}</div>
                     </div>
                 </div>
-                <button data-guppy-id="${guppy.id}" class="rehome-button ml-4 bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-sm ${guppy.stage === 'fry' ? 'opacity-50 cursor-not-allowed' : ''}" ${guppy.stage === 'fry' ? 'disabled' : ''}>
+                <button data-guppy-id="${guppy.id}" class="rehome-button ml-4 bg-red-900/30 hover:bg-red-900/50 text-red-400 border border-red-500/30 font-bold py-2 px-4 rounded text-sm uppercase tracking-wider ${guppy.stage === 'fry' ? 'opacity-50 cursor-not-allowed' : ''}" ${guppy.stage === 'fry' ? 'disabled' : ''}>
                     ${t('info_rehome')} (${value}💰)
                 </button>
             </div>`;
@@ -1143,9 +1143,9 @@ function openShop() {
                 <div><p class="font-bold">${itemName}</p><p class="text-sm text-slate-400">${t('shop_desc_tank')}</p></div>`;
         }
         const price = gameState.gameMode === 'normal' && gameState.shopPrices[item.id] ? gameState.shopPrices[item.id] : item.price;
-        return `<div class="border border-slate-700 rounded-lg p-2 text-center flex flex-col justify-between">
+        return `<div class="bg-slate-900/40 border border-cyan-500/20 rounded-xl p-4 text-center flex flex-col justify-between hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.1)] transition-all group">
             ${itemPreview}
-            <button data-item-id="${item.id}" class="buy-button mt-2 w-full btn">${price} 💰</button>
+            <button data-item-id="${item.id}" class="buy-button mt-4 w-full py-2 bg-cyan-900/30 hover:bg-cyan-800/50 border border-cyan-500/30 text-cyan-100 font-bold rounded uppercase tracking-wider transition-colors">${price} 💰</button>
         </div>`;
     }).join('');
 
@@ -1226,7 +1226,7 @@ function openCollection() {
         }
 
         return `
-            <div class="bg-slate-800/50 border ${isUnlocked ? 'border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.2)]' : 'border-slate-700'} rounded-lg p-2 text-center flex flex-col justify-between h-32">
+            <div class="bg-slate-900/40 border ${isUnlocked ? 'border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]' : 'border-slate-800'} rounded-xl p-3 text-center flex flex-col justify-between h-36 transition-all">
                 ${contentHTML}
             </div>
         `;
@@ -1370,16 +1370,16 @@ function openBreedModal() {
         <div class="modal-content">
             <button class="close-modal-button absolute top-4 right-4 text-2xl font-bold text-slate-400 hover:text-white">&times;</button>
             <h2 class="text-3xl font-bold mb-4 text-cyan-300">${t('modal_breed_lab')}</h2>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div class="text-center p-2 border border-slate-700 rounded-lg">${getGuppyCardHTML(p1)}</div>
-                <div class="text-center p-2 border border-slate-700 rounded-lg">${getGuppyCardHTML(p2)}</div>
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <div class="text-center p-4 border border-cyan-500/30 bg-slate-900/40 rounded-xl">${getGuppyCardHTML(p1)}</div>
+                <div class="text-center p-4 border border-cyan-500/30 bg-slate-900/40 rounded-xl">${getGuppyCardHTML(p2)}</div>
             </div>
             <div id="breed-action-container" class="text-center mb-4">
-                <button id="final-breed-button" class="btn btn-primary font-bold py-2 px-8 rounded-lg">${t('modal_breed_exec')}${breedCostText}</button>
+                <button id="final-breed-button" class="bg-pink-600/20 hover:bg-pink-600/40 text-pink-300 border border-pink-500/50 font-bold py-3 px-10 rounded-lg uppercase tracking-widest hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all">${t('modal_breed_exec')}${breedCostText}</button>
             </div>
             <div id="breed-result-container" class="hidden">
-                <h3 class="text-xl font-semibold mt-6 mb-2 text-cyan-400">${t('modal_breed_result')}</h3>
-                <div id="breed-result-guppy" class="flex justify-center items-center p-2 border border-slate-700 rounded-lg"></div>
+                <h3 class="text-xl font-semibold mt-6 mb-2 text-cyan-400 font-rajdhani uppercase tracking-wider">${t('modal_breed_result')}</h3>
+                <div id="breed-result-guppy" class="flex justify-center items-center p-4 border border-cyan-500/50 bg-slate-900/60 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.2)]"></div>
                 <h4 class="text-lg font-semibold mt-4 mb-2 text-cyan-400">${t('modal_breed_report')}</h4>
                 <div id="breed-report" class="text-sm bg-slate-900/50 p-3 rounded-lg border border-slate-700 space-y-1"></div>
                 <div class="text-center mt-4">
@@ -1495,7 +1495,7 @@ function openMoveGuppyModal() {
     let optionsHTML = '';
     gameState.aquariums.forEach((aq, index) => {
         if (index !== gameState.currentAquariumIndex) {
-            optionsHTML += `<button class="move-to-aq-button btn w-full" data-target-index="${index}">${t('modal_move_btn', { index: index + 1 })}</button>`;
+            optionsHTML += `<button class="move-to-aq-button w-full py-3 bg-slate-800/50 hover:bg-cyan-900/30 border border-slate-600 hover:border-cyan-500/50 text-slate-300 hover:text-cyan-100 font-bold rounded-lg uppercase tracking-wider transition-all mb-2" data-target-index="${index}">${t('modal_move_btn', { index: index + 1 })}</button>`;
         }
     });
 

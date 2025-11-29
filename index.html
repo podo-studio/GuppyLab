@@ -7,211 +7,333 @@
     <title>Guppy Lab v1.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="src/css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 </head>
 
-<body class="bg-slate-900 text-white overflow-hidden select-none font-sans">
+<body class="bg-slate-950 text-cyan-50 overflow-hidden select-none font-rajdhani">
 
     <!-- Intro Screen -->
     <div id="intro-wrapper"
-        class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 transition-opacity duration-1000">
-        <div class="text-center space-y-8">
-            <h1 class="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 mb-4 font-jua tracking-widest"
-                data-i18n="game_title">Guppy Lab</h1>
-            <p class="text-xl text-slate-400 font-light tracking-wide mb-12" data-i18n="game_subtitle">나만의 구피 수조를 만들어보세요
-            </p>
+        class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-1000">
+        <div class="intro-bg absolute inset-0 z-0"></div>
+        <div class="intro-light-rays absolute inset-0 z-0 opacity-30"></div>
 
-            <div class="flex flex-col space-y-4 w-64 mx-auto">
+        <div
+            class="relative z-10 text-center space-y-8 p-8 glass-panel-tech rounded-3xl border border-cyan-500/20 shadow-[0_0_50px_rgba(6,182,212,0.1)]">
+            <h1 class="intro-title text-7xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 mb-2 font-rajdhani tracking-widest uppercase"
+                data-i18n="game_title">Guppy Lab</h1>
+            <p class="intro-subtitle text-xl text-cyan-300/70 font-light tracking-[0.5em] mb-12 uppercase"
+                data-i18n="game_subtitle">Synthetic Life Simulator</p>
+
+            <div class="flex flex-col space-y-4 w-72 mx-auto mt-12">
                 <button id="start-game-button"
-                    class="group relative px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all duration-300 border border-slate-700 hover:border-blue-500 shadow-lg hover:shadow-blue-500/20 overflow-hidden">
+                    class="group relative px-8 py-5 bg-slate-900/80 hover:bg-cyan-900/30 rounded-none clip-path-tech transition-all duration-300 border border-cyan-500/30 hover:border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.1)] hover:shadow-[0_0_30px_rgba(6,182,212,0.3)] overflow-hidden">
                     <div
-                        class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                        class="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
                     </div>
-                    <span id="start-btn-text" class="relative z-10 text-lg font-medium text-white tracking-wider"
-                        data-i18n="btn_start_game">게임 시작</span>
+                    <div
+                        class="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500">
+                    </div>
+                    <span id="start-btn-text"
+                        class="relative z-10 text-xl font-bold text-cyan-100 tracking-widest uppercase"
+                        data-i18n="btn_start_game">Initialize</span>
                 </button>
 
                 <div class="relative">
                     <input type="file" id="intro-load-file-input" class="hidden" accept=".json">
                     <button id="intro-load-button"
-                        class="w-full group relative px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all duration-300 border border-slate-700 hover:border-slate-500 shadow-lg overflow-hidden">
+                        class="w-full group relative px-8 py-4 bg-slate-900/50 hover:bg-slate-800/50 rounded-none clip-path-tech transition-all duration-300 border border-slate-700 hover:border-slate-500 shadow-lg overflow-hidden">
                         <span
-                            class="relative z-10 text-xl font-medium text-slate-300 group-hover:text-white transition-colors tracking-wider"
-                            data-i18n="btn_load_game">불러오기</span>
+                            class="relative z-10 text-lg font-medium text-slate-400 group-hover:text-cyan-200 transition-colors tracking-wider uppercase"
+                            data-i18n="btn_load_game">Load System</span>
                     </button>
                 </div>
             </div>
 
             <!-- Language Selector -->
-            <div class="flex justify-center space-x-4 mt-8">
-                <button class="lang-btn text-2xl hover:scale-110 transition-transform" data-lang="ko">🇰🇷</button>
-                <button class="lang-btn text-2xl hover:scale-110 transition-transform" data-lang="en">🇺🇸</button>
-                <button class="lang-btn text-2xl hover:scale-110 transition-transform" data-lang="zh">🇨🇳</button>
-                <button class="lang-btn text-2xl hover:scale-110 transition-transform" data-lang="ja">🇯🇵</button>
+            <div class="flex justify-center space-x-6 mt-12">
+                <button
+                    class="lang-btn text-sm font-bold text-slate-500 hover:text-cyan-400 transition-colors uppercase tracking-wider"
+                    data-lang="ko">KOR</button>
+                <button
+                    class="lang-btn text-sm font-bold text-slate-500 hover:text-cyan-400 transition-colors uppercase tracking-wider"
+                    data-lang="en">ENG</button>
+                <button
+                    class="lang-btn text-sm font-bold text-slate-500 hover:text-cyan-400 transition-colors uppercase tracking-wider"
+                    data-lang="zh">CHN</button>
+                <button
+                    class="lang-btn text-sm font-bold text-slate-500 hover:text-cyan-400 transition-colors uppercase tracking-wider"
+                    data-lang="ja">JPN</button>
             </div>
 
-            <div class="mt-16 opacity-80 flex flex-col items-center space-y-4">
+            <div class="mt-8 opacity-80 flex flex-col items-center space-y-4">
                 <!-- Mode Toggle -->
                 <div
-                    class="flex items-center space-x-3 pointer-events-auto bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700/50 backdrop-blur-sm">
-                    <span class="text-xs text-blue-400 font-bold transition-colors duration-300" id="label-normal-mode"
-                        data-i18n="mode_normal">일반 모드</span>
+                    class="flex items-center space-x-4 pointer-events-auto bg-slate-900/80 px-6 py-2 rounded-full border border-slate-700/50 backdrop-blur-sm shadow-inner">
+                    <span
+                        class="text-[10px] text-cyan-500/50 font-bold transition-colors duration-300 uppercase tracking-widest"
+                        id="label-normal-mode" data-i18n="mode_normal">Normal</span>
 
                     <button id="mode-toggle-btn"
-                        class="w-10 h-5 bg-slate-700 rounded-full relative transition-colors duration-300 focus:outline-none shadow-inner"
+                        class="w-12 h-6 bg-slate-800 rounded-full relative transition-colors duration-300 focus:outline-none shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] border border-slate-700"
                         aria-label="Toggle Game Mode">
                         <div id="mode-toggle-knob"
-                            class="w-3 h-3 bg-slate-400 rounded-full absolute top-1 left-1 transition-all duration-300 shadow-sm">
+                            class="w-4 h-4 bg-cyan-500 rounded-full absolute top-1 left-1 transition-all duration-300 shadow-[0_0_10px_rgba(34,211,238,0.8)]">
                         </div>
                     </button>
 
-                    <span class="text-xs text-slate-600 font-medium transition-colors duration-300" id="label-dev-mode"
-                        data-i18n="mode_dev">개발자 모드</span>
+                    <span
+                        class="text-[10px] text-slate-600 font-medium transition-colors duration-300 uppercase tracking-widest"
+                        id="label-dev-mode" data-i18n="mode_dev">Dev</span>
                 </div>
-                <p class="text-xs text-cyan-200/50 font-jua tracking-wider">DESIGNED BY PODO STUDIO</p>
-                <p class="text-xs text-slate-600 font-mono">v1.1</p>
+                <p class="text-[10px] text-slate-600 font-mono tracking-widest">SYSTEM v1.1 // PODO STUDIO</p>
             </div>
         </div>
     </div>
 
     <!-- Main App Screen -->
-    <div id="main-app-screen" class="hidden flex-col h-screen bg-slate-900">
+    <div id="main-app-screen" class="hidden flex-col h-screen bg-slate-950 relative overflow-hidden">
+
+        <!-- Background Grid -->
+        <div
+            class="absolute inset-0 z-0 pointer-events-none bg-[linear-gradient(rgba(6,182,212,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.03)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_100%)]">
+        </div>
+
         <!-- Header -->
         <header
-            class="h-16 bg-slate-800/80 border-b border-slate-700 flex items-center justify-between px-6 relative z-20 shadow-md">
-            <div class="flex items-center space-x-4">
-                <div class="flex items-center bg-slate-900/50 rounded-lg px-4 py-2 border border-slate-700">
-                    <span class="text-xl mr-2">💰</span>
-                    <span id="coins-display" class="font-bold text-yellow-400 text-xl font-mono">0</span>
-                </div>
+            class="h-20 bg-slate-900/40 backdrop-blur-md border-b border-cyan-500/10 flex items-center justify-between px-8 relative z-20 shadow-lg">
+            <div class="flex items-center space-x-6">
                 <div
-                    class="w-24 md:w-48 bg-slate-700 rounded-full h-4 overflow-hidden border border-slate-600 relative group">
-                    <div id="water-quality-bar"
-                        class="bg-gradient-to-r from-cyan-500 to-blue-500 h-full transition-all duration-500"
-                        style="width: 100%"></div>
-                    <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white drop-shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                        data-i18n="label_water_quality">수질</div>
+                    class="flex items-center bg-slate-900/60 rounded-lg px-5 py-2 border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.05)]">
+                    <svg class="w-5 h-5 text-yellow-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                    <span id="coins-display" class="font-bold text-cyan-50 text-xl font-mono tracking-wider">0</span>
+                </div>
+                <div class="flex flex-col space-y-1">
+                    <div class="flex justify-between text-[10px] font-bold text-cyan-400 uppercase tracking-wider w-48">
+                        <span data-i18n="label_water_quality">Water Quality</span>
+                        <span id="water-quality-text">100%</span>
+                    </div>
+                    <div class="w-48 h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700 relative">
+                        <div id="water-quality-bar"
+                            class="bg-gradient-to-r from-cyan-600 to-blue-500 h-full transition-all duration-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                            style="width: 100%"></div>
+                    </div>
                 </div>
             </div>
 
             <div id="aquarium-title"
-                class="absolute top-6 left-1/2 transform -translate-x-1/2 text-white/80 font-bold text-xs md:text-sm pointer-events-none whitespace-nowrap">
-                수조 1</div>
+                class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-cyan-100/50 font-bold text-lg pointer-events-none whitespace-nowrap tracking-[0.2em] uppercase font-rajdhani">
+                TANK 01</div>
 
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-2 relative">
                 <button id="menu-toggle-button"
-                    class="p-2 rounded-lg hover:bg-slate-700 text-2xl transition-colors">☰</button>
+                    class="p-3 rounded-lg hover:bg-cyan-900/20 text-cyan-400 hover:text-cyan-200 transition-colors border border-transparent hover:border-cyan-500/30">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+
+                <!-- Dropdown Menu -->
                 <div id="game-menu"
-                    class="hidden absolute top-16 right-6 bg-slate-800 border border-slate-700 rounded-lg shadow-xl flex-col w-48 py-2 z-50">
+                    class="hidden absolute top-20 right-0 bg-slate-900/95 backdrop-blur-xl border border-cyan-500/30 rounded-xl shadow-[0_0_30px_rgba(0,0,0,0.5)] flex-col w-56 py-2 z-50 overflow-hidden">
                     <button id="shop-button"
-                        class="text-left px-4 py-3 hover:bg-slate-700 flex items-center space-x-3 transition-colors"><span>🛍️</span>
-                        <span data-i18n="menu_shop">상점</span></button>
+                        class="text-left px-6 py-4 hover:bg-cyan-900/20 flex items-center space-x-4 transition-colors group border-l-2 border-transparent hover:border-cyan-400">
+                        <svg class="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition-colors" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                        </svg>
+                        <span class="text-slate-300 group-hover:text-white font-medium tracking-wide"
+                            data-i18n="menu_shop">Shop</span>
+                    </button>
                     <button id="collection-button"
-                        class="text-left px-4 py-3 hover:bg-slate-700 flex items-center space-x-3 transition-colors"><span>📖</span>
-                        <span data-i18n="menu_collection">도감</span></button>
+                        class="text-left px-6 py-4 hover:bg-cyan-900/20 flex items-center space-x-4 transition-colors group border-l-2 border-transparent hover:border-cyan-400">
+                        <svg class="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition-colors" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                            </path>
+                        </svg>
+                        <span class="text-slate-300 group-hover:text-white font-medium tracking-wide"
+                            data-i18n="menu_collection">Collection</span>
+                    </button>
                     <button id="guppy-list-button"
-                        class="text-left px-4 py-3 hover:bg-slate-700 flex items-center space-x-3 transition-colors"><span>🐟</span>
-                        <span data-i18n="menu_guppy_list">구피 목록</span></button>
-                    <div class="h-px bg-slate-700 my-1"></div>
+                        class="text-left px-6 py-4 hover:bg-cyan-900/20 flex items-center space-x-4 transition-colors group border-l-2 border-transparent hover:border-cyan-400">
+                        <svg class="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition-colors" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                            </path>
+                        </svg>
+                        <span class="text-slate-300 group-hover:text-white font-medium tracking-wide"
+                            data-i18n="menu_guppy_list">Guppy List</span>
+                    </button>
+                    <div class="h-px bg-slate-700/50 mx-4 my-1"></div>
                     <button id="save-button"
-                        class="text-left px-4 py-3 hover:bg-slate-700 flex items-center space-x-3 transition-colors"><span>💾</span>
-                        <span data-i18n="menu_save">저장</span></button>
+                        class="text-left px-6 py-4 hover:bg-cyan-900/20 flex items-center space-x-4 transition-colors group border-l-2 border-transparent hover:border-cyan-400">
+                        <svg class="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition-colors" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
+                            </path>
+                        </svg>
+                        <span class="text-slate-300 group-hover:text-white font-medium tracking-wide"
+                            data-i18n="menu_save">Save</span>
+                    </button>
                     <input type="file" id="load-file-input" class="hidden" accept=".json">
                     <button id="load-button"
-                        class="text-left px-4 py-3 hover:bg-slate-700 flex items-center space-x-3 transition-colors"><span>📂</span>
-                        <span data-i18n="menu_load">불러오기</span></button>
-                    <div class="h-px bg-slate-700 my-1"></div>
+                        class="text-left px-6 py-4 hover:bg-cyan-900/20 flex items-center space-x-4 transition-colors group border-l-2 border-transparent hover:border-cyan-400">
+                        <svg class="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition-colors" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        <span class="text-slate-300 group-hover:text-white font-medium tracking-wide"
+                            data-i18n="menu_load">Load</span>
+                    </button>
+                    <div class="h-px bg-slate-700/50 mx-4 my-1"></div>
                     <button id="manual-button"
-                        class="text-left px-4 py-3 hover:bg-slate-700 flex items-center space-x-3 transition-colors"><span>❓</span>
-                        <span data-i18n="menu_help">도움말</span></button>
+                        class="text-left px-6 py-4 hover:bg-cyan-900/20 flex items-center space-x-4 transition-colors group border-l-2 border-transparent hover:border-cyan-400">
+                        <svg class="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition-colors" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                        <span class="text-slate-300 group-hover:text-white font-medium tracking-wide"
+                            data-i18n="menu_help">Help</span>
+                    </button>
                 </div>
             </div>
         </header>
 
         <!-- Game Area -->
-        <main class="flex-1 relative overflow-hidden bg-gradient-to-b from-slate-800 to-slate-900">
+        <main class="flex-1 relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950">
             <!-- Aquarium Navigation -->
             <button id="prev-aquarium"
-                class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full backdrop-blur-sm transition-all text-2xl hidden">&lt;</button>
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-slate-900/50 hover:bg-cyan-900/50 text-cyan-400 border border-cyan-500/30 p-4 rounded-full backdrop-blur-sm transition-all hover:scale-110 hidden">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
             <button id="next-aquarium"
-                class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full backdrop-blur-sm transition-all text-2xl hidden">&gt;</button>
+                class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-slate-900/50 hover:bg-cyan-900/50 text-cyan-400 border border-cyan-500/30 p-4 rounded-full backdrop-blur-sm transition-all hover:scale-110 hidden">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
 
             <!-- Aquarium Container -->
             <div id="aquarium" class="w-full h-full relative cursor-crosshair">
                 <!-- Fish and items will be here -->
             </div>
 
-            <!-- Action Bar -->
+            <!-- Action Bar (Dock Style) -->
             <div
-                class="absolute bottom-12 md:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4 md:space-x-6 bg-slate-900/80 backdrop-blur-md px-6 py-3 md:px-8 md:py-4 rounded-2xl border border-slate-700/50 shadow-2xl w-max">
-                <button id="feed-button" class="flex flex-col items-center space-y-1 group">
+                class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-end space-x-6 bg-slate-900/60 backdrop-blur-xl px-8 py-4 rounded-3xl border border-cyan-500/20 shadow-[0_10px_40px_rgba(0,0,0,0.5)] w-max z-30">
+                <button id="feed-button" class="group flex flex-col items-center space-y-2 relative">
                     <div
-                        class="w-10 h-10 md:w-12 md:h-12 bg-amber-500/20 group-hover:bg-amber-500/40 rounded-xl flex items-center justify-center border border-amber-500/50 transition-all duration-300 group-hover:scale-110">
-                        <span class="text-xl md:text-2xl">🪱</span>
+                        class="w-14 h-14 bg-slate-800/80 group-hover:bg-amber-500/20 rounded-2xl flex items-center justify-center border border-slate-600 group-hover:border-amber-500 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+                        <svg class="w-8 h-8 text-slate-400 group-hover:text-amber-400 transition-colors" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
                     </div>
                     <span
-                        class="text-[10px] md:text-xs font-bold text-slate-300 group-hover:text-white transition-colors whitespace-nowrap"
-                        data-i18n="action_feed">먹이주기</span>
+                        class="text-[10px] font-bold text-slate-400 group-hover:text-amber-400 transition-colors uppercase tracking-wider absolute -bottom-6 opacity-0 group-hover:opacity-100"
+                        data-i18n="action_feed">Feed</span>
                 </button>
-                <button id="clean-button" class="flex flex-col items-center space-y-1 group">
+                <button id="clean-button" class="group flex flex-col items-center space-y-2 relative">
                     <div
-                        class="w-10 h-10 md:w-12 md:h-12 bg-blue-500/20 group-hover:bg-blue-500/40 rounded-xl flex items-center justify-center border border-blue-500/50 transition-all duration-300 group-hover:scale-110">
-                        <span class="text-xl md:text-2xl">🧹</span>
+                        class="w-14 h-14 bg-slate-800/80 group-hover:bg-cyan-500/20 rounded-2xl flex items-center justify-center border border-slate-600 group-hover:border-cyan-500 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+                        <svg class="w-8 h-8 text-slate-400 group-hover:text-cyan-400 transition-colors" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                            </path>
+                        </svg>
                     </div>
                     <span
-                        class="text-[10px] md:text-xs font-bold text-slate-300 group-hover:text-white transition-colors whitespace-nowrap"
-                        data-i18n="action_clean">청소하기</span>
+                        class="text-[10px] font-bold text-slate-400 group-hover:text-cyan-400 transition-colors uppercase tracking-wider absolute -bottom-6 opacity-0 group-hover:opacity-100"
+                        data-i18n="action_clean">Clean</span>
                 </button>
-                <button id="breed-button" class="flex flex-col items-center space-y-1 group">
+                <button id="breed-button" class="group flex flex-col items-center space-y-2 relative">
                     <div
-                        class="w-10 h-10 md:w-12 md:h-12 bg-pink-500/20 group-hover:bg-pink-500/40 rounded-xl flex items-center justify-center border border-pink-500/50 transition-all duration-300 group-hover:scale-110">
-                        <span class="text-xl md:text-2xl">💕</span>
+                        class="w-14 h-14 bg-slate-800/80 group-hover:bg-pink-500/20 rounded-2xl flex items-center justify-center border border-slate-600 group-hover:border-pink-500 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_0_20px_rgba(236,72,153,0.4)]">
+                        <svg class="w-8 h-8 text-slate-400 group-hover:text-pink-400 transition-colors" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                            </path>
+                        </svg>
                     </div>
                     <span
-                        class="text-[10px] md:text-xs font-bold text-slate-300 group-hover:text-white transition-colors whitespace-nowrap"
-                        data-i18n="action_breed">교배</span>
+                        class="text-[10px] font-bold text-slate-400 group-hover:text-pink-400 transition-colors uppercase tracking-wider absolute -bottom-6 opacity-0 group-hover:opacity-100"
+                        data-i18n="action_breed">Breed</span>
                 </button>
             </div>
 
             <!-- Guppy Info Panel -->
             <div id="guppy-info-panel"
-                class="absolute top-4 right-4 w-64 bg-slate-800/90 backdrop-blur-md border border-slate-600 rounded-xl p-4 shadow-2xl hidden transform transition-all duration-300">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="font-bold text-lg text-cyan-300" data-i18n="info_title">구피 정보</h3>
-                    <button id="close-info-panel" class="text-slate-400 hover:text-white">&times;</button>
+                class="absolute top-24 right-8 w-72 bg-slate-900/90 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-6 shadow-[0_0_30px_rgba(0,0,0,0.5)] hidden transform transition-all duration-300 z-40">
+                <div class="flex justify-between items-start mb-6 border-b border-slate-700 pb-4">
+                    <h3 class="font-bold text-xl text-cyan-400 font-rajdhani tracking-wider uppercase"
+                        data-i18n="info_title">Specimen Data</h3>
+                    <button id="close-info-panel" class="text-slate-500 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
-                <div class="space-y-3">
-                    <p id="info-id" class="text-xs text-slate-400">ID: #0</p>
-                    <div id="info-pattern-details" class="bg-slate-900/50 p-2 rounded-lg"></div>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div class="bg-slate-700/50 p-2 rounded">
-                            <span class="text-xs text-slate-400 block" data-i18n="label_age">나이</span>
-                            <span id="info-age" class="font-bold">0</span>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <p id="info-id" class="text-xs text-slate-500 font-mono">ID: #0000</p>
+                        <div id="info-pattern-details" class="text-xs text-cyan-200 font-medium"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+                            <span class="text-[10px] text-slate-400 block uppercase tracking-wider mb-1"
+                                data-i18n="label_age">Age</span>
+                            <span id="info-age" class="font-bold text-xl text-white font-rajdhani">0</span>
                         </div>
-                        <div class="bg-slate-700/50 p-2 rounded">
-                            <span class="text-xs text-slate-400 block" data-i18n="label_stage">단계</span>
-                            <span id="info-stage" class="font-bold">-</span>
+                        <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+                            <span class="text-[10px] text-slate-400 block uppercase tracking-wider mb-1"
+                                data-i18n="label_stage">Stage</span>
+                            <span id="info-stage" class="font-bold text-white uppercase">-</span>
                         </div>
                     </div>
-                    <div>
-                        <div class="flex justify-between text-xs text-slate-400 mb-1">
-                            <span data-i18n="label_hunger">포만감</span>
-                            <span id="info-hunger">100/100</span>
+
+                    <div class="bg-slate-800/30 p-3 rounded-lg border border-slate-700/30">
+                        <div class="flex justify-between text-[10px] text-slate-400 mb-2 uppercase tracking-wider">
+                            <span data-i18n="label_hunger">Satiety</span>
+                            <span id="info-hunger" class="font-mono text-cyan-400">100/100</span>
                         </div>
-                        <div class="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
-                            <div class="bg-green-500 h-full" style="width: 100%"></div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-green-500 to-emerald-400 h-full shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                                style="width: 100%"></div>
                         </div>
                     </div>
+
                     <div class="flex flex-col space-y-2 pt-2">
                         <button id="info-breed-button"
-                            class="w-full bg-pink-600 hover:bg-pink-500 text-white text-sm font-bold py-1.5 rounded transition-colors"
-                            data-i18n="info_breed">교배</button>
+                            class="w-full bg-pink-600/20 hover:bg-pink-600/40 text-pink-300 border border-pink-500/50 text-sm font-bold py-2 rounded-lg transition-all uppercase tracking-wider hover:shadow-[0_0_15px_rgba(236,72,153,0.3)]"
+                            data-i18n="info_breed">Initiate Breeding</button>
                         <button id="info-move-button"
-                            class="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-1.5 rounded transition-colors hidden"
-                            data-i18n="info_move">수조 이동</button>
+                            class="w-full bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/50 text-sm font-bold py-2 rounded-lg transition-all uppercase tracking-wider hidden"
+                            data-i18n="info_move">Transfer Tank</button>
                         <button id="info-rehome-button"
-                            class="w-full bg-red-600 hover:bg-red-500 text-white text-sm font-bold py-1.5 rounded transition-colors"
-                            data-i18n="info_rehome">분양 보내기</button>
+                            class="w-full bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-500/50 text-sm font-bold py-2 rounded-lg transition-all uppercase tracking-wider"
+                            data-i18n="info_rehome">Release Specimen</button>
                     </div>
                 </div>
             </div>
