@@ -1346,7 +1346,7 @@ function cancelBreeding() {
     updateAllGuppySelectionUI();
 
     if (breedButton) {
-        breedButton.querySelector('span:nth-child(2)').textContent = t('breed_button');
+        breedButton.querySelector('span:nth-child(2)').textContent = t('action_breed');
         breedButton.classList.remove('text-red-400');
     }
 }
