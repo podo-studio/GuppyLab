@@ -196,6 +196,8 @@ body {
 .bubble {
     position: absolute;
     bottom: -20px;
+    width: 15px;
+    height: 15px;
     background-color: rgba(34, 211, 238, 0.1);
     border: 1px solid rgba(34, 211, 238, 0.3);
     border-radius: 50%;
