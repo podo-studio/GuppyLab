@@ -1,7 +1,8 @@
 // --- DOM 요소 ---
-let introWrapper, mainAppScreen, startGameButton, modeToggleBtn, modeToggleKnob, labelNormalMode, labelDevMode, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, waterQualityText, feedButton, cleanButton, breedButton, pauseButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
+let introWrapper, mainAppScreen, startGameButton, modeToggleBtn, modeToggleKnob, labelNormalMode, labelDevMode, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, waterQualityText, feedButton, cleanButton, breedButton, pauseButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, achievementsButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
 let selectedGameMode = 'normal';
 let currentLanguage = localStorage.getItem('guppy_lang') || 'ko';
+const filename = 'guppy_lab_save.json';
 
 function t(key, params = {}) {
     const lang = currentLanguage;
@@ -59,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     guppyListButton = document.getElementById('guppy-list-button');
     shopButton = document.getElementById('shop-button');
     collectionButton = document.getElementById('collection-button');
+    achievementsButton = document.getElementById('achievements-button');
     modalContainer = document.getElementById('modal-container');
     prevAquariumButton = document.getElementById('prev-aquarium');
     nextAquariumButton = document.getElementById('next-aquarium');
@@ -93,6 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize other UI listeners here if needed, or keep them where they are but ensure elements exist
     setupEventListeners();
+
+    if (achievementsButton) achievementsButton.addEventListener('click', openAchievementList);
 
     if (saveButton) saveButton.addEventListener('click', exportSaveFile);
     if (loadButton) loadButton.addEventListener('click', () => loadFileInput.click());
@@ -250,6 +254,17 @@ const COLLECTION_TARGETS = [
     { id: 'galaxy', nameKey: 'col_galaxy', hintKey: 'col_galaxy_hint', criteria: { patternType: 'freckles', bodyColor: { r: 0, g: 0, b: 0 }, patternColor: { r: 128, g: 0, b: 128 }, tolerance: 50 } },
 ];
 
+const ACHIEVEMENTS = [
+    { id: 'breeder_novice', titleKey: 'ach_breeder_novice', descKey: 'ach_breeder_novice_desc', condition: (stats) => stats.totalGuppiesBred >= 5, getProgress: (stats) => ({ current: stats.totalGuppiesBred, target: 5 }), icon: '🐟' },
+    { id: 'breeder_expert', titleKey: 'ach_breeder_expert', descKey: 'ach_breeder_expert_desc', condition: (stats) => stats.totalGuppiesBred >= 50, getProgress: (stats) => ({ current: stats.totalGuppiesBred, target: 50 }), icon: '🐠' },
+    { id: 'rich_novice', titleKey: 'ach_rich_novice', descKey: 'ach_rich_novice_desc', condition: (stats) => stats.totalCoinsEarned >= 1000, getProgress: (stats) => ({ current: stats.totalCoinsEarned, target: 1000 }), icon: '💰' },
+    { id: 'rich_expert', titleKey: 'ach_rich_expert', descKey: 'ach_rich_expert_desc', condition: (stats) => stats.totalCoinsEarned >= 10000, getProgress: (stats) => ({ current: stats.totalCoinsEarned, target: 10000 }), icon: '💎' },
+    { id: 'feeder', titleKey: 'ach_feeder', descKey: 'ach_feeder_desc', condition: (stats) => stats.totalFoodFed >= 20, getProgress: (stats) => ({ current: stats.totalFoodFed, target: 20 }), icon: '🐛' },
+    { id: 'cleaner', titleKey: 'ach_cleaner', descKey: 'ach_cleaner_desc', condition: (stats) => stats.totalTanksCleaned >= 10, getProgress: (stats) => ({ current: stats.totalTanksCleaned, target: 10 }), icon: '🧹' },
+    { id: 'collector_novice', titleKey: 'ach_collector_novice', descKey: 'ach_collector_novice_desc', condition: (stats) => stats.totalPatternsDiscovered >= 5, getProgress: (stats) => ({ current: stats.totalPatternsDiscovered, target: 5 }), icon: '📜' },
+    { id: 'collector_master', titleKey: 'ach_collector_master', descKey: 'ach_collector_master_desc', condition: (stats) => stats.totalPatternsDiscovered >= PATTERN_TYPES.length, getProgress: (stats) => ({ current: stats.totalPatternsDiscovered, target: PATTERN_TYPES.length }), icon: '👑' },
+];
+
 let gameState = {
     aquariums: [{ guppies: [], decorations: [], waterQuality: 100, food: [] }],
     currentAquariumIndex: 0,
@@ -263,6 +278,14 @@ let gameState = {
     isPaused: false,
     gameMode: 'developer', // 'developer' or 'normal'
     shopPrices: {}, // Stores randomized prices for normal mode
+    stats: {
+        totalGuppiesBred: 0,
+        totalCoinsEarned: 0,
+        totalFoodFed: 0,
+        totalTanksCleaned: 0,
+        totalPatternsDiscovered: 0
+    },
+    unlockedAchievements: [], // Array of unlocked achievement IDs
 };
 let gameInitialized = false;
 
@@ -646,6 +669,7 @@ function breedGuppies(parent1, parent2) {
     if (gameState.gameMode === 'developer' && !gameState.discoveredPatterns.has(patternKey)) {
         gameState.discoveredPatterns.add(patternKey);
         gameState.coins += 50;
+        gameState.stats.totalCoinsEarned += 50;
         showToast(t('msg_coin_reward', { amount: 50 }));
     } else if (gameState.gameMode === 'normal' && !gameState.discoveredPatterns.has(patternKey)) {
         // Normal Mode: Just discover, no coin reward
@@ -664,6 +688,9 @@ function breedGuppies(parent1, parent2) {
 
     gameState.aquariums[gameState.currentAquariumIndex].guppies.push(newGuppy);
     newGuppy.createElement();
+
+    gameState.stats.totalGuppiesBred++;
+    checkAchievements();
 
     return { newGuppy, inheritance };
 }
@@ -707,6 +734,8 @@ function rehomeGuppy(guppyId) {
     showConfirmation(t('msg_rehome_confirm', { amount: value }), () => {
         console.log(`Rehoming guppy ${guppyId}...`);
         gameState.coins += value;
+        gameState.stats.totalCoinsEarned += value;
+        checkAchievements();
 
         // Try to destroy via method if available
         if (typeof guppy.destroy === 'function') {
@@ -797,12 +826,6 @@ async function exportSaveFile() {
         aq.food = [];
     });
     plainState.discoveredPatterns = Array.from(plainState.discoveredPatterns);
-    // unlockedCollection is already an array, so it saves directly
-
-    const now = new Date();
-    const timestamp = now.toISOString().replace(/[-:T]/g, '').slice(0, 14); // YYYYMMDDHHmmss
-    const modeLabel = gameState.gameMode || 'unknown';
-    const filename = `GuppyLab_${modeLabel}_${timestamp}.json`;
     const jsonString = JSON.stringify(plainState);
 
     try {
@@ -837,6 +860,126 @@ async function exportSaveFile() {
             showToast(t('msg_save_fail'));
         }
     }
+}
+
+function checkAchievements() {
+    if (!gameState.stats) return;
+
+    // Update dynamic stats
+    // Fix: Count unique pattern types, not unique color combinations
+    const uniquePatternTypes = new Set();
+    gameState.discoveredPatterns.forEach(key => {
+        const type = key.split(':')[0];
+        uniquePatternTypes.add(type);
+    });
+    gameState.stats.totalPatternsDiscovered = uniquePatternTypes.size;
+
+    ACHIEVEMENTS.forEach(ach => {
+        if (!gameState.unlockedAchievements.includes(ach.id)) {
+            if (ach.condition(gameState.stats)) {
+                unlockAchievement(ach);
+            }
+        }
+    });
+}
+
+function unlockAchievement(achievement) {
+    gameState.unlockedAchievements.push(achievement.id);
+    // showToast(`🏆 ${t(achievement.titleKey)}`); // Replaced with modal
+    showAchievementModal(achievement);
+}
+
+function showAchievementModal(achievement) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay flex items-center justify-center z-[60]'; // Higher z-index
+    modal.innerHTML = `
+        <div class="bg-slate-900 border-2 border-yellow-500 rounded-2xl p-8 max-w-sm w-full text-center shadow-[0_0_50px_rgba(234,179,8,0.5)] transform scale-0 transition-transform duration-300" id="ach-popup-content">
+            <div class="text-6xl mb-4 animate-bounce">${achievement.icon}</div>
+            <h2 class="text-2xl font-bold text-yellow-400 mb-2 font-rajdhani uppercase tracking-widest">${t('ach_unlocked')}</h2>
+            <h3 class="text-xl font-bold text-white mb-2">${t(achievement.titleKey)}</h3>
+            <p class="text-slate-400 text-sm mb-6">${t(achievement.descKey)}</p>
+            <button class="bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-2 px-8 rounded-full uppercase tracking-wider transition-colors" onclick="this.closest('.modal-overlay').remove()">
+                ${t('btn_awesome')}
+            </button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Animate in
+    requestAnimationFrame(() => {
+        const content = modal.querySelector('#ach-popup-content');
+        if (content) content.classList.remove('scale-0');
+    });
+
+    // Auto close after 5 seconds
+    setTimeout(() => {
+        if (document.body.contains(modal)) {
+            modal.remove();
+        }
+    }, 5000);
+}
+
+function openAchievementList() {
+    const modal = document.createElement('div');
+    modal.id = 'achievement-modal';
+    modal.className = 'modal-overlay';
+
+    let achievementsHTML = '';
+    ACHIEVEMENTS.forEach(ach => {
+        const isUnlocked = gameState.unlockedAchievements.includes(ach.id);
+        const opacityClass = isUnlocked ? 'opacity-100' : 'opacity-50 grayscale';
+        const bgClass = isUnlocked ? 'bg-slate-800/80 border-cyan-500/30' : 'bg-slate-900/50 border-slate-700/30';
+        const icon = isUnlocked ? ach.icon : '🔒';
+        const title = t(ach.titleKey);
+        const desc = t(ach.descKey);
+
+        // Calculate progress
+        const progress = ach.getProgress ? ach.getProgress(gameState.stats) : { current: 0, target: 1 };
+        const percent = Math.min(100, Math.floor((progress.current / progress.target) * 100));
+
+        achievementsHTML += `
+            <div class="flex flex-col p-4 rounded-xl border ${bgClass} ${opacityClass} transition-all">
+                <div class="flex items-center space-x-4 mb-2">
+                    <div class="text-3xl">${icon}</div>
+                    <div class="flex-1 text-left">
+                        <h4 class="font-bold text-cyan-100">${title}</h4>
+                        <p class="text-xs text-slate-400">${desc}</p>
+                    </div>
+                    ${isUnlocked ? '<div class="text-cyan-400">✓</div>' : ''}
+                </div>
+                <div class="w-full bg-slate-700/50 rounded-full h-2 mt-1">
+                    <div class="bg-cyan-500 h-2 rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+                </div>
+                <div class="text-right text-[10px] text-slate-500 mt-1 font-mono">
+                    ${Math.floor(progress.current)} / ${progress.target} (${percent}%)
+                </div>
+            </div>
+        `;
+    });
+
+    modal.innerHTML = `
+        <div class="modal-content w-full max-w-2xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+                <h3 class="font-bold text-2xl text-cyan-400 font-rajdhani tracking-wider uppercase">${t('modal_achievements_title')}</h3>
+                <button class="modal-close text-slate-500 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                ${achievementsHTML}
+            </div>
+        </div>`;
+
+    modalContainer.appendChild(modal);
+
+    modal.querySelector('.modal-close').addEventListener('click', () => {
+        modal.remove();
+    });
+
+    // Close on click outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
 }
 
 function importSaveFile(event) {
@@ -886,6 +1029,20 @@ function restoreGameState(loadedState) {
     gameState = { ...gameState, ...loadedState };
     gameState.discoveredPatterns = new Set(loadedState.discoveredPatterns);
     if (!gameState.unlockedCollection) gameState.unlockedCollection = [];
+    if (!gameState.unlockedAchievements) gameState.unlockedAchievements = [];
+    if (!gameState.stats) {
+        gameState.stats = {
+            totalGuppiesBred: 0,
+            totalCoinsEarned: 0,
+            totalFoodFed: 0,
+            totalTanksCleaned: 0,
+            totalPatternsDiscovered: 0
+        };
+    }
+    // Fix: Sync totalCoinsEarned if it's less than current coins (e.g. from old save)
+    if (gameState.stats.totalCoinsEarned < gameState.coins) {
+        gameState.stats.totalCoinsEarned = gameState.coins;
+    }
 
     // Clear existing elements
     gameState.aquariums.forEach(aq => {
@@ -1356,7 +1513,10 @@ function checkCollectionUnlock(guppy) {
             gameState.unlockedCollection.push(target.id);
             showToast(t('msg_collection_unlock', { name: t(target.nameKey) }));
             // Bonus coins for unlocking
+            // Bonus coins for unlocking
             gameState.coins += 100;
+            gameState.stats.totalCoinsEarned += 100;
+            checkAchievements();
             showToast(t('msg_collection_bonus', { amount: 100 }));
             updateUI();
         }
@@ -1730,6 +1890,14 @@ function startNewGame(mode = 'developer') {
             currentInfoGuppyId: null,
             isPaused: false,
             unlockedCollection: [],
+            unlockedAchievements: [],
+            stats: {
+                totalGuppiesBred: 0,
+                totalCoinsEarned: 0,
+                totalFoodFed: 0,
+                totalTanksCleaned: 0,
+                totalPatternsDiscovered: 0
+            },
             gameMode: mode,
             shopPrices: {},
         };
@@ -1802,6 +1970,8 @@ function setupEventListeners() {
     if (feedButton) feedButton.addEventListener('click', () => {
         if (gameState.coins >= FEED_COST) {
             gameState.coins -= FEED_COST;
+            gameState.stats.totalFoodFed++;
+            checkAchievements();
             updateUI();
             // Scatter food
             const currentAq = gameState.aquariums[gameState.currentAquariumIndex];
@@ -1817,6 +1987,8 @@ function setupEventListeners() {
 
     if (cleanButton) cleanButton.addEventListener('click', () => {
         gameState.aquariums[gameState.currentAquariumIndex].waterQuality = 100;
+        gameState.stats.totalTanksCleaned++;
+        checkAchievements();
         updateUI();
         showToast(t('msg_water_clean'));
     });
