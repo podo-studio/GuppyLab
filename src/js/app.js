@@ -1006,45 +1006,78 @@ function openGuppyList() {
     guppyListModal.className = 'modal-overlay';
     let listContent = '';
     if (currentAq.guppies.length === 0) {
-        listContent = `<p class="text-slate-400">${t('msg_empty_tank')}</p>`;
+        listContent = `<p class="text-slate-400 text-center py-8">${t('msg_empty_tank')}</p>`;
     } else {
         listContent = currentAq.guppies.map(guppy => {
             const value = calculateGuppyValue(guppy);
-            const colorsHTML = guppy.pattern.colors.map((c, i) => `
-                <div class="flex items-center space-x-1 text-xs">
+            // Compact color display
+            const colorsCompactHTML = guppy.pattern.colors.map((c, i) => `
+                <div class="flex items-center space-x-1 text-xs bg-slate-800/50 rounded px-1.5 py-0.5 border border-slate-700/50" title="R:${c.r} G:${c.g} B:${c.b}">
                     <div class="w-3 h-3 rounded-full border border-slate-600" style="background-color: ${toRgbString(c)}"></div>
-                    <span class="text-slate-500">R:${c.r} G:${c.g} B:${c.b}</span>
+                    <span class="text-slate-400 font-mono hidden sm:inline">${c.r},${c.g},${c.b}</span>
                 </div>
             `).join('');
 
             return `
-            <div class="flex items-center p-3 rounded-lg hover:bg-cyan-900/20 border border-transparent hover:border-cyan-500/30 transition-all">
-                <div class="flex-1 flex items-center cursor-pointer" onclick="showGuppyInfoById(${guppy.id})">
-                    <div class="mr-4 flex-shrink-0" style="width: 80px; height: 30px;">
-                        ${guppy.getGuppySVG()}
+            <div class="flex items-start p-3 rounded-lg hover:bg-cyan-900/20 border border-transparent hover:border-cyan-500/30 transition-all group bg-slate-900/30 mb-2">
+                <!-- Visual -->
+                <div class="mr-4 mt-1 flex-shrink-0 cursor-pointer transition-transform group-hover:scale-110" style="width: 80px; height: 30px;" onclick="showGuppyInfoById(${guppy.id})">
+                    ${guppy.getGuppySVG()}
+                </div>
+
+                <!-- Info Container -->
+                <div class="flex-1 flex flex-col space-y-1 cursor-pointer" onclick="showGuppyInfoById(${guppy.id})">
+                    <!-- Row 1: Name (Full Width) -->
+                    <div class="w-full">
+                        <p class="font-bold text-cyan-100 font-rajdhani text-lg leading-tight truncate" title="${guppy.name}">${guppy.name}</p>
                     </div>
-                    <div>
-                        <p class="font-bold text-cyan-100 font-rajdhani text-lg">${guppy.name} <span class="text-xs text-slate-400">#${guppy.id}</span> <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span></p>
-                        <p class="text-xs text-slate-400">(${guppy.stage === 'fry' ? t('stage_fry') : t('stage_adult')}, ${t('info_age', { age: guppy.age })})</p>
-                        <p class="text-sm text-cyan-400 font-bold uppercase tracking-wider">${getPatternLabel(guppy.pattern.type)}</p>
-                        <div class="mt-1 space-y-1">${colorsHTML}</div>
+                    
+                    <!-- Row 2: Metadata (ID, Gender, Stage, Age) -->
+                    <div class="flex items-center space-x-2 text-xs text-slate-400 border-b border-slate-800/50 pb-2 mb-1">
+                        <span class="font-mono">#${guppy.id}</span>
+                        <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'} font-bold text-sm">${guppy.gender === 'male' ? '♂' : '♀'}</span>
+                        <span class="text-slate-600">|</span>
+                        <span>${guppy.stage === 'fry' ? t('stage_fry') : t('stage_adult')}</span>
+                        <span class="text-slate-600">|</span>
+                        <span>${t('info_age', { age: guppy.age })}</span>
+                    </div>
+
+                    <!-- Row 3: Pattern & Colors (Grid) -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Pattern -->
+                        <div class="flex flex-col justify-center">
+                             <span class="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Pattern</span>
+                             <span class="text-cyan-400 font-bold text-sm uppercase tracking-wider">${getPatternLabel(guppy.pattern.type)}</span>
+                        </div>
+
+                        <!-- Colors -->
+                        <div class="flex flex-col justify-center">
+                             <span class="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Colors</span>
+                             <div class="flex flex-wrap gap-1">
+                                ${colorsCompactHTML}
+                             </div>
+                        </div>
                     </div>
                 </div>
-                <button data-guppy-id="${guppy.id}" class="breed-button-list ml-4 bg-pink-900/30 hover:bg-pink-900/50 text-pink-400 border border-pink-500/30 font-bold py-2 px-4 rounded text-sm uppercase tracking-wider ${guppy.stage === 'fry' ? 'hidden' : ''}">
-                    ${t('action_breed')}
-                </button>
-                <button data-guppy-id="${guppy.id}" class="rehome-button ml-4 bg-red-900/30 hover:bg-red-900/50 text-red-400 border border-red-500/30 font-bold py-2 px-4 rounded text-sm uppercase tracking-wider ${guppy.stage === 'fry' ? 'opacity-50 cursor-not-allowed' : ''}" ${guppy.stage === 'fry' ? 'disabled' : ''}>
-                    ${t('info_rehome')} (${value}💰)
-                </button>
+
+                <!-- Actions -->
+                <div class="ml-4 flex flex-col space-y-2 self-center">
+                     <button data-guppy-id="${guppy.id}" class="breed-button-list bg-pink-900/30 hover:bg-pink-900/50 text-pink-400 border border-pink-500/30 font-bold py-1 px-3 rounded text-xs uppercase tracking-wider ${guppy.stage === 'fry' ? 'hidden' : ''}">
+                        ${t('action_breed')}
+                    </button>
+                    <button data-guppy-id="${guppy.id}" class="rehome-button bg-red-900/30 hover:bg-red-900/50 text-red-400 border border-red-500/30 font-bold py-1 px-3 rounded text-xs uppercase tracking-wider ${guppy.stage === 'fry' ? 'opacity-50 cursor-not-allowed' : ''}" ${guppy.stage === 'fry' ? 'disabled' : ''}>
+                        ${t('info_rehome')} <span class="text-slate-300 ml-1">${value}💰</span>
+                    </button>
+                </div>
             </div>`;
         }).join('');
     }
 
     guppyListModal.innerHTML = `
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 800px;">
             <button class="close-modal-button absolute top-4 right-4 text-2xl font-bold text-slate-400 hover:text-white">&times;</button>
             <h2 class="text-3xl font-bold mb-4 text-cyan-300">${t('modal_guppy_list_title', { index: gameState.currentAquariumIndex + 1 })}</h2>
-            <div class="space-y-3">${listContent}</div>
+            <div class="space-y-2">${listContent}</div>
         </div>
     `;
     modalContainer.appendChild(guppyListModal);
