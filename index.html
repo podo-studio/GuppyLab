@@ -287,6 +287,21 @@
                         class="text-[10px] font-bold text-slate-400 group-hover:text-pink-400 transition-colors uppercase tracking-wider absolute -bottom-6 opacity-0 group-hover:opacity-100"
                         data-i18n="action_breed">Breed</span>
                 </button>
+                <button id="pause-button" class="group flex flex-col items-center space-y-2 relative">
+                    <div
+                        class="w-14 h-14 bg-slate-800/80 group-hover:bg-purple-500/20 rounded-2xl flex items-center justify-center border border-slate-600 group-hover:border-purple-500 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+                        <svg id="pause-icon"
+                            class="w-8 h-8 text-slate-400 group-hover:text-purple-400 transition-colors" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <span id="pause-text"
+                        class="text-[10px] font-bold text-slate-400 group-hover:text-purple-400 transition-colors uppercase tracking-wider absolute -bottom-6 opacity-0 group-hover:opacity-100"
+                        data-i18n="action_pause">Pause</span>
+                </button>
             </div>
 
             <!-- Guppy Info Panel -->
@@ -351,6 +366,7 @@
             </div>
         </main>
     </div>
+
     <!-- Modal Container -->
     <div id="modal-container"></div>
 

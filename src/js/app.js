@@ -1,5 +1,5 @@
 // --- DOM 요소 ---
-let introWrapper, mainAppScreen, startGameButton, modeToggleBtn, modeToggleKnob, labelNormalMode, labelDevMode, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, waterQualityText, feedButton, cleanButton, breedButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
+let introWrapper, mainAppScreen, startGameButton, modeToggleBtn, modeToggleKnob, labelNormalMode, labelDevMode, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, waterQualityText, feedButton, cleanButton, breedButton, pauseButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
 let selectedGameMode = 'normal';
 let currentLanguage = localStorage.getItem('guppy_lang') || 'ko';
 
@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     feedButton = document.getElementById('feed-button');
     cleanButton = document.getElementById('clean-button');
     breedButton = document.getElementById('breed-button');
+    pauseButton = document.getElementById('pause-button');
     guppyInfoPanel = document.getElementById('guppy-info-panel');
     closeInfoPanelButton = document.getElementById('close-info-panel');
     infoBreedButton = document.getElementById('info-breed-button');
@@ -123,6 +124,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Language
     setLanguage(currentLanguage);
 });
+
+function togglePause() {
+    gameState.isPaused = !gameState.isPaused;
+    updatePauseButtonState();
+    showToast(gameState.isPaused ? t('msg_paused') : t('msg_resumed'));
+}
+
+function updatePauseButtonState() {
+    if (!pauseButton) return;
+    const icon = pauseButton.querySelector('svg');
+    const text = pauseButton.querySelector('span:nth-child(2)');
+
+    if (gameState.isPaused) {
+        // Show Play icon/text (Resume)
+        if (icon) icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+        if (text) text.textContent = t('action_resume');
+        pauseButton.querySelector('div').classList.add('bg-purple-500/20', 'border-purple-500');
+        pauseButton.querySelector('div').classList.remove('bg-slate-800/80', 'border-slate-600');
+    } else {
+        // Show Pause icon/text
+        if (icon) icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+        if (text) text.textContent = t('action_pause');
+        pauseButton.querySelector('div').classList.remove('bg-purple-500/20', 'border-purple-500');
+        pauseButton.querySelector('div').classList.add('bg-slate-800/80', 'border-slate-600');
+    }
+}
 
 function toggleGameMode() {
     if (selectedGameMode === 'normal') {
@@ -1350,6 +1377,7 @@ function showToast(message) {
 
 function startBreeding(firstParent = null) {
     gameState.isPaused = true;
+    updatePauseButtonState();
     gameState.isBreedingMode = true;
     gameState.breedingParents = firstParent ? [firstParent] : [];
     guppyInfoPanel.classList.add('hidden');
@@ -1395,6 +1423,7 @@ function selectBreedingGuppy(guppy) {
 
 function cancelBreeding() {
     gameState.isPaused = false;
+    updatePauseButtonState();
     gameState.isBreedingMode = false;
     gameState.breedingParents = [];
     updateAllGuppySelectionUI();
@@ -1735,6 +1764,7 @@ function startNewGame(mode = 'developer') {
             createDefaultGuppies();
         }
 
+        updatePauseButtonState();
         gameInitialized = true;
         init();
         showGameScreen();
@@ -1786,6 +1816,8 @@ function setupEventListeners() {
         updateUI();
         showToast(t('msg_water_clean'));
     });
+
+    if (pauseButton) pauseButton.addEventListener('click', togglePause);
 
     if (breedButton) breedButton.addEventListener('click', () => {
         if (gameState.isBreedingMode) {
