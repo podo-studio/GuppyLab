@@ -1,5 +1,5 @@
 // --- DOM 요소 ---
-let introWrapper, mainAppScreen, startGameButton, modeToggleBtn, modeToggleKnob, labelNormalMode, labelDevMode, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, waterQualityText, feedButton, cleanButton, breedButton, pauseButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, achievementsButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu;
+let introWrapper, mainAppScreen, startGameButton, modeToggleBtn, modeToggleKnob, labelNormalMode, labelDevMode, introLoadButton, introLoadFileInput, aquarium, coinsDisplay, waterQualityBar, waterQualityText, feedButton, cleanButton, breedButton, pauseButton, guppyInfoPanel, closeInfoPanelButton, infoBreedButton, infoRehomeButton, infoMoveButton, manualButton, guppyListButton, shopButton, collectionButton, achievementsButton, modalContainer, prevAquariumButton, nextAquariumButton, aquariumTitle, saveButton, loadButton, loadFileInput, menuToggleButton, gameMenu, quitButton;
 let selectedGameMode = 'normal';
 let currentLanguage = localStorage.getItem('guppy_lang') || 'ko';
 const filename = 'guppy_lab_save.json';
@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     infoRehomeButton = document.getElementById('info-rehome-button');
     infoMoveButton = document.getElementById('info-move-button');
     manualButton = document.getElementById('manual-button');
+    quitButton = document.getElementById('quit-button');
     guppyListButton = document.getElementById('guppy-list-button');
     shopButton = document.getElementById('shop-button');
     collectionButton = document.getElementById('collection-button');
@@ -1966,6 +1967,7 @@ function setupEventListeners() {
     if (guppyListButton) guppyListButton.addEventListener('click', openGuppyList);
     if (shopButton) shopButton.addEventListener('click', openShop);
     if (collectionButton) collectionButton.addEventListener('click', openCollection);
+    if (quitButton) quitButton.addEventListener('click', quitToTitle);
 
     if (feedButton) feedButton.addEventListener('click', () => {
         if (gameState.coins >= FEED_COST) {
@@ -2132,5 +2134,28 @@ function setupEventListeners() {
                 }
             }
         }
+    });
+}
+
+function quitToTitle() {
+    showConfirmation(t('msg_quit_confirm'), () => {
+        console.log("Quitting to title...");
+
+        // Hide game screen, show intro
+        mainAppScreen.classList.add('hidden');
+        mainAppScreen.style.display = 'none';
+        introWrapper.classList.remove('hidden');
+
+        // Reset game state (optional, but good practice to clear memory or stop loops)
+        gameState.isPaused = true;
+        gameInitialized = false;
+
+        // Clear intervals if any (though requestAnimationFrame handles most)
+        // Clear DOM elements to prevent duplicates on restart
+        aquarium.innerHTML = '';
+
+        // Close menu
+        const menu = document.getElementById('game-menu');
+        if (menu) menu.classList.add('hidden');
     });
 }

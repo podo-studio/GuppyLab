@@ -31,6 +31,7 @@ const TRANSLATIONS = {
         menu_save: "저장",
         menu_load: "불러오기",
         menu_achievements: "업적",
+        menu_quit: "타이틀로 돌아가기",
         menu_help: "도움말",
 
         // Guppy Info
@@ -121,6 +122,7 @@ const TRANSLATIONS = {
         modal_guppy_list_title: "내 구피 목록 (수조 {index})",
         modal_confirm_yes: "예",
         modal_confirm_no: "아니오",
+        msg_quit_confirm: "정말 타이틀 화면으로 돌아가시겠습니까? 저장되지 않은 진행 상황은 잃게 됩니다.",
         modal_achievements_title: "업적",
 
         // Achievements
@@ -242,6 +244,7 @@ const TRANSLATIONS = {
         menu_save: "Save",
         menu_load: "Load",
         menu_achievements: "Achievements",
+        menu_quit: "Quit to Title",
         menu_help: "Manual",
         info_title: "Guppy Info",
         info_id: "ID: #{id}",
@@ -320,6 +323,7 @@ const TRANSLATIONS = {
         modal_guppy_list_title: "Guppy List (Tank {index})",
         modal_confirm_yes: "Yes",
         modal_confirm_no: "No",
+        msg_quit_confirm: "Are you sure you want to quit to the title screen? Unsaved progress will be lost.",
         modal_achievements_title: "Achievements",
 
         // Achievements
@@ -437,6 +441,7 @@ const TRANSLATIONS = {
         menu_save: "保存",
         menu_load: "加载",
         menu_achievements: "成就",
+        menu_quit: "返回标题",
         menu_help: "帮助",
         info_title: "孔雀鱼信息",
         info_id: "ID: #{id}",
@@ -515,6 +520,7 @@ const TRANSLATIONS = {
         modal_guppy_list_title: "孔雀鱼列表 (鱼缸 {index})",
         modal_confirm_yes: "是",
         modal_confirm_no: "否",
+        msg_quit_confirm: "确定要返回标题画面吗？未保存的进度将会丢失。",
         modal_achievements_title: "成就",
         ach_unlocked: "成就解锁！",
         btn_awesome: "太棒了！",
@@ -630,6 +636,7 @@ const TRANSLATIONS = {
         menu_save: "保存",
         menu_load: "ロード",
         menu_achievements: "実績",
+        menu_quit: "タイトルへ戻る",
         menu_help: "ヘルプ",
         info_title: "グッピー情報",
         info_id: "ID: #{id}",
@@ -708,6 +715,7 @@ const TRANSLATIONS = {
         modal_guppy_list_title: "グッピー一覧 (水槽 {index})",
         modal_confirm_yes: "はい",
         modal_confirm_no: "いいえ",
+        msg_quit_confirm: "タイトル画面に戻りますか？保存されていない進行状況は失われます。",
         modal_achievements_title: "実績",
         ach_unlocked: "実績解除！",
         btn_awesome: "すごい！",
