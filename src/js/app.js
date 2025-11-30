@@ -197,6 +197,7 @@ function toggleGameMode() {
 }
 
 // --- 게임 설정 및 데이터 ---
+const FLOOR_HEIGHT = 110; // Height of the bottom UI area
 const ADULT_AGE = 20;
 const MAX_HUNGER = 100;
 const HUNGRY_THRESHOLD = 70;
@@ -285,8 +286,11 @@ class Food {
     }
     sink() {
         if (!this.element) return;
-        this.y += 0.5;
-        this.element.style.top = `${this.y}px`;
+        const containerHeight = aquarium.clientHeight || 400;
+        if (this.y < containerHeight - FLOOR_HEIGHT - 10) { // -10 for pellet size buffer
+            this.y += 0.5;
+            this.element.style.top = `${this.y}px`;
+        }
     }
     destroy() {
         if (this.element) {
@@ -311,7 +315,7 @@ class Guppy {
         const isValid = (val) => typeof val === 'number' && isFinite(val);
 
         this.x = isValid(x) ? x : Math.random() * (containerWidth - 50);
-        this.y = isValid(y) ? y : Math.random() * (containerHeight - 25);
+        this.y = isValid(y) ? y : Math.random() * (containerHeight - FLOOR_HEIGHT - 25);
 
         this.target = null; this.speed = 1 + Math.random() * 1.5; this.isFlipped = false;
         this.nibbleTargetX = null;
@@ -543,7 +547,7 @@ class Guppy {
         if (!this.target || (this.target && !aquariumState.food.includes(this.target))) {
             const containerWidth = aquarium.clientWidth || 800;
             const containerHeight = aquarium.clientHeight || 400;
-            this.target = { x: Math.random() * (containerWidth - 50), y: Math.random() * (containerHeight - 25) };
+            this.target = { x: Math.random() * (containerWidth - 50), y: Math.random() * (containerHeight - FLOOR_HEIGHT - 25) };
         }
     }
 

@@ -185,7 +185,7 @@ body {
 /* Decoration */
 .decoration {
     position: absolute;
-    bottom: 0;
+    bottom: 110px;
     transform: translateX(-50%);
     pointer-events: none;
     z-index: 1;
