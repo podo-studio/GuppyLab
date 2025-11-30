@@ -1104,13 +1104,17 @@ function showGuppyInfo(guppy) {
         gameState.currentInfoGuppyId = guppy.id;
         const el = (id) => document.getElementById(id);
         el('info-id').innerHTML = `
-            <div class="flex items-center space-x-2">
-                <span class="text-lg font-bold text-white">${guppy.name}</span>
-                <span class="text-xs text-slate-500">#${guppy.id}</span>
-                <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'}">${guppy.gender === 'male' ? '♂' : '♀'}</span>
-                <button onclick="openRenameModal(${guppy.id})" class="text-slate-400 hover:text-cyan-400 transition-colors" title="${t('action_rename')}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                </button>
+            <div class="flex flex-col space-y-1">
+                <div class="w-full">
+                     <span class="text-xl font-bold text-white block truncate" title="${guppy.name}">${guppy.name}</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs text-slate-500">#${guppy.id}</span>
+                    <span class="${guppy.gender === 'male' ? 'text-blue-400' : 'text-pink-400'} font-bold">${guppy.gender === 'male' ? '♂' : '♀'}</span>
+                    <button onclick="openRenameModal(${guppy.id})" class="text-slate-400 hover:text-cyan-400 transition-colors" title="${t('action_rename')}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </button>
+                </div>
             </div>`;
         const pd = el('info-pattern-details');
         const colorsHTML = guppy.pattern.colors.map(c => `
